@@ -440,19 +440,19 @@ A few methods are currently supported only on iOS/Android SDKs:
 
 * Push Registration
 
-The method `mpInstance.logPushRegistration()` accepts two parameters. For Android, provide both `pushToken` and `senderId`. For iOS, provide the push token in the first parameter, and simply pass `null` for the second parameter
+    The method `mpInstance.logPushRegistration()` accepts two parameters. For Android, provide both `pushToken` and `senderId`. For iOS, provide the push token in the first parameter, and simply pass `null` for the second parameter
 
-### Android
+    ### Android
 
-```dart
-mpInstance.logPushRegistration(pushToken, senderId);
-```
+    ```dart
+    mpInstance.logPushRegistration(pushToken, senderId);
+    ```
 
-### iOS
+    ### iOS
 
-```dart
-mpInstance.logPushRegistration(pushToken, null);
-```
+    ```dart
+    mpInstance.logPushRegistration(pushToken, null);
+    ```
 
 
 # License
