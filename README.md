@@ -9,9 +9,9 @@ See the table below to see what features are currently supported. The Flutter mP
 ### Supported Features
 | Method | Android | iOS | Web | Notes |
 |---|---|---|---| --- |
-| Custom Events | <li> [X] </li> | <li> [X]  </li> | <li> [X]  </li> |  |
-| Page Views | <li> [X]  </li> | <li> [X]  </li> | <li> [X]  </li> |  |
-| Identity | <li> [X]  </li> | <li> [X]  </li> | <li> [X]  </li> |  |
+| Custom Events | X | X | X |  |
+| Page Views | X | X | X |  |
+| Identity | X | X | X |  |
 | eCommerce |  |  |  | Coming Soon |
 | Consent |  |  |  | Coming Soon |
 
@@ -174,7 +174,7 @@ Next, you'll need to start the SDK:
 }
 ```
 
-See [Identity](http://docs.mparticle.com/developers/sdk/ios/identity/) for more information on supplying an `MPIdentityApiRequest` object during SDK initialization.
+See [Identity](https://docs.mparticle.com/developers/sdk/ios/idsync/) for more information on supplying an `MPIdentityApiRequest` object during SDK initialization.
 
 
 ## <a name="Web"></a>Web
@@ -287,8 +287,6 @@ user.removeUserAttribute('age')
 user.getUserIdentities().then((identities) {
     print(identities); // Map<IdentityType, String>
 });
-
-
 ```
 
 ## IdentityRequest
@@ -384,6 +382,7 @@ mpInstance?.identity
             print("Failure Response: $failureResponse");
         }
     );
+```
 
 ```dart
 var identityRequest = MparticleFlutterSdk.identityRequest;
@@ -441,7 +440,7 @@ A few methods are currently supported only on iOS/Android SDKs:
 
 * Push Registration
 
-The method `mpInstance.logPushRegistration()` accepts two parameters. For Android, provide both `pushToken` and `senderId`. For iOS, provide the push token in the first parameter, and simply pass `null` for the second parameter
+    The method `mpInstance.logPushRegistration()` accepts two parameters. For Android, provide both `pushToken` and `senderId`. For iOS, provide the push token in the first parameter, and simply pass `null` for the second parameter
 
     ### Android
 
