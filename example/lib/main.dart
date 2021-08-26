@@ -121,6 +121,17 @@ class _MyAppState extends State<MyApp> {
                   eventName: 'Error event logged',
                   customAttributes: {'errorKey': 'errorValue'});
             }),
+            buildButton('Get Attributions', () async {
+              var attributions = await mpInstance?.getAttributions();
+              print('Number of Attributions');
+              print(attributions?.length);
+              attributions?.forEach((key, value) {
+                print('key');
+                print(key);
+                print('value');
+                print(value);
+              });
+            }),
             buildButton('Set opt out', () {
               mpInstance?.setOptOut(optOutBoolean: true);
             }),

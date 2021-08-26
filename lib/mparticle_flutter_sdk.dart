@@ -1,6 +1,7 @@
 // This file implements the public facing API for the Flutter plugin
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
@@ -148,6 +149,12 @@ class MparticleFlutterSdk {
       return null;
     }
     return new User(mpid);
+  }
+
+  Future<Map> getAttributions() async {
+    String attributionsString = await _channel.invokeMethod('getAttributions');
+    Map attributionsMap = jsonDecode(attributionsString);
+    return attributionsMap;
   }
 }
 
