@@ -130,6 +130,20 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
       }
       break;
     // user methods
+    case "getAttributions":
+        if let attributions = MParticle.sharedInstance().attributionInfo() {
+            var dictionary: [String: Any] = [:]
+            for (kitId,attributionResult) in attributions {
+                var attributionDict: [String: Any] = [:]
+                attributionDict["linkParameters"] = attributionResult.linkInfo
+                attributionDict["kitId"] = attributionResult.kitCode
+                dictionary[kitId.stringValue] = attributionDict
+            }
+
+            result(asStringForStringKey(jsonDictionary: dictionary))
+        } else {
+            result("")
+        }
     case "getMPID":
         if let user = MParticle.sharedInstance().identity.currentUser {
             result(user.userId.stringValue)
