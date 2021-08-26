@@ -3,6 +3,12 @@ import 'dart:async';
 
 import 'package:mparticle_flutter_sdk/mparticle_flutter_sdk.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
+import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
+import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
+import 'package:mparticle_flutter_sdk/events/promotion.dart';
+import 'package:mparticle_flutter_sdk/events/product.dart';
+import 'package:mparticle_flutter_sdk/events/impression.dart';
+import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/kits/kits.dart';
 import 'package:mparticle_flutter_sdk/identity/alias_request.dart';
@@ -115,6 +121,42 @@ class _MyAppState extends State<MyApp> {
                   eventName: 'Screen event logged',
                   customAttributes: {'key1': 'value1'},
                   customFlags: {'flag1': 'flagValue1'});
+            }),
+            buildButton('Log Commerce - Product', () {
+              final Product product1 = Product('Orange', '123abc', 2, 1.3);
+              final Product product2 = Product('Apple', '456abc', 4, 2.2);
+              final TransactionAttributes transactionAttributes =
+                  TransactionAttributes('affiliation', '12412342', 1.34, 43.232,
+                      242.2323, '123456');
+              mpInstance?.logCommerceEvent(
+                  productActionType: ProductActionType.Purchase,
+                  products: [product1.toJson(), product2.toJson()],
+                  transactionAttributes: transactionAttributes,
+                  currency: 'US',
+                  screenName: 'One Click Purchase');
+            }),
+            buildButton('Log Commerce - Promotion', () {
+              final Promotion promotion1 =
+                  Promotion('12312', 'Jennifer Slater', 'BOGO Bonanza', 'top');
+              final Promotion promotion2 =
+                  Promotion('15632', 'Gregor Roman', 'Eco Living', 'mid');
+
+              mpInstance?.logCommerceEvent(
+                  promotionActionType: PromotionActionType.View,
+                  promotions: [promotion1.toJson(), promotion2.toJson()],
+                  currency: 'US',
+                  screenName: 'One Click Purchase');
+            }),
+            buildButton('Log Commerce - Impression', () {
+              final Product product1 = Product('Orange', '123abc', 2, 1.3);
+              final Product product2 = Product('Apple', '456abc', 4, 2.2);
+              final Impression impression1 =
+                  Impression('produce', [product1, product2]);
+              final Impression impression2 = Impression('citris', [product1]);
+              mpInstance?.logCommerceEvent(
+                  impressions: [impression1.toJson(), impression2.toJson()],
+                  currency: 'US',
+                  screenName: 'One Click Purchase');
             }),
             buildButton('Log Error', () {
               mpInstance?.logError(

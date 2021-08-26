@@ -5,6 +5,12 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
+import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
+import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
+import 'package:mparticle_flutter_sdk/events/promotion.dart';
+import 'package:mparticle_flutter_sdk/events/product.dart';
+import 'package:mparticle_flutter_sdk/events/impression.dart';
+import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
 import 'package:mparticle_flutter_sdk/src/user.dart';
@@ -60,6 +66,71 @@ class MparticleFlutterSdk {
     required int kit,
   }) async {
     return await _channel.invokeMethod('isKitActive', {'kitId': kit});
+  }
+
+  /// Logs a product commerce event with an [productActionType], a promotion commerce event with a [eventType], and an impression commerce event if neither of the prior are implemented.
+  Future<void> logCommerceEvent({
+    ProductActionType? productActionType,
+    PromotionActionType? promotionActionType,
+    List<Map<String, dynamic>>? promotions,
+    List<Map<String, dynamic>>? products,
+    List<Map<String, dynamic>>? impressions,
+    TransactionAttributes? transactionAttributes,
+    String? checkoutOptions,
+    String? currency,
+    String? productListName,
+    String? productListSource,
+    String? screenName,
+    int? checkoutStep,
+    bool? nonInteractive,
+  }) async {
+    if (productActionType != null) {
+      return await _channel.invokeMethod('logCommerceEvent', {
+        'productActionType':
+            ProductActionType.values.indexOf(productActionType),
+        'products': products,
+        'promotions': promotions,
+        'impressions': impressions,
+        'transactionAttributes': transactionAttributes?.toJson(),
+        'checkoutOptions': checkoutOptions,
+        'currency': currency,
+        'productListName': productListName,
+        'productListSource': productListSource,
+        'screenName': screenName,
+        'checkoutStep': checkoutStep,
+        'nonInteractive': nonInteractive
+      });
+    } else if (promotionActionType != null) {
+      return await _channel.invokeMethod('logCommerceEvent', {
+        'promotionActionType':
+            PromotionActionType.values.indexOf(promotionActionType),
+        'products': products,
+        'promotions': promotions,
+        'impressions': impressions,
+        'transactionAttributes': transactionAttributes,
+        'checkoutOptions': checkoutOptions,
+        'currency': currency,
+        'productListName': productListName,
+        'productListSource': productListSource,
+        'screenName': screenName,
+        'checkoutStep': checkoutStep,
+        'nonInteractive': nonInteractive
+      });
+    } else {
+      return await _channel.invokeMethod('logCommerceEvent', {
+        'products': products,
+        'promotions': promotions,
+        'impressions': impressions,
+        'transactionAttributes': transactionAttributes,
+        'checkoutOptions': checkoutOptions,
+        'currency': currency,
+        'productListName': productListName,
+        'productListSource': productListSource,
+        'screenName': screenName,
+        'checkoutStep': checkoutStep,
+        'nonInteractive': nonInteractive
+      });
+    }
   }
 
   /// Logs an error event with an [eventName] and [customAttributes].
