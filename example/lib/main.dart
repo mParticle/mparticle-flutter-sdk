@@ -123,11 +123,11 @@ class _MyAppState extends State<MyApp> {
                   customFlags: {'flag1': 'flagValue1'});
             }),
             buildButton('Log Commerce - Product', () {
-              final Product product1 = Product('Orange', '123abc', 2, 1.3);
-              final Product product2 = Product('Apple', '456abc', 4, 2.2);
+              final Product product1 = Product('Orange', '123abc', 2.4, 1);
+              final Product product2 = Product('Apple', '456abc', 4.1, 2);
               final TransactionAttributes transactionAttributes =
-                  TransactionAttributes('affiliation', '12412342', 1.34, 43.232,
-                      242.2323, '123456');
+                  TransactionAttributes('123456', 'affiliation', '12412342',
+                      1.34, 43.232, 242.2323);
               mpInstance?.logCommerceEvent(
                   productActionType: ProductActionType.Purchase,
                   products: [product1.toJson(), product2.toJson()],
@@ -148,11 +148,11 @@ class _MyAppState extends State<MyApp> {
                   screenName: 'One Click Purchase');
             }),
             buildButton('Log Commerce - Impression', () {
-              final Product product1 = Product('Orange', '123abc', 2, 1.3);
-              final Product product2 = Product('Apple', '456abc', 4, 2.2);
+              final Product product1 = Product('Orange', '123abc', 2.4, 1);
+              final Product product2 = Product('Apple', '456abc', 4.1, 2);
               final Impression impression1 =
                   Impression('produce', [product1, product2]);
-              final Impression impression2 = Impression('citris', [product1]);
+              final Impression impression2 = Impression('citrus', [product1]);
               mpInstance?.logCommerceEvent(
                   impressions: [impression1.toJson(), impression2.toJson()],
                   currency: 'US',

@@ -7,9 +7,6 @@ import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
 import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
 import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
-import 'package:mparticle_flutter_sdk/events/promotion.dart';
-import 'package:mparticle_flutter_sdk/events/product.dart';
-import 'package:mparticle_flutter_sdk/events/impression.dart';
 import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
@@ -84,53 +81,27 @@ class MparticleFlutterSdk {
     int? checkoutStep,
     bool? nonInteractive,
   }) async {
+    var commerceEvent = {
+      'products': products,
+      'promotions': promotions,
+      'impressions': impressions,
+      'transactionAttributes': transactionAttributes?.toJson(),
+      'checkoutOptions': checkoutOptions,
+      'currency': currency,
+      'productListName': productListName,
+      'productListSource': productListSource,
+      'screenName': screenName,
+      'checkoutStep': checkoutStep,
+      'nonInteractive': nonInteractive
+    };
     if (productActionType != null) {
-      return await _channel.invokeMethod('logCommerceEvent', {
-        'productActionType':
-            ProductActionType.values.indexOf(productActionType),
-        'products': products,
-        'promotions': promotions,
-        'impressions': impressions,
-        'transactionAttributes': transactionAttributes?.toJson(),
-        'checkoutOptions': checkoutOptions,
-        'currency': currency,
-        'productListName': productListName,
-        'productListSource': productListSource,
-        'screenName': screenName,
-        'checkoutStep': checkoutStep,
-        'nonInteractive': nonInteractive
-      });
+      commerceEvent['productActionType'] =
+          ProductActionType.values.indexOf(productActionType);
     } else if (promotionActionType != null) {
-      return await _channel.invokeMethod('logCommerceEvent', {
-        'promotionActionType':
-            PromotionActionType.values.indexOf(promotionActionType),
-        'products': products,
-        'promotions': promotions,
-        'impressions': impressions,
-        'transactionAttributes': transactionAttributes,
-        'checkoutOptions': checkoutOptions,
-        'currency': currency,
-        'productListName': productListName,
-        'productListSource': productListSource,
-        'screenName': screenName,
-        'checkoutStep': checkoutStep,
-        'nonInteractive': nonInteractive
-      });
-    } else {
-      return await _channel.invokeMethod('logCommerceEvent', {
-        'products': products,
-        'promotions': promotions,
-        'impressions': impressions,
-        'transactionAttributes': transactionAttributes,
-        'checkoutOptions': checkoutOptions,
-        'currency': currency,
-        'productListName': productListName,
-        'productListSource': productListSource,
-        'screenName': screenName,
-        'checkoutStep': checkoutStep,
-        'nonInteractive': nonInteractive
-      });
+      commerceEvent['promotionActionType'] =
+          PromotionActionType.values.indexOf(promotionActionType);
     }
+    return await _channel.invokeMethod('logCommerceEvent', commerceEvent);
   }
 
   /// Logs an error event with an [eventName] and [customAttributes].

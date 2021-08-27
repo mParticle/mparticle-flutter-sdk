@@ -1,32 +1,36 @@
 class TransactionAttributes {
-  TransactionAttributes(this.affiliation, this.couponCode, this.shipping,
-      this.tax, this.revenue, this.transactionId);
+  TransactionAttributes(this.transactionId,
+      [this.affiliation,
+      this.couponCode,
+      this.shipping,
+      this.tax,
+      this.revenue]);
 
+  final String transactionId;
   final String? affiliation;
   final String? couponCode;
   final double? shipping;
   final double? tax;
   final double? revenue;
-  final String? transactionId;
 
-  static TransactionAttributes fromJson(dynamic json) {
+  static TransactionAttributes fromJson(Map<String, dynamic> json) {
     return TransactionAttributes(
+        json['transactionId'] as String,
         json['affiliation'] as String,
         json['couponCode'] as String,
         json['shipping'] as double,
         json['tax'] as double,
-        json['revenue'] as double,
-        json['transactionId'] as String);
+        json['revenue'] as double);
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'transactionId': this.transactionId,
       'affiliation': this.affiliation,
       'couponCode': this.couponCode,
       'shipping': this.shipping,
       'tax': this.tax,
-      'revenue': this.revenue,
-      'transactionId': this.transactionId
+      'revenue': this.revenue
     };
   }
 }
