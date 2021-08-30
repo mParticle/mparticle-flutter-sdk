@@ -119,6 +119,16 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         } ?: result.error(TAG, "Missing attributeKey", null)
       }
       "aliasUsers" -> this.aliasUsers(call, result)
+      "getAttributions" ->
+        MParticle.getInstance()?.attributionResults
+        ?.entries
+        ?.fold(JSONObject()) { jsonObj, entry ->
+          val value = JSONObject().apply {
+            put("linkParameters",(entry.value.parameters ?: JSONObject()).toString())
+            put("kitId", entry.value.serviceProviderId.toString())
+          }
+          jsonObj.put(entry.key.toString(), value)
+        }.let { result.success((it ?: JSONObject()).toString()) }
       else -> {
         result.notImplemented()
       }
