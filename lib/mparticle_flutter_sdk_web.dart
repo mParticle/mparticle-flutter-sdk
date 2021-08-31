@@ -265,32 +265,13 @@ class MparticleFlutterSdkWeb {
         break;
       case 'logCommerceEvent':
         var commerceEvent = call.arguments['commerceEvent'];
-        int? productActionType = commerceEvent['productActionType'];
 
-        // Web has Enums which start with Unknown, so we must increment by 1 since Dart enums start with AddToCart
-        // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L256
-        if (productActionType != null) {
-          productActionType =
-              convertProductActionTypeIndexToJSProductActionType(
-                  productActionType, mParticle['ProductActionType']);
-        }
-
-        int? promotionActionType = commerceEvent['promotionActionType'];
-        if (promotionActionType != null) {
-          promotionActionType =
-              convertPromotionActionTypeIndexToJSPromotionAction(
-                  promotionActionType, mParticle["PromotionType"]);
-        }
-        List? rawProducts = commerceEvent['products'];
-        List? products = [];
-
-        Map<String, dynamic>? customAttributes =
-            commerceEvent['customAttributes'];
+        var customAttributes = commerceEvent['customAttributes'];
         if (customAttributes == null) {
           customAttributes = {};
         }
-        Map<String, dynamic>? customFlags = commerceEvent['customFlags'];
 
+        var customFlags = commerceEvent['customFlags'];
         if (customFlags == null) {
           customFlags = {};
         }
@@ -300,17 +281,23 @@ class MparticleFlutterSdkWeb {
           mpCommerce.callMethod('setCurrencyCode', [currency]);
         }
 
-        var checkoutStep = commerceEvent['checkoutStep'];
-        var checkoutOptions = commerceEvent['checkoutOptions'];
-        var transactionAttributes = commerceEvent['transactionAttributes'];
+        var transactionAttributes = {};
+        if (commerceEvent['transactionAttributes'] != null) {
+          transactionAttributes = commerceEvent['transactionAttributes'];
+        }
+
+        String? checkoutStep = commerceEvent['checkoutStep'];
         if (checkoutStep != null) {
           transactionAttributes['Step'] = checkoutStep;
         }
 
+        String? checkoutOptions = commerceEvent['checkoutOptions'];
         if (checkoutOptions != null) {
           transactionAttributes['Option'] = checkoutOptions;
         }
 
+        List? rawProducts = commerceEvent['products'];
+        List? products = [];
         if (rawProducts != null && rawProducts.length > 0) {
           rawProducts.forEach((rawProduct) {
             var product = mpCommerce.callMethod('createProduct', [
@@ -321,10 +308,27 @@ class MparticleFlutterSdkWeb {
             products.add(product);
           });
         }
+
+        int? rawProductActionType = commerceEvent['productActionType'];
+        // Web integer values for product action types differ from Dart Enums
+        // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L255-L267
+        // Convert the product action type from what is passed from Dart to the JS SDK value
+        int? jsProductActionType =
+            convertProductActionTypeIndexToJSProductActionType(
+                rawProductActionType, mParticle['ProductActionType']);
+
+        // Web integer values for promotion action types differ from Dart Enums
+        // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L324-L328
+        // Convert the promotion action type from what is passed from Dart to the JS SDK value
+        int? rawPromotionActionType = commerceEvent['promotionActionType'];
+        int? jsPromotionActionType =
+            convertPromotionActionTypeIndexToJSPromotionAction(
+                rawPromotionActionType, mParticle["PromotionType"]);
+
         // log product action
-        if (productActionType != null) {
+        if (rawProductActionType != null && jsProductActionType != null) {
           mpCommerce.callMethod('logProductAction', [
-            productActionType,
+            jsProductActionType,
             JsObject.jsify(products),
             JsObject.jsify(customAttributes),
             JsObject.jsify(customFlags),
@@ -332,7 +336,8 @@ class MparticleFlutterSdkWeb {
           ]);
           return true;
           // log promotion
-        } else if (promotionActionType != null) {
+        } else if (rawPromotionActionType != null &&
+            jsPromotionActionType != null) {
           List? rawPromotions = commerceEvent["promotions"];
           List? promotions = [];
 
@@ -349,11 +354,12 @@ class MparticleFlutterSdkWeb {
           }
 
           mpCommerce.callMethod('logPromotion',
-              [promotionActionType, JsObject.jsify(promotions)]);
+              [jsPromotionActionType, JsObject.jsify(promotions)]);
 
           return true;
           // log impression
-        } else {
+        } else if (rawProductActionType == null &&
+            rawPromotionActionType == null) {
           List? rawImpressions = commerceEvent["impressions"];
           List? impressions = [];
 
