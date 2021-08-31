@@ -10,7 +10,7 @@ import 'dart:convert';
 import 'dart:js';
 import 'package:mparticle_flutter_sdk/src/web_helpers/identity_helpers.dart'
     as webIdentityHelpers;
-
+import 'package:mparticle_flutter_sdk/src/web_helpers/ecommerce_helpers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -34,6 +34,8 @@ class MparticleFlutterSdkWeb {
     final mParticle = JsObject.fromBrowserObject(context['mParticle']);
     final mpIdentity =
         JsObject.fromBrowserObject(context['mParticle']['Identity']);
+    final mpCommerce =
+        JsObject.fromBrowserObject(context['mParticle']['eCommerce']);
 
     // Calls to the mParticle JS Identity methods are async, so we must await
     // a Future that contains a Completer. The Completer completes inside the JS callback
@@ -260,6 +262,128 @@ class MparticleFlutterSdkWeb {
           print(
               'You included only a startTime or an endTime, but not both. Please include BOTH a startTime and an endTime, or let mParticle calculate both for you');
         }
+        break;
+      case 'logCommerceEvent':
+        var commerceEvent = call.arguments['commerceEvent'];
+        int? productActionType = commerceEvent['productActionType'];
+
+        // Web has Enums which start with Unknown, so we must increment by 1 since Dart enums start with AddToCart
+        // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L256
+        if (productActionType != null) {
+          productActionType =
+              convertProductActionTypeIndexToJSProductActionType(
+                  productActionType, mParticle['ProductActionType']);
+        }
+
+        int? promotionActionType = commerceEvent['promotionActionType'];
+        if (promotionActionType != null) {
+          promotionActionType =
+              convertPromotionActionTypeIndexToJSPromotionAction(
+                  promotionActionType, mParticle["PromotionType"]);
+        }
+        List? rawProducts = commerceEvent['products'];
+        List? products = [];
+
+        Map<String, dynamic>? customAttributes =
+            commerceEvent['customAttributes'];
+        if (customAttributes == null) {
+          customAttributes = {};
+        }
+        Map<String, dynamic>? customFlags = commerceEvent['customFlags'];
+
+        if (customFlags == null) {
+          customFlags = {};
+        }
+
+        String? currency = commerceEvent['currency'];
+        if (currency != null) {
+          mpCommerce.callMethod('setCurrencyCode', [currency]);
+        }
+
+        var checkoutStep = commerceEvent['checkoutStep'];
+        var checkoutOptions = commerceEvent['checkoutOptions'];
+        var transactionAttributes = commerceEvent['transactionAttributes'];
+        if (checkoutStep != null) {
+          transactionAttributes['Step'] = checkoutStep;
+        }
+
+        if (checkoutOptions != null) {
+          transactionAttributes['Option'] = checkoutOptions;
+        }
+
+        if (rawProducts != null && rawProducts.length > 0) {
+          rawProducts.forEach((rawProduct) {
+            var product = mpCommerce.callMethod('createProduct', [
+              rawProduct['name'],
+              rawProduct['quantity'],
+              rawProduct['price']
+            ]);
+            products.add(product);
+          });
+        }
+        // log product action
+        if (productActionType != null) {
+          mpCommerce.callMethod('logProductAction', [
+            productActionType,
+            JsObject.jsify(products),
+            JsObject.jsify(customAttributes),
+            JsObject.jsify(customFlags),
+            JsObject.jsify(transactionAttributes)
+          ]);
+          return true;
+          // log promotion
+        } else if (promotionActionType != null) {
+          List? rawPromotions = commerceEvent["promotions"];
+          List? promotions = [];
+
+          if (rawPromotions != null && rawPromotions.length > 0) {
+            rawPromotions.forEach((rawPromotion) {
+              var promotion = mpCommerce.callMethod('createPromotion', [
+                rawPromotion['promotionId'],
+                rawPromotion['creative'],
+                rawPromotion['name'],
+                rawPromotion['position'],
+              ]);
+              promotions.add(promotion);
+            });
+          }
+
+          mpCommerce.callMethod('logPromotion',
+              [promotionActionType, JsObject.jsify(promotions)]);
+
+          return true;
+          // log impression
+        } else {
+          List? rawImpressions = commerceEvent["impressions"];
+          List? impressions = [];
+
+          if (rawImpressions != null && rawImpressions.length > 0) {
+            rawImpressions.forEach((rawImpression) {
+              List impressionProducts = [];
+              var rawImpressionProducts = rawImpression['products'];
+
+              if (rawImpressionProducts != null &&
+                  rawImpressionProducts.length > 0) {
+                rawImpressionProducts.forEach((rawImpressionProduct) {
+                  var product = mpCommerce.callMethod('createProduct', [
+                    rawImpressionProduct['name'],
+                    rawImpressionProduct['quantity'],
+                    rawImpressionProduct['price']
+                  ]);
+                  impressionProducts.add(product);
+                });
+              }
+              var impression = mpCommerce.callMethod('createImpression', [
+                rawImpression['impressionListName'],
+                JsObject.jsify(impressionProducts)
+              ]);
+              impressions.add(impression);
+            });
+          }
+
+          mpCommerce.callMethod('logImpression', [JsObject.jsify(impressions)]);
+        }
+
         break;
       default:
         throw PlatformException(
