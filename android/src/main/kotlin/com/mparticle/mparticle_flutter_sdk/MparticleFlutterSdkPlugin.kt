@@ -124,6 +124,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         ?.entries
         ?.fold(JSONObject()) { jsonObj, entry ->
           val value = JSONObject().apply {
+            put("link", entry.value.link)
             put("linkParameters",(entry.value.parameters ?: JSONObject()).toString())
             put("kitId", entry.value.serviceProviderId.toString())
           }
