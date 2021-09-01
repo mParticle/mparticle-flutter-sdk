@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'dart:js';
 import 'package:mparticle_flutter_sdk/src/web_helpers/identity_helpers.dart'
     as webIdentityHelpers;
-import 'package:mparticle_flutter_sdk/src/web_helpers/ecommerce_helpers.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -309,26 +308,13 @@ class MparticleFlutterSdkWeb {
           });
         }
 
-        int? rawProductActionType = commerceEvent['productActionType'];
-        // Web integer values for product action types differ from Dart Enums
-        // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L255-L267
-        // Convert the product action type from what is passed from Dart to the JS SDK value
-        int? jsProductActionType =
-            convertProductActionTypeIndexToJSProductActionType(
-                rawProductActionType, mParticle['ProductActionType']);
-
-        // Web integer values for promotion action types differ from Dart Enums
-        // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L324-L328
-        // Convert the promotion action type from what is passed from Dart to the JS SDK value
-        int? rawPromotionActionType = commerceEvent['promotionActionType'];
-        int? jsPromotionActionType =
-            convertPromotionActionTypeIndexToJSPromotionAction(
-                rawPromotionActionType, mParticle["PromotionType"]);
+        int? productActionType = commerceEvent['jsProductActionType'];
+        int? promotionActionType = commerceEvent['jsPromotionActionType'];
 
         // log product action
-        if (rawProductActionType != null && jsProductActionType != null) {
+        if (productActionType != null) {
           mpCommerce.callMethod('logProductAction', [
-            jsProductActionType,
+            productActionType,
             JsObject.jsify(products),
             JsObject.jsify(customAttributes),
             JsObject.jsify(customFlags),
@@ -336,8 +322,7 @@ class MparticleFlutterSdkWeb {
           ]);
           return true;
           // log promotion
-        } else if (rawPromotionActionType != null &&
-            jsPromotionActionType != null) {
+        } else if (promotionActionType != null) {
           List? rawPromotions = commerceEvent["promotions"];
           List? promotions = [];
 
@@ -354,12 +339,11 @@ class MparticleFlutterSdkWeb {
           }
 
           mpCommerce.callMethod('logPromotion',
-              [jsPromotionActionType, JsObject.jsify(promotions)]);
+              [promotionActionType, JsObject.jsify(promotions)]);
 
           return true;
           // log impression
-        } else if (rawProductActionType == null &&
-            rawPromotionActionType == null) {
+        } else {
           List? rawImpressions = commerceEvent["impressions"];
           List? impressions = [];
 

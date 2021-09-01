@@ -18,7 +18,6 @@ import 'identity/alias_request.dart';
 import 'identity/identity_api_result.dart';
 import 'identity/identity_type.dart';
 
-
 /// The interface that implements the mParticle Dart SDK.
 class MparticleFlutterSdk {
   static MparticleFlutterSdk? _instance;
@@ -91,13 +90,16 @@ class MparticleFlutterSdk {
           ProductActionType.values.indexOf(productActionType);
       commerceEventMessage['productActionName'] =
           productActionTypeString(productActionType);
+      commerceEventMessage['jsProductActionType'] = getWebSDKProductActionType(productActionType);
     } else if (promotionActionType != null) {
       commerceEventMessage['promotionActionType'] =
           PromotionActionType.values.indexOf(promotionActionType);
       commerceEventMessage['promotionActionName'] =
           promotionActionTypeString(promotionActionType);
+      commerceEventMessage['jsPromotionActionType'] = getWebSDKPromotionActionType(promotionActionType);
     }
-    return await _channel.invokeMethod('logCommerceEvent', {"commerceEvent": commerceEventMessage});
+    return await _channel.invokeMethod(
+        'logCommerceEvent', {"commerceEvent": commerceEventMessage});
   }
 
   /// Logs an error event with an [eventName] and [customAttributes].

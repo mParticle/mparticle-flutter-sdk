@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> {
               final Impression impression1 =
                   Impression('produce', [product1, product2]);
               final Impression impression2 = Impression('citrus', [product1]);
-              CommerceEvent commerceEvent = new CommerceEvent.withImpression(impression2)
+              CommerceEvent commerceEvent = new CommerceEvent.withImpression(impression1)
                   ..impressions.add(impression2)
                   ..currency = 'US'
                   ..screenName = 'One Click Purchase';
