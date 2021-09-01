@@ -130,7 +130,7 @@ class _MyAppState extends State<MyApp> {
                       1.34, 43.232, 242.2323);
               mpInstance?.logCommerceEvent(
                   productActionType: ProductActionType.Purchase,
-                  products: [product1.toJson(), product2.toJson()],
+                  products: [product1, product2],
                   transactionAttributes: transactionAttributes,
                   currency: 'US',
                   screenName: 'One Click Purchase');
@@ -143,7 +143,7 @@ class _MyAppState extends State<MyApp> {
 
               mpInstance?.logCommerceEvent(
                   promotionActionType: PromotionActionType.View,
-                  promotions: [promotion1.toJson(), promotion2.toJson()],
+                  promotions: [promotion1, promotion2],
                   currency: 'US',
                   screenName: 'One Click Purchase');
             }),
@@ -154,7 +154,7 @@ class _MyAppState extends State<MyApp> {
                   Impression('produce', [product1, product2]);
               final Impression impression2 = Impression('citrus', [product1]);
               mpInstance?.logCommerceEvent(
-                  impressions: [impression1.toJson(), impression2.toJson()],
+                  impressions: [impression1, impression2],
                   currency: 'US',
                   screenName: 'One Click Purchase');
             }),

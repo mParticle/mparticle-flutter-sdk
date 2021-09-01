@@ -3,6 +3,9 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:mparticle_flutter_sdk/events/impression.dart';
+import 'package:mparticle_flutter_sdk/events/product.dart';
+import 'package:mparticle_flutter_sdk/events/promotion.dart';
 import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
 import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
@@ -69,10 +72,12 @@ class MparticleFlutterSdk {
   Future<void> logCommerceEvent({
     ProductActionType? productActionType,
     PromotionActionType? promotionActionType,
-    List<Map<String, dynamic>>? promotions,
-    List<Map<String, dynamic>>? products,
-    List<Map<String, dynamic>>? impressions,
+    List<Promotion>? promotions,
+    List<Product>? products,
+    List<Impression>? impressions,
     TransactionAttributes? transactionAttributes,
+    Map<String, String?>? customAttributes,
+    Map<String, dynamic>? customFlags,
     String? checkoutOptions,
     String? currency,
     String? productListName,
@@ -81,11 +86,32 @@ class MparticleFlutterSdk {
     int? checkoutStep,
     bool? nonInteractive,
   }) async {
+    var promotionsJSON = [];
+    if (promotions != null) {
+      for (var promotion in promotions) {
+        promotionsJSON.add(promotion.toJson());
+      }
+    }
+    var productsJSON = [];
+    if (products != null) {
+      for (var product in products) {
+        productsJSON.add(product.toJson());
+      }
+    }
+    var impressionsJSON = [];
+    if (impressions != null) {
+      for (var impression in impressions) {
+        impressionsJSON.add(impression.toJson());
+      }
+    }
+
     var commerceEvent = {
-      'products': products,
-      'promotions': promotions,
-      'impressions': impressions,
+      'products': productsJSON,
+      'promotions': promotionsJSON,
+      'impressions': impressionsJSON,
       'transactionAttributes': transactionAttributes?.toJson(),
+      'customAttributes': customAttributes,
+      'customFlags': customFlags,
       'checkoutOptions': checkoutOptions,
       'currency': currency,
       'productListName': productListName,
@@ -101,7 +127,8 @@ class MparticleFlutterSdk {
       commerceEvent['promotionActionType'] =
           PromotionActionType.values.indexOf(promotionActionType);
     }
-    return await _channel.invokeMethod('logCommerceEvent', commerceEvent);
+    return await _channel
+        .invokeMethod('logCommerceEvent', {"commerceEvent": commerceEvent});
   }
 
   /// Logs an error event with an [eventName] and [customAttributes].

@@ -1,9 +1,9 @@
 class Product {
-  Product(this.name, this.sku, this.price, this.quantity);
+  Product(this.name, this.sku, this.price, [this.quantity]);
 
   final String name;
   final String sku;
-  final int quantity;
+  final int? quantity;
   final double price;
 
   static Product fromJson(Map<String, dynamic> json) {
