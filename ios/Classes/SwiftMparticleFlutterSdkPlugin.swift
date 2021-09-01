@@ -258,6 +258,133 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                 }
             }
         }
+    case "logCommerceEvent":
+        if let callArguments = call.arguments as? [String: Any],
+           let commerceArguments = callArguments["commerceEvent"] as? [String: Any] {
+            let event: MPCommerceEvent
+            if let rawActionType = commerceArguments["productActionType"] as? NSNumber,
+               let actionType = MPCommerceEventAction(rawValue:UInt(truncating: rawActionType)) {
+                event = MPCommerceEvent.init(action: actionType)
+            } else if let rawActionType = commerceArguments["promotionActionType"] as? NSNumber,
+                      let actionType = MPPromotionAction(rawValue:UInt(truncating: rawActionType)) {
+                let container = MPPromotionContainer.init(action: actionType, promotion: nil)
+
+                if let rawPromotions = commerceArguments["promotions"] as? [[String: Any]] {
+                    for rawPromotion in rawPromotions {
+                        let promotion = MPPromotion.init()
+                        promotion.promotionId = rawPromotion["promotionId"] as? String
+                        promotion.creative = rawPromotion["creative"] as? String
+                        promotion.name = rawPromotion["name"] as? String
+                        promotion.position = rawPromotion["position"] as? String
+
+                        container .addPromotion(promotion)
+                    }
+                }
+
+                event = MPCommerceEvent.init(promotionContainer: container)
+            } else {
+                event = MPCommerceEvent.init(impressionName: nil, product: nil)
+            }
+            // Optional Products on Commerce Event
+            if let rawProducts = commerceArguments["products"] as? [[String: Any]] {
+                for rawProduct in rawProducts {
+                    if let name = rawProduct["name"] as? String,
+                       let sku = rawProduct["sku"] as? String,
+                       let price = rawProduct["price"] as? NSNumber {
+                        let newProduct = MPProduct.init()
+                        newProduct.name = name
+                        newProduct.sku = sku
+                        newProduct.price = price
+                        if let quantity = rawProduct["quantity"] as? NSNumber {
+                            newProduct.quantity = quantity
+                        }
+
+                        event.addProduct(newProduct)
+                    }
+                }
+            }
+
+            // Optional Transaction Attributes
+            if let rawTransactionAttributes = commerceArguments["transactionAttributes"] as? [String: Any] {
+                let attributes = MPTransactionAttributes.init()
+                if let affiliation = rawTransactionAttributes["affiliation"] as? String {
+                    attributes.affiliation = affiliation
+                }
+                if let couponCode = rawTransactionAttributes["couponCode"] as? String {
+                    attributes.couponCode = couponCode
+                }
+                if let shipping = rawTransactionAttributes["shipping"] as? NSNumber {
+                    attributes.shipping = shipping
+                }
+                if let tax = rawTransactionAttributes["tax"] as? NSNumber {
+                    attributes.tax = tax
+                }
+                if let revenue = rawTransactionAttributes["revenue"] as? NSNumber {
+                    attributes.revenue = revenue
+                }
+                if let transactionId = rawTransactionAttributes["transactionId"] as? String {
+                    attributes.transactionId = transactionId
+                }
+
+                event.transactionAttributes = attributes
+            }
+
+            let customAttributes = commerceArguments["customAttributes"] as? [String: Any]
+            event.customAttributes = customAttributes
+            if let customFlags = commerceArguments["customFlags"] as? [String: String] {
+                for (key, value) in customFlags {
+                    event.addCustomFlag(value, withKey: key)
+                }
+            }
+
+            if let rawImpressions = commerceArguments["impressions"] as? [[String: Any]] {
+                for rawImpression in rawImpressions {
+                    if let listName = rawImpression["impressionListName"] as? String,
+                       let rawProducts = rawImpression["products"] as? [[String: Any]] {
+                        for rawProduct in rawProducts {
+                            if let name = rawProduct["name"] as? String,
+                               let sku = rawProduct["sku"] as? String,
+                               let quantity = rawProduct["quantity"] as? NSNumber,
+                               let price = rawProduct["price"] as? NSNumber {
+                                let newProduct = MPProduct.init(name: name,
+                                                                sku: sku,
+                                                                quantity: quantity,
+                                                                price: price)
+                                event.addImpression(newProduct, listName: listName)
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Optionable Properties on MPCommerceEvent
+            if let checkoutOptions = commerceArguments["checkoutOptions"] as? String {
+                event.checkoutOptions = checkoutOptions
+            }
+            if let currency = commerceArguments["currency"] as? String {
+                event.currency = currency
+            }
+            if let productListName = commerceArguments["productListName"] as? String {
+                event.productListName = productListName
+            }
+            if let productListSource = commerceArguments["productListSource"] as? String {
+                event.productListSource = productListSource
+            }
+            if let screenName = commerceArguments["screenName"] as? String {
+                event.screenName = screenName
+            }
+            // ??? checkoutStep is deprecated for iOS
+            if let checkoutStep = commerceArguments["checkoutStep"] as? NSNumber {
+                event.checkoutStep = checkoutStep.intValue
+            }
+            if let nonInteractive = commerceArguments["nonInteractive"] as? Bool {
+                event.nonInteractive = nonInteractive
+            }
+
+            MParticle.sharedInstance().logEvent(event)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+        }
     default:
         print("mParticle flutter SDK for iOS does not support \(call.method)")
     }
