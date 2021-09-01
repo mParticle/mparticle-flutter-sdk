@@ -43,9 +43,23 @@ Now that you have the mParticle Dart plugin, install mParticle on your native/we
 
 To install mParticle on an Android platform:
 
-1. Grab your mParticle key and secret from [your workspace's dashboard](https://app.mparticle.com/apps) and construct an `MParticleOptions` object.
+1. Add the following dependencies to your app's `build.gradle`:
 
-2. Call `start` from the `onCreate` method of your app's `Application` class. It's crucial that the SDK be started here for proper session management. If you don't already have an `Application` class, create it and then specify its fully-qualified name in the `<application>` tag of your app's `AndroidManifest.xml`.
+```groovy
+dependencies {
+    implementation 'com.mparticle:android-core:5+'
+
+    // Required for gathering Android Advertising ID (see below)
+    implementation 'com.google.android.gms:play-services-ads-identifier:16.0.0'
+
+    // Recommended to query the Google Play install referrer
+    implementation 'com.android.installreferrer:installreferrer:1.0'
+}
+```
+
+2. Grab your mParticle key and secret from [your workspace's dashboard](https://app.mparticle.com/apps) and construct an `MParticleOptions` object.
+
+3. Call `start` from the `onCreate` method of your app's `Application` class. It's crucial that the SDK be started here for proper session management. If you don't already have an `Application` class, create it and then specify its fully-qualified name in the `<application>` tag of your app's `AndroidManifest.xml`.
 
 ```java
 package com.example.myapp;
@@ -74,6 +88,21 @@ public class MyApplication extends Application {
 }
 ```
 
+```kotlin
+import com.mparticle.MParticle
+import com.mparticle.MParticleOptions
+
+class ExampleApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        val options = MParticleOptions.builder(this)
+            .credentials("REPLACE ME WITH KEY", "REPLACE ME WITH SECRET")
+            .build()
+        MParticle.start(options)
+    }
+}
+```
+
 > **Warning:** Don't log events in your `Application.onCreate()`. Android may instantiate your `Application` class for a lot of reasons, in the background, while the user isn't even using their device. 
 For more help, see [the Android set up docs](https://docs.mparticle.com/developers/sdk/android/getting-started/#create-an-input).
 
@@ -91,7 +120,7 @@ To install mParticle on an iOS platform:
 2. Install the SDK using CocoaPods:
 
 ```bash
-$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 7.2.0 or later
+$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 8.5.0 or later
 $ pod install
 ```
 
