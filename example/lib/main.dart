@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:mparticle_flutter_sdk/mparticle_flutter_sdk.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
+import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
 import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
 import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
 import 'package:mparticle_flutter_sdk/events/promotion.dart';
@@ -128,12 +129,12 @@ class _MyAppState extends State<MyApp> {
               final TransactionAttributes transactionAttributes =
                   TransactionAttributes('123456', 'affiliation', '12412342',
                       1.34, 43.232, 242.2323);
-              mpInstance?.logCommerceEvent(
-                  productActionType: ProductActionType.Purchase,
-                  products: [product1, product2],
-                  transactionAttributes: transactionAttributes,
-                  currency: 'US',
-                  screenName: 'One Click Purchase');
+              CommerceEvent commerceEvent = new CommerceEvent.withProduct(ProductActionType.Purchase, product1)
+                ..products.add(product2)
+                ..transactionAttributes = transactionAttributes
+                ..currency = 'US'
+                ..screenName = 'One Click Purchase';
+              mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - Promotion', () {
               final Promotion promotion1 =
@@ -141,11 +142,11 @@ class _MyAppState extends State<MyApp> {
               final Promotion promotion2 =
                   Promotion('15632', 'Gregor Roman', 'Eco Living', 'mid');
 
-              mpInstance?.logCommerceEvent(
-                  promotionActionType: PromotionActionType.View,
-                  promotions: [promotion1, promotion2],
-                  currency: 'US',
-                  screenName: 'One Click Purchase');
+              CommerceEvent commerceEvent = CommerceEvent.withPromotion(PromotionActionType.View, promotion1)
+                ..promotions.add(promotion2)
+                ..currency = 'US'
+                ..screenName = 'OneClickPurchase';
+              mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - Impression', () {
               final Product product1 = Product('Orange', '123abc', 2.4, 1);
@@ -153,10 +154,11 @@ class _MyAppState extends State<MyApp> {
               final Impression impression1 =
                   Impression('produce', [product1, product2]);
               final Impression impression2 = Impression('citrus', [product1]);
-              mpInstance?.logCommerceEvent(
-                  impressions: [impression1, impression2],
-                  currency: 'US',
-                  screenName: 'One Click Purchase');
+              CommerceEvent commerceEvent = new CommerceEvent.withImpression(impression2)
+                  ..impressions.add(impression2)
+                  ..currency = 'US'
+                  ..screenName = 'One Click Purchase';
+              mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Error', () {
               mpInstance?.logError(

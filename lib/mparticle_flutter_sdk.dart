@@ -4,20 +4,20 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/services.dart';
-import 'package:mparticle_flutter_sdk/events/impression.dart';
-import 'package:mparticle_flutter_sdk/events/product.dart';
-import 'package:mparticle_flutter_sdk/events/promotion.dart';
-import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
+import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
 import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
 import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
-import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
+import 'package:mparticle_flutter_sdk/src/commerce/commerce_helpers.dart';
+import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
 import 'package:mparticle_flutter_sdk/src/user.dart';
 
 import 'identity/alias_request.dart';
 import 'identity/identity_api_result.dart';
+import 'identity/identity_type.dart';
+
 
 /// The interface that implements the mParticle Dart SDK.
 class MparticleFlutterSdk {
@@ -70,66 +70,34 @@ class MparticleFlutterSdk {
   }
 
   /// Logs a product commerce event with an [productActionType], a promotion commerce event with a [eventType], and an impression commerce event if neither of the prior are implemented.
-  Future<void> logCommerceEvent({
-    ProductActionType? productActionType,
-    PromotionActionType? promotionActionType,
-    List<Promotion>? promotions,
-    List<Product>? products,
-    List<Impression>? impressions,
-    TransactionAttributes? transactionAttributes,
-    Map<String, String?>? customAttributes,
-    Map<String, dynamic>? customFlags,
-    String? checkoutOptions,
-    String? currency,
-    String? productListName,
-    String? productListSource,
-    String? screenName,
-    int? checkoutStep,
-    bool? nonInteractive,
-  }) async {
-    var promotionsJSON = [];
-    if (promotions != null) {
-      for (var promotion in promotions) {
-        promotionsJSON.add(promotion.toJson());
-      }
-    }
-    var productsJSON = [];
-    if (products != null) {
-      for (var product in products) {
-        productsJSON.add(product.toJson());
-      }
-    }
-    var impressionsJSON = [];
-    if (impressions != null) {
-      for (var impression in impressions) {
-        impressionsJSON.add(impression.toJson());
-      }
-    }
-
-    var commerceEvent = {
-      'products': productsJSON,
-      'promotions': promotionsJSON,
-      'impressions': impressionsJSON,
-      'transactionAttributes': transactionAttributes?.toJson(),
-      'customAttributes': customAttributes,
-      'customFlags': customFlags,
-      'checkoutOptions': checkoutOptions,
-      'currency': currency,
-      'productListName': productListName,
-      'productListSource': productListSource,
-      'screenName': screenName,
-      'checkoutStep': checkoutStep,
-      'nonInteractive': nonInteractive
+  Future<void> logCommerceEvent(CommerceEvent commerceEvent) async {
+    var commerceEventMessage = {
+      'products': commerceEvent.products.map((e) => e.toJson()).toList(),
+      'promotions': commerceEvent.promotions.map((e) => e.toJson()).toList(),
+      'impressions': commerceEvent.impressions.map((e) => e.toJson()).toList(),
+      'transactionAttributes': commerceEvent.transactionAttributes?.toJson(),
+      'checkoutOptions': commerceEvent.checkoutOptions,
+      'currency': commerceEvent.currency,
+      'productListName': commerceEvent.productListName,
+      'productListSource': commerceEvent.productListSource,
+      'screenName': commerceEvent.screenName,
+      'checkoutStep': commerceEvent.checkoutStep,
+      'nonInteractive': commerceEvent.nonInteractive
     };
+    ProductActionType? productActionType = commerceEvent.productActionType;
+    PromotionActionType? promotionActionType = commerceEvent.promotionActionType;
     if (productActionType != null) {
-      commerceEvent['productActionType'] =
+      commerceEventMessage['productActionType'] =
           ProductActionType.values.indexOf(productActionType);
+      commerceEventMessage['productActionName'] =
+          productActionTypeString(productActionType);
     } else if (promotionActionType != null) {
-      commerceEvent['promotionActionType'] =
+      commerceEventMessage['promotionActionType'] =
           PromotionActionType.values.indexOf(promotionActionType);
+      commerceEventMessage['promotionActionName'] =
+          promotionActionTypeString(promotionActionType);
     }
-    return await _channel
-        .invokeMethod('logCommerceEvent', {"commerceEvent": commerceEvent});
+    return await _channel.invokeMethod('logCommerceEvent', {"commerceEvent": commerceEventMessage});
   }
 
   /// Logs an error event with an [eventName] and [customAttributes].
