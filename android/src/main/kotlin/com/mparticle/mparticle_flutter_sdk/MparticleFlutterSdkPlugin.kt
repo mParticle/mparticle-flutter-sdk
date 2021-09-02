@@ -21,8 +21,10 @@ import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
 import com.mparticle.MPEvent
 import com.mparticle.UserAttributeListener
+import com.mparticle.commerce.*
 
 import org.json.JSONObject
+import kotlin.IllegalArgumentException
 
 
 /** MparticleFlutterSdkPlugin */
@@ -132,6 +134,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           }
           jsonObj.put(entry.key.toString(), value)
         }.let { result.success((it ?: JSONObject()).toString()) }
+      "logCommerceEvent" -> this.logCommerceEvent(call, result)
       else -> {
         result.notImplemented()
       }
@@ -194,6 +197,70 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       }
     } catch (e: Exception) {
       result.error(TAG, e.getLocalizedMessage(), null)
+    }
+  }
+
+  private fun logCommerceEvent(call: MethodCall, result: Result) {
+    try {
+      val map = call.argument<Map<String, Any?>>("commerceEvent") ?: mapOf()
+      val promotions: MutableList<Promotion>? =
+        (map["promotions"] as List<Map<String, Any?>?>?)?.map { it?.toPromotion() }
+          ?.filterNotNull()
+          ?.toMutableList()
+      val products: MutableList<Product>? =
+        (map["products"] as List<Map<String, Any?>?>?)?.map { it?.toProduct() }
+          ?.filterNotNull()
+          ?.toMutableList()
+      val impressions: MutableList<Impression>? =
+        (map["impressions"] as List<Map<String, Any?>?>?)?.map { it?.toImpression() }
+          ?.filterNotNull()
+          ?.toMutableList()
+      val transactionAttributes: TransactionAttributes? =
+        (map["transactionAttributes"] as Map<String, Any?>?)?.toTransactionAttributes()
+      val nonInteractive = map["nonInteractive"]?.toString()?.toBoolean()
+      val productListSource = map["productListSource"]?.toString()
+      val productListName = map["productListName"]?.toString()
+      val currency = map["currency"]?.toString()
+      val productActionType = map["androidProductActionType"]?.toString()
+      val promotionActionType = map["androidPromotionActionType"]?.toString()
+      val screenName = map["screenName"]?.toString()
+      val checkoutStep = map["checkoutStep"]?.toString()?.toInt()
+      val checkoutOptions = map["checkoutOptions"]?.toString()
+      val customAttributes: HashMap<String, String?>? = map["customAttributes"] as HashMap<String, String?>?
+      val customFlags: HashMap<String, Any?>? = map["customFlags"] as HashMap<String, Any?>?
+      val commerceEvent = when {
+        !productActionType.isNullOrEmpty() && !products.isNullOrEmpty() -> CommerceEvent.Builder(productActionType.toString(), products.removeAt(0))
+        !promotionActionType.isNullOrEmpty()&& !promotions.isNullOrEmpty() -> CommerceEvent.Builder(promotionActionType.toString(), promotions.removeAt(0))
+        !impressions.isNullOrEmpty() -> CommerceEvent.Builder(impressions.removeAt(0))
+        else -> throw java.lang.IllegalArgumentException("""CommerceEvents must have either 1) "promotionAction" and at least 1 Promotion, 2) a "productAction" and at least 1 Product or 3) at least 1 Impression """)
+      }
+        .apply {
+          promotions?.forEach { addPromotion(it)}
+          products?.forEach { addProduct(it)}
+          impressions?.forEach { addImpression(it) }
+
+          transactionAttributes?.let { transactionAttributes(it) }
+
+          currency?.let { currency(it) }
+          nonInteractive?.let { nonInteraction(it) }
+          productListSource?.let { productListSource(it)}
+          productListName?.let { productListName(it)}
+          screenName?.let { screen(it)}
+          checkoutStep?.let { checkoutStep(it) }
+          checkoutOptions?.let { checkoutOptions(it) }
+          customAttributes?.let { customAttributes(it)}
+          customFlags?.entries?.associate { (key, value) ->
+            key to when (value) {
+              is List<*> -> value.map { it.toString() }
+              else -> listOf(value.toString())
+            }
+          }?.let { customFlags(it) }
+        }.build()
+
+      MParticle.getInstance()?.logEvent(commerceEvent).let { result.success(it != null) }
+
+    } catch (ex: IllegalArgumentException) {
+      result.error(TAG, ex.message, null)
     }
   }
 
@@ -523,5 +590,53 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
     channel.setMethodCallHandler(null)
+  }
+
+  fun Map<String, Any?>.toPromotion(): Promotion =
+    Promotion().apply {
+      get("name")?.toString()?.let { name = it }
+      get("position")?.toString()?.let { position = it }
+      get("promotionId")?.toString()?.let { id = it }
+      get("creative")?.toString()?.let { creative = it }
+    }
+
+  @Throws(IllegalArgumentException::class)
+  fun Map<String, Any?>.toProduct(): Product {
+    val quantity = get("quantity")?.toString()?.toDoubleOrNull()
+    val price = get("price")?.toString()?.toDoubleOrNull()
+    val name = get("name")?.toString()
+    val sku = get("sku")?.toString()
+    return if (name == null || sku == null || price == null) {
+      throw IllegalArgumentException("""Product requires "name", "sku" and "price" values""")
+    } else {
+      Product.Builder(name, sku, price)
+        .also { product ->
+          quantity?.let { product.quantity(it) }
+        }
+        .build()
+    }
+  }
+
+  fun Map<String, Any?>.toTransactionAttributes(): TransactionAttributes =
+    TransactionAttributes().also { transactionAttributes ->
+      get("revenue").toString().toDoubleOrNull()?.let { transactionAttributes.revenue = it }
+      get("shipping")?.toString()?.toDoubleOrNull()?.let { transactionAttributes.shipping = it }
+      get("affiliation")?.toString()?.let { transactionAttributes.affiliation = it }
+      get("tax")?.toString()?.toDoubleOrNull()?.let { transactionAttributes.tax = it }
+      get("couponCode")?.toString()?.let { transactionAttributes.couponCode = it }
+      get("transactionId")?.toString()?.let { transactionAttributes.id = it }
+    }
+
+  @Throws(IllegalArgumentException::class)
+  fun Map<String, Any?>.toImpression(): Impression {
+    val impressionListName = get("impressionListName")?.toString()
+    val products = (get("products") as? ArrayList<*>)?.map { (it as? Map<String, Any?>)?.toProduct() ?: throw java.lang.IllegalArgumentException(""""products" entry: $it is malformed """) }
+    return if (impressionListName == null || products == null || products.isEmpty()) {
+      throw IllegalArgumentException("""Impression requires an "impressionListName" and at least on "product" """)
+    } else {
+      Impression(impressionListName, products[0]).also { impression ->
+        products.subList(1, products.size).forEach { impression.addProduct(it)}
+      }
+    }
   }
 }

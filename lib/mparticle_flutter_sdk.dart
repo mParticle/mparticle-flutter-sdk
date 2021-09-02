@@ -90,14 +90,12 @@ class MparticleFlutterSdk {
     if (productActionType != null) {
       commerceEventMessage['productActionType'] =
           ProductActionType.values.indexOf(productActionType);
-      commerceEventMessage['productActionName'] =
-          productActionTypeString(productActionType);
+      commerceEventMessage['androidProductActionType'] = getAndroidSDKProductActionTypeString(productActionType);
       commerceEventMessage['jsProductActionType'] = getWebSDKProductActionType(productActionType);
     } else if (promotionActionType != null) {
       commerceEventMessage['promotionActionType'] =
           PromotionActionType.values.indexOf(promotionActionType);
-      commerceEventMessage['promotionActionName'] =
-          promotionActionTypeString(promotionActionType);
+    commerceEventMessage['androidPromotionActionType'] = getAndroidSDKPromotionActionTypeString(promotionActionType);
       commerceEventMessage['jsPromotionActionType'] = getWebSDKPromotionActionType(promotionActionType);
     }
     return await _channel.invokeMethod(
