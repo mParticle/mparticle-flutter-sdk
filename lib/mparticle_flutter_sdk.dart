@@ -82,7 +82,9 @@ class MparticleFlutterSdk {
       'productListSource': commerceEvent.productListSource,
       'screenName': commerceEvent.screenName,
       'checkoutStep': commerceEvent.checkoutStep,
-      'nonInteractive': commerceEvent.nonInteractive
+      'nonInteractive': commerceEvent.nonInteractive,
+      'customAttributes': commerceEvent.customAttributes,
+      'customFlags': commerceEvent.customFlags
     };
     ProductActionType? productActionType = commerceEvent.productActionType;
     PromotionActionType? promotionActionType = commerceEvent.promotionActionType;
