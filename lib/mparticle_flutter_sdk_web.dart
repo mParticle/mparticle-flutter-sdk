@@ -275,14 +275,9 @@ class MparticleFlutterSdkWeb {
           customFlags = {};
         }
 
-        String? currency = commerceEvent['currency'];
-        if (currency != null) {
-          mpCommerce.callMethod('setCurrencyCode', [currency]);
-        }
-
-        var transactionAttributes = {};
-        if (commerceEvent['transactionAttributes'] != null) {
-          transactionAttributes = commerceEvent['transactionAttributes'];
+        var transactionAttributes = commerceEvent['transactionAttributes'];
+        if (transactionAttributes == null) {
+          transactionAttributes = {};
         }
 
         String? checkoutStep = commerceEvent['checkoutStep'];
@@ -295,14 +290,20 @@ class MparticleFlutterSdkWeb {
           transactionAttributes['Option'] = checkoutOptions;
         }
 
+        String? currency = commerceEvent['currency'];
+        if (currency != null) {
+          mpCommerce.callMethod('setCurrencyCode', [currency]);
+        }
+
         List? rawProducts = commerceEvent['products'];
         List? products = [];
         if (rawProducts != null && rawProducts.length > 0) {
           rawProducts.forEach((rawProduct) {
             var product = mpCommerce.callMethod('createProduct', [
               rawProduct['name'],
-              rawProduct['quantity'],
-              rawProduct['price']
+              rawProduct['sku'],
+              rawProduct['price'],
+              rawProduct['quantity']
             ]);
             products.add(product);
           });
@@ -357,8 +358,9 @@ class MparticleFlutterSdkWeb {
                 rawImpressionProducts.forEach((rawImpressionProduct) {
                   var product = mpCommerce.callMethod('createProduct', [
                     rawImpressionProduct['name'],
-                    rawImpressionProduct['quantity'],
-                    rawImpressionProduct['price']
+                    rawImpressionProduct['sku'],
+                    rawImpressionProduct['price'],
+                    rawImpressionProduct['quantity']
                   ]);
                   impressionProducts.add(product);
                 });

@@ -79,7 +79,6 @@ int? getWebSDKProductActionType(ProductActionType productActionType) {
 // https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L324-L328
 int? getWebSDKPromotionActionType(PromotionActionType promotionActionTypeEnum) {
   const jsPromotionActionTypes = {
-    'Unknown': 0,
     'PromotionView': 1,
     'PromotionClick': 2,
   };
@@ -88,8 +87,5 @@ int? getWebSDKPromotionActionType(PromotionActionType promotionActionTypeEnum) {
       return jsPromotionActionTypes["PromotionClick"];
     case PromotionActionType.View:
       return jsPromotionActionTypes["PromotionView"];
-    default:
-      print('You passed in a promotion action type is not supported on Web');
-      return null;
   }
 }
