@@ -36,4 +36,7 @@ class CommerceEvent {
   String? screenName;
   int? checkoutStep;
   bool? nonInteractive;
+
+  Map<String, String?>? customAttributes;
+  Map<String, dynamic>? customFlags;
 }
