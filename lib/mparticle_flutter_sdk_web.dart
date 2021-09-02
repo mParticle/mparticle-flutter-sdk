@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'dart:js';
 import 'package:mparticle_flutter_sdk/src/web_helpers/identity_helpers.dart'
     as webIdentityHelpers;
-
 import 'package:flutter/services.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
@@ -34,6 +33,8 @@ class MparticleFlutterSdkWeb {
     final mParticle = JsObject.fromBrowserObject(context['mParticle']);
     final mpIdentity =
         JsObject.fromBrowserObject(context['mParticle']['Identity']);
+    final mpCommerce =
+        JsObject.fromBrowserObject(context['mParticle']['eCommerce']);
 
     // Calls to the mParticle JS Identity methods are async, so we must await
     // a Future that contains a Completer. The Completer completes inside the JS callback
@@ -260,6 +261,121 @@ class MparticleFlutterSdkWeb {
           print(
               'You included only a startTime or an endTime, but not both. Please include BOTH a startTime and an endTime, or let mParticle calculate both for you');
         }
+        break;
+      case 'logCommerceEvent':
+        var commerceEvent = call.arguments['commerceEvent'];
+
+        var customAttributes = commerceEvent['customAttributes'];
+        if (customAttributes == null) {
+          customAttributes = {};
+        }
+
+        var customFlags = commerceEvent['customFlags'];
+        if (customFlags == null) {
+          customFlags = {};
+        }
+
+        var transactionAttributes = commerceEvent['transactionAttributes'];
+        if (transactionAttributes == null) {
+          transactionAttributes = {};
+        }
+
+        String? checkoutStep = commerceEvent['checkoutStep'];
+        if (checkoutStep != null) {
+          transactionAttributes['Step'] = checkoutStep;
+        }
+
+        String? checkoutOptions = commerceEvent['checkoutOptions'];
+        if (checkoutOptions != null) {
+          transactionAttributes['Option'] = checkoutOptions;
+        }
+
+        String? currency = commerceEvent['currency'];
+        if (currency != null) {
+          mpCommerce.callMethod('setCurrencyCode', [currency]);
+        }
+
+        List? rawProducts = commerceEvent['products'];
+        List? products = [];
+        if (rawProducts != null && rawProducts.length > 0) {
+          rawProducts.forEach((rawProduct) {
+            var product = mpCommerce.callMethod('createProduct', [
+              rawProduct['name'],
+              rawProduct['sku'],
+              rawProduct['price'],
+              rawProduct['quantity']
+            ]);
+            products.add(product);
+          });
+        }
+
+        int? productActionType = commerceEvent['jsProductActionType'];
+        int? promotionActionType = commerceEvent['jsPromotionActionType'];
+
+        // log product action
+        if (productActionType != null) {
+          mpCommerce.callMethod('logProductAction', [
+            productActionType,
+            JsObject.jsify(products),
+            JsObject.jsify(customAttributes),
+            JsObject.jsify(customFlags),
+            JsObject.jsify(transactionAttributes)
+          ]);
+          return true;
+          // log promotion
+        } else if (promotionActionType != null) {
+          List? rawPromotions = commerceEvent["promotions"];
+          List? promotions = [];
+
+          if (rawPromotions != null && rawPromotions.length > 0) {
+            rawPromotions.forEach((rawPromotion) {
+              var promotion = mpCommerce.callMethod('createPromotion', [
+                rawPromotion['promotionId'],
+                rawPromotion['creative'],
+                rawPromotion['name'],
+                rawPromotion['position'],
+              ]);
+              promotions.add(promotion);
+            });
+          }
+
+          mpCommerce.callMethod('logPromotion',
+              [promotionActionType, JsObject.jsify(promotions)]);
+
+          return true;
+          // log impression
+        } else {
+          List? rawImpressions = commerceEvent["impressions"];
+          List? impressions = [];
+
+          if (rawImpressions != null && rawImpressions.length > 0) {
+            rawImpressions.forEach((rawImpression) {
+              List impressionProducts = [];
+              var rawImpressionProducts = rawImpression['products'];
+
+              if (rawImpressionProducts != null &&
+                  rawImpressionProducts.length > 0) {
+                rawImpressionProducts.forEach((rawImpressionProduct) {
+                  var product = mpCommerce.callMethod('createProduct', [
+                    rawImpressionProduct['name'],
+                    rawImpressionProduct['sku'],
+                    rawImpressionProduct['price'],
+                    rawImpressionProduct['quantity']
+                  ]);
+                  impressionProducts.add(product);
+                });
+              }
+              var impression = mpCommerce.callMethod('createImpression', [
+                rawImpression['impressionListName'],
+                JsObject.jsify(impressionProducts)
+              ]);
+              impressions.add(impression);
+            });
+          }
+
+          mpCommerce.callMethod('logImpression', [JsObject.jsify(impressions)]);
+        }
+
         break;
       default:
         throw PlatformException(

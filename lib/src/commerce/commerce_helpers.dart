@@ -34,3 +34,58 @@ String promotionActionTypeString(PromotionActionType productActionType) {
       return "view";
   }
 }
+
+// Web integer values for product action types differ from Dart Enums
+// https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L255-L267
+int? getWebSDKProductActionType(ProductActionType productActionType) {
+  const jsProductActionTypes = {
+    'AddToCart': 1,
+    'RemoveFromCart': 2,
+    'Checkout': 3,
+    'CheckoutOption': 4,
+    'Click': 5,
+    'ViewDetail': 6,
+    'Purchase': 7,
+    'Refund': 8,
+    'AddToWishlist': 9,
+    'RemoveFromWishlist': 10,
+  };
+
+  switch (productActionType) {
+    case ProductActionType.AddToCart:
+      return jsProductActionTypes['AddToCart'];
+    case ProductActionType.RemoveFromCart:
+      return jsProductActionTypes['RemoveFromCart'];
+    case ProductActionType.AddToWishList:
+      return jsProductActionTypes['AddToWishlist'];
+    case ProductActionType.RemoveFromWishlist:
+      return jsProductActionTypes['RemoveFromWishlist'];
+    case ProductActionType.Checkout:
+      return jsProductActionTypes['Checkout'];
+    case ProductActionType.Click:
+      return jsProductActionTypes['CheckoutOption'];
+    case ProductActionType.ViewDetail:
+      return jsProductActionTypes['Click'];
+    case ProductActionType.Purchase:
+      return jsProductActionTypes['ViewDetail'];
+    case ProductActionType.Refund:
+      return jsProductActionTypes['Purchase'];
+    case ProductActionType.CheckoutOptions:
+      return jsProductActionTypes['Refund'];
+  }
+}
+
+// Web integer values for promotion action types differ from Dart Enums
+// https://github.com/mParticle/mparticle-web-sdk/blob/master/src/types.js#L324-L328
+int? getWebSDKPromotionActionType(PromotionActionType promotionActionTypeEnum) {
+  const jsPromotionActionTypes = {
+    'PromotionView': 1,
+    'PromotionClick': 2,
+  };
+  switch (promotionActionTypeEnum) {
+    case PromotionActionType.Click:
+      return jsPromotionActionTypes["PromotionClick"];
+    case PromotionActionType.View:
+      return jsPromotionActionTypes["PromotionView"];
+  }
+}
