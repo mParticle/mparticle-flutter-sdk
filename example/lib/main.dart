@@ -9,6 +9,8 @@ import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
 import 'package:mparticle_flutter_sdk/events/promotion.dart';
 import 'package:mparticle_flutter_sdk/events/product.dart';
 import 'package:mparticle_flutter_sdk/events/impression.dart';
+import 'package:mparticle_flutter_sdk/events/screen_event.dart';
+import 'package:mparticle_flutter_sdk/events/mp_event.dart';
 import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/kits/kits.dart';
@@ -111,17 +113,16 @@ class _MyAppState extends State<MyApp> {
               child: Text('EVENT LOGGING'),
             ),
             buildButton('Log Event', () {
-              mpInstance?.logEvent(
-                  eventName: 'Test event logged',
-                  eventType: EventType.Navigation,
-                  customAttributes: {'key1': 'value1'},
-                  customFlags: {'flag1': 'flagValue1'});
+              MPEvent event = MPEvent('Test event logged', EventType.Navigation)
+                ..customAttributes = {'key1': 'value1'}
+                ..customFlags = {'flag1': 'flagValue1'};
+              mpInstance?.logEvent(event);
             }),
             buildButton('Log Screen Event', () {
-              mpInstance?.logScreenEvent(
-                  eventName: 'Screen event logged',
-                  customAttributes: {'key1': 'value1'},
-                  customFlags: {'flag1': 'flagValue1'});
+              ScreenEvent screenEvent = ScreenEvent('Screen event logged')
+                ..customAttributes = {'key1': 'value1'}
+                ..customFlags = {'flag1': 'flagValue1'};
+              mpInstance?.logScreenEvent(screenEvent);
             }),
             buildButton('Log Commerce - Product', () {
               final Product product1 = Product('Orange', '123abc', 2.4, 1);
@@ -129,7 +130,7 @@ class _MyAppState extends State<MyApp> {
               final TransactionAttributes transactionAttributes =
                   TransactionAttributes('123456', 'affiliation', '12412342',
                       1.34, 43.232, 242.2323);
-              CommerceEvent commerceEvent = new CommerceEvent.withProduct(ProductActionType.Purchase, product1)
+              CommerceEvent commerceEvent = CommerceEvent.withProduct(ProductActionType.Purchase, product1)
                 ..products.add(product2)
                 ..transactionAttributes = transactionAttributes
                 ..currency = 'US'
@@ -154,7 +155,7 @@ class _MyAppState extends State<MyApp> {
               final Impression impression1 =
                   Impression('produce', [product1, product2]);
               final Impression impression2 = Impression('citrus', [product1]);
-              CommerceEvent commerceEvent = new CommerceEvent.withImpression(impression1)
+              CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
                   ..impressions.add(impression2)
                   ..currency = 'US'
                   ..screenName = 'One Click Purchase';

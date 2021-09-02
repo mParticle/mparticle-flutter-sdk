@@ -14,6 +14,8 @@ import 'package:mparticle_flutter_sdk/src/commerce/commerce_helpers.dart';
 import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
 import 'package:mparticle_flutter_sdk/src/user.dart';
 
+import 'events/mp_event.dart';
+import 'events/screen_event.dart';
 import 'identity/alias_request.dart';
 import 'identity/identity_api_result.dart';
 import 'identity/identity_type.dart';
@@ -115,18 +117,13 @@ class MparticleFlutterSdk {
     });
   }
 
-  /// Logs a custom event with an [eventName], [eventType], [customAttributes], and [customFlags]
-  Future<void> logEvent({
-    required String eventName,
-    EventType? eventType,
-    Map<String, String?>? customAttributes,
-    Map<String, dynamic>? customFlags,
-  }) async {
+  /// Logs an MPEvent
+  Future<void> logEvent(MPEvent event) async {
     return await _channel.invokeMethod('logEvent', {
-      'eventName': eventName,
-      'eventType': EventType.values.indexOf(eventType as EventType),
-      'customAttributes': customAttributes,
-      'customFlags': customFlags
+      'eventName': event.eventName,
+      'eventType': EventType.values.indexOf(event.eventType as EventType),
+      'customAttributes': event.customAttributes,
+      'customFlags': event.customFlags
     });
   }
 
@@ -143,15 +140,11 @@ class MparticleFlutterSdk {
   }
 
   /// Logs a screen event (in web parlance, a 'page view') with an [eventName], [customAttributes], and [customFlags]
-  Future<void> logScreenEvent({
-    String eventName = '',
-    Map<String, String?>? customAttributes,
-    Map<String, dynamic>? customFlags,
-  }) async {
+  Future<void> logScreenEvent(ScreenEvent screenEvent) async {
     return await _channel.invokeMethod('logScreenEvent', {
-      'eventName': eventName,
-      'customAttributes': customAttributes,
-      'customFlags': customFlags
+      'eventName': screenEvent.eventName,
+      'customAttributes': screenEvent.customAttributes,
+      'customFlags': screenEvent.customFlags
     });
   }
 
