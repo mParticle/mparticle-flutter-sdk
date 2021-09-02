@@ -133,7 +133,15 @@ class _MyAppState extends State<MyApp> {
                 ..products.add(product2)
                 ..transactionAttributes = transactionAttributes
                 ..currency = 'US'
-                ..screenName = 'One Click Purchase';
+                ..screenName = 'One Click Purchase'
+                ..customAttributes = {
+                  "foo": "bar",
+                  "fuzz": "baz"
+                }
+                ..customFlags = {
+                  "flag1": "val1",
+                  "flag2": ["val2", "val3"]
+                };
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - Promotion', () {
@@ -145,7 +153,15 @@ class _MyAppState extends State<MyApp> {
               CommerceEvent commerceEvent = CommerceEvent.withPromotion(PromotionActionType.View, promotion1)
                 ..promotions.add(promotion2)
                 ..currency = 'US'
-                ..screenName = 'OneClickPurchase';
+                ..screenName = 'OneClickPurchase'
+                ..customAttributes = {
+                  "foo": "bar",
+                  "fuzz": "baz"
+                }
+                ..customFlags = {
+                  "flag1": "val1",
+                  "flag2": ["val2", "val3"]
+                };
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - Impression', () {
@@ -157,7 +173,15 @@ class _MyAppState extends State<MyApp> {
               CommerceEvent commerceEvent = new CommerceEvent.withImpression(impression1)
                   ..impressions.add(impression2)
                   ..currency = 'US'
-                  ..screenName = 'One Click Purchase';
+                  ..screenName = 'One Click Purchase'
+                  ..customAttributes = {
+                    "foo": "bar",
+                    "fuzz": "baz"
+                    }
+                  ..customFlags = {
+                    "flag1": "val1",
+                    "flag2": ["val2", "val3"]
+                  };
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Error', () {

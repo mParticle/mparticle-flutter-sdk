@@ -226,6 +226,8 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       val screenName = map["screenName"]?.toString()
       val checkoutStep = map["checkoutStep"]?.toString()?.toInt()
       val checkoutOptions = map["checkoutOptions"]?.toString()
+      val customAttributes: HashMap<String, String?>? = map["customAttributes"] as HashMap<String, String?>?
+      val customFlags: HashMap<String, Any?>? = map["customFlags"] as HashMap<String, Any?>?
       val commerceEvent = when {
         !productActionType.isNullOrEmpty() && !products.isNullOrEmpty() -> CommerceEvent.Builder(productActionType.toString(), products.removeAt(0))
         !promotionActionType.isNullOrEmpty()&& !promotions.isNullOrEmpty() -> CommerceEvent.Builder(promotionActionType.toString(), promotions.removeAt(0))
@@ -246,6 +248,13 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           screenName?.let { screen(it)}
           checkoutStep?.let { checkoutStep(it) }
           checkoutOptions?.let { checkoutOptions(it) }
+          customAttributes?.let { customAttributes(it)}
+          customFlags?.entries?.associate { (key, value) ->
+            key to when (value) {
+              is List<*> -> value.map { it.toString() }
+              else -> listOf(value.toString())
+            }
+          }?.let { customFlags(it) }
         }.build()
 
       MParticle.getInstance()?.logEvent(commerceEvent).let { result.success(it != null) }
