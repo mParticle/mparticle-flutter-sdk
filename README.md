@@ -12,7 +12,7 @@ See the table below to see what features are currently supported. The Flutter mP
 | Custom Events | X | X | X |  |
 | Page Views | X | X | X |  |
 | Identity | X | X | X |  |
-| eCommerce |  |  |  | Coming Soon |
+| eCommerce | X | X | X |  |
 | Consent |  |  |  | Coming Soon |
 
 
@@ -259,27 +259,87 @@ MparticleFlutterSdk? mpInstance = await MparticleFlutterSdk.getInstance();
 
 ## Log Events
 
-To log events, import mParticle `EventTypes` to write proper event logging calls:
+To log events, import mParticle `EventTypes` and `MPEvent` to write proper event logging calls:
 
 ```dart
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
+import 'package:mparticle_flutter_sdk/events/mp_event.dart';
 
-mpInstance?.logEvent(
-    eventName: 'Clicked Search Bar',
-    eventType: EventType.Search,
-    customAttributes: {'key1': 'value1'},
-    customFlags: {'flag1': 'flagValue1'});
+MPEvent event = MPEvent('Clicked Search Bar', EventType.Search)
+  ..customAttributes = { 'key1': 'value1' }
+  ..customFlags = { 'flag1': 'value1' };
+mpInstance?.logEvent(event);
 ```
 
 
-To log screen events:
+To log screen events, import mParticle `ScreenEvent`:
 
 ```dart
-mpInstance?.logScreenEvent(
-    eventName: 'Screen event logged',
-    customAttributes: {'key1': 'value1'},
-    customFlags: {'flag1': 'flagValue1'});
+import 'package:mparticle_flutter_sdk/events/screen_event.dart';
+
+ScreenEvent screenEvent = ScreenEvent('Screen event logged')
+  ..customAttributes = { 'key1': 'value1' }
+  ..customFlags = { 'flag1': 'value1' };
+mpInstance?.logScreenEvent(screenEvent);
 }
+```
+
+## Commerce Events
+
+To log product commerce events, import `CommerceEvent`, `Product` and `ProductActionType` (optionally `TransactionAttributes`)
+
+```dart
+import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
+import 'package:mparticle_flutter_sdk/events/product.dart';
+import 'package:mparticle_flutter_sdk/events/product_action_type.dart';
+import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
+
+final Product product1 = Product('Orange', '123abc', 5.0, 1);
+final Product product2 = Product('Apple', '456abc', 10.5, 2);
+final TransactionAttributes transactionAttributes =
+  TransactionAttributes('123456', 'affiliation', '12412342',
+      1.34, 43.232, 242.2323);
+CommerceEvent commerceEvent = CommerceEvent.withProduct(ProductActionType.Purchase, product1)
+    ..products.add(product2)
+    ..transactionAttributes = transactionAttributes
+    ..currency = 'US'
+    ..screenName = 'One Click Purchase';
+mpInstance?.logCommerceEvent(commerceEvent);
+```
+
+To log promotion commerce events, import `CommerceEvent`, `Promotion` and `PromotionActionType`:
+
+```dart
+import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
+import 'package:mparticle_flutter_sdk/events/promotion.dart';
+import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
+
+final Promotion promotion1 = Promotion('12312', 'Jennifer Slater', 'BOGO Bonanza', 'top');
+final Promotion promotion2 = Promotion('15632', 'Gregor Roman', 'Eco Living', 'mid');
+
+CommerceEvent commerceEvent = CommerceEvent.withPromotion(PromotionActionType.View, promotion1)
+    ..promotions.add(promotion2)
+    ..currency = 'US'
+    ..screenName = 'OneClickPurchase';
+mpInstance?.logCommerceEvent(commerceEvent);
+```
+
+To log impression commerce events, import `CommerceEvent`, `Impression` and `Product`
+
+```dart
+import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
+import 'package:mparticle_flutter_sdk/events/impression.dart';
+import 'package:mparticle_flutter_sdk/events/product.dart';
+
+final Product product1 = Product('Orange', '123abc', 2.4, 1);
+final Product product2 = Product('Apple', '456abc', 4.1, 2);
+final Impression impression1 = Impression('produce', [product1, product2]);
+final Impression impression2 = Impression('citrus', [product1]);
+CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
+  ..impressions.add(impression2)
+  ..currency = 'US'
+  ..screenName = 'One Click Purchase';
+mpInstance?.logCommerceEvent(commerceEvent);
 ```
 
 ## User
