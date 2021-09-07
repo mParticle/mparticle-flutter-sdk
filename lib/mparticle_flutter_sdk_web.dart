@@ -295,6 +295,12 @@ class MparticleFlutterSdkWeb {
           mpCommerce.callMethod('setCurrencyCode', [currency]);
         }
 
+        var eventOptions = {};
+        bool? shouldUploadEvent = commerceEvent['shouldUploadEvent'];
+        if (shouldUploadEvent != null) {
+          eventOptions['shouldUploadEvent'] = shouldUploadEvent;
+        }
+
         List? rawProducts = commerceEvent['products'];
         List? products = [];
         if (rawProducts != null && rawProducts.length > 0) {

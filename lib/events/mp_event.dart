@@ -5,6 +5,7 @@ class MPEvent {
   final EventType? eventType;
   Map<String, String?>? customAttributes;
   Map<String, dynamic>? customFlags;
+  bool? shouldUploadEvent;
 
   MPEvent(this.eventName, [this.eventType]);
 }

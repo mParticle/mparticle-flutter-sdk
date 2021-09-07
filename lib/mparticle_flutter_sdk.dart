@@ -84,21 +84,27 @@ class MparticleFlutterSdk {
       'screenName': commerceEvent.screenName,
       'checkoutStep': commerceEvent.checkoutStep,
       'nonInteractive': commerceEvent.nonInteractive,
+      'shouldUploadEvent': commerceEvent.shouldUploadEvent,
       'customAttributes': commerceEvent.customAttributes,
       'customFlags': commerceEvent.customFlags
     };
     ProductActionType? productActionType = commerceEvent.productActionType;
-    PromotionActionType? promotionActionType = commerceEvent.promotionActionType;
+    PromotionActionType? promotionActionType =
+        commerceEvent.promotionActionType;
     if (productActionType != null) {
       commerceEventMessage['productActionType'] =
           ProductActionType.values.indexOf(productActionType);
-      commerceEventMessage['androidProductActionType'] = getAndroidSDKProductActionTypeString(productActionType);
-      commerceEventMessage['jsProductActionType'] = getWebSDKProductActionType(productActionType);
+      commerceEventMessage['androidProductActionType'] =
+          getAndroidSDKProductActionTypeString(productActionType);
+      commerceEventMessage['jsProductActionType'] =
+          getWebSDKProductActionType(productActionType);
     } else if (promotionActionType != null) {
       commerceEventMessage['promotionActionType'] =
           PromotionActionType.values.indexOf(promotionActionType);
-    commerceEventMessage['androidPromotionActionType'] = getAndroidSDKPromotionActionTypeString(promotionActionType);
-      commerceEventMessage['jsPromotionActionType'] = getWebSDKPromotionActionType(promotionActionType);
+      commerceEventMessage['androidPromotionActionType'] =
+          getAndroidSDKPromotionActionTypeString(promotionActionType);
+      commerceEventMessage['jsPromotionActionType'] =
+          getWebSDKPromotionActionType(promotionActionType);
     }
     return await _channel.invokeMethod(
         'logCommerceEvent', {"commerceEvent": commerceEventMessage});
@@ -121,7 +127,8 @@ class MparticleFlutterSdk {
       'eventName': event.eventName,
       'eventType': EventType.values.indexOf(event.eventType as EventType),
       'customAttributes': event.customAttributes,
-      'customFlags': event.customFlags
+      'customFlags': event.customFlags,
+      'shouldUploadEvent': event.shouldUploadEvent
     });
   }
 
