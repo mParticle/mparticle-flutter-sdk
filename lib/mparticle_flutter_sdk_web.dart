@@ -325,7 +325,8 @@ class MparticleFlutterSdkWeb {
             JsObject.jsify(products),
             JsObject.jsify(customAttributes),
             JsObject.jsify(customFlags),
-            JsObject.jsify(transactionAttributes)
+            JsObject.jsify(transactionAttributes),
+            JsObject.jsify(eventOptions)
           ]);
           return true;
           // log promotion
@@ -345,9 +346,13 @@ class MparticleFlutterSdkWeb {
             });
           }
 
-          mpCommerce.callMethod('logPromotion',
-              [promotionActionType, JsObject.jsify(promotions)]);
-
+          mpCommerce.callMethod('logPromotion', [
+            promotionActionType,
+            JsObject.jsify(promotions),
+            JsObject.jsify(customAttributes),
+            JsObject.jsify(customFlags),
+            JsObject.jsify(eventOptions)
+          ]);
           return true;
           // log impression
         } else {
@@ -379,7 +384,12 @@ class MparticleFlutterSdkWeb {
             });
           }
 
-          mpCommerce.callMethod('logImpression', [JsObject.jsify(impressions)]);
+          mpCommerce.callMethod('logImpression', [
+            JsObject.jsify(impressions),
+            JsObject.jsify(customAttributes),
+            JsObject.jsify(customFlags),
+            JsObject.jsify(eventOptions)
+          ]);
         }
 
         break;
