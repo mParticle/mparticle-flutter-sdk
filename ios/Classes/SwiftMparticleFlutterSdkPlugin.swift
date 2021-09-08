@@ -45,6 +45,9 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                     event.addCustomFlag(value, withKey: key)
                 }
             }
+            if let shouldUploadEvent = callArguments["shouldUploadEvent"] as? Bool {
+                event.shouldUploadEvent = shouldUploadEvent
+            }
             MParticle.sharedInstance().logEvent(event)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
@@ -379,6 +382,9 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             }
             if let nonInteractive = commerceArguments["nonInteractive"] as? Bool {
                 event.nonInteractive = nonInteractive
+            }
+            if let shouldUploadEvent = commerceArguments["shouldUploadEvent"] as? Bool {
+                event.shouldUploadEvent = shouldUploadEvent
             }
 
             MParticle.sharedInstance().logEvent(event)

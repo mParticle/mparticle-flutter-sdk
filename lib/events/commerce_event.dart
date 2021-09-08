@@ -7,17 +7,19 @@ import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 import 'impression.dart';
 
 class CommerceEvent {
-
-  CommerceEvent.withProduct(this.productActionType, Product product): promotionActionType = null {
+  CommerceEvent.withProduct(this.productActionType, Product product)
+      : promotionActionType = null {
     products.add(product);
   }
 
-  CommerceEvent.withPromotion(this.promotionActionType, Promotion promotion) : productActionType = null {
+  CommerceEvent.withPromotion(this.promotionActionType, Promotion promotion)
+      : productActionType = null {
     promotions.add(promotion);
   }
 
-
-  CommerceEvent.withImpression(Impression impression): promotionActionType = null, productActionType = null {
+  CommerceEvent.withImpression(Impression impression)
+      : promotionActionType = null,
+        productActionType = null {
     impressions.add(impression);
   }
 
@@ -36,6 +38,7 @@ class CommerceEvent {
   String? screenName;
   int? checkoutStep;
   bool? nonInteractive;
+  bool? shouldUploadEvent;
 
   Map<String, String?>? customAttributes;
   Map<String, dynamic>? customFlags;

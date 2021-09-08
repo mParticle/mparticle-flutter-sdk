@@ -151,6 +151,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       val eventTypeEnum = MParticle.EventType.values().firstOrNull { it.ordinal == eventType }
       val customAttributes: HashMap<String, String?>? = call.argument("customAttributes")
       val customFlags: HashMap<String, String>? = call.argument("customFlags")
+      val shouldUploadEvent: Boolean? = call.argument("shouldUploadEvent")
 
       val builder = if (eventTypeEnum != null) {
         MPEvent.Builder(eventName, eventTypeEnum)
@@ -164,6 +165,11 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           builder.addCustomFlag(key, value)
         }
       }
+
+      if (shouldUploadEvent != null) {
+        builder.shouldUploadEvent(shouldUploadEvent)
+      }
+
       val event = builder.build()
       MParticle.getInstance()?.logEvent(event)
 
@@ -218,6 +224,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       val transactionAttributes: TransactionAttributes? =
         (map["transactionAttributes"] as Map<String, Any?>?)?.toTransactionAttributes()
       val nonInteractive = map["nonInteractive"]?.toString()?.toBoolean()
+      val shouldUploadEvent = map["shouldUploadEvent"]?.toString()?.toBoolean()
       val productListSource = map["productListSource"]?.toString()
       val productListName = map["productListName"]?.toString()
       val currency = map["currency"]?.toString()
@@ -243,6 +250,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
 
           currency?.let { currency(it) }
           nonInteractive?.let { nonInteraction(it) }
+          shouldUploadEvent?.let { shouldUploadEvent(it)}
           productListSource?.let { productListSource(it)}
           productListName?.let { productListName(it)}
           screenName?.let { screen(it)}

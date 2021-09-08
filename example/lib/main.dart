@@ -118,6 +118,13 @@ class _MyAppState extends State<MyApp> {
                 ..customFlags = {'flag1': 'flagValue1'};
               mpInstance?.logEvent(event);
             }),
+            buildButton('Log Event - No Upload', () {
+              MPEvent event = MPEvent('Test event logged', EventType.Navigation)
+                ..customAttributes = {'key1': 'value1'}
+                ..customFlags = {'flag1': 'flagValue1'}
+                ..shouldUploadEvent = false;
+              mpInstance?.logEvent(event);
+            }),
             buildButton('Log Screen Event', () {
               ScreenEvent screenEvent = ScreenEvent('Screen event logged')
                 ..customAttributes = {'key1': 'value1'}
@@ -130,15 +137,13 @@ class _MyAppState extends State<MyApp> {
               final TransactionAttributes transactionAttributes =
                   TransactionAttributes('123456', 'affiliation', '12412342',
                       1.34, 43.232, 242.2323);
-              CommerceEvent commerceEvent = CommerceEvent.withProduct(ProductActionType.Purchase, product1)
+              CommerceEvent commerceEvent = CommerceEvent.withProduct(
+                  ProductActionType.Purchase, product1)
                 ..products.add(product2)
                 ..transactionAttributes = transactionAttributes
                 ..currency = 'US'
                 ..screenName = 'One Click Purchase'
-                ..customAttributes = {
-                  "foo": "bar",
-                  "fuzz": "baz"
-                }
+                ..customAttributes = {"foo": "bar", "fuzz": "baz"}
                 ..customFlags = {
                   "flag1": "val1",
                   "flag2": ["val2", "val3"]
@@ -151,14 +156,12 @@ class _MyAppState extends State<MyApp> {
               final Promotion promotion2 =
                   Promotion('15632', 'Gregor Roman', 'Eco Living', 'mid');
 
-              CommerceEvent commerceEvent = CommerceEvent.withPromotion(PromotionActionType.View, promotion1)
+              CommerceEvent commerceEvent = CommerceEvent.withPromotion(
+                  PromotionActionType.View, promotion1)
                 ..promotions.add(promotion2)
                 ..currency = 'US'
                 ..screenName = 'OneClickPurchase'
-                ..customAttributes = {
-                  "foo": "bar",
-                  "fuzz": "baz"
-                }
+                ..customAttributes = {"foo": "bar", "fuzz": "baz"}
                 ..customFlags = {
                   "flag1": "val1",
                   "flag2": ["val2", "val3"]
@@ -171,18 +174,36 @@ class _MyAppState extends State<MyApp> {
               final Impression impression1 =
                   Impression('produce', [product1, product2]);
               final Impression impression2 = Impression('citrus', [product1]);
-              CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
-                  ..impressions.add(impression2)
-                  ..currency = 'US'
-                  ..screenName = 'One Click Purchase'
-                  ..customAttributes = {
-                    "foo": "bar",
-                    "fuzz": "baz"
-                    }
-                  ..customFlags = {
-                    "flag1": "val1",
-                    "flag2": ["val2", "val3"]
-                  };
+              CommerceEvent commerceEvent =
+                  CommerceEvent.withImpression(impression1)
+                    ..impressions.add(impression2)
+                    ..currency = 'US'
+                    ..screenName = 'One Click Purchase'
+                    ..customAttributes = {"foo": "bar", "fuzz": "baz"}
+                    ..customFlags = {
+                      "flag1": "val1",
+                      "flag2": ["val2", "val3"]
+                    };
+              mpInstance?.logCommerceEvent(commerceEvent);
+            }),
+            buildButton('Log Commerce - No Upload', () {
+              final Product product1 = Product('Orange', '123abc', 2.4, 1);
+              final Product product2 = Product('Apple', '456abc', 4.1, 2);
+              final TransactionAttributes transactionAttributes =
+                  TransactionAttributes('123456', 'affiliation', '12412342',
+                      1.34, 43.232, 242.2323);
+              CommerceEvent commerceEvent = CommerceEvent.withProduct(
+                  ProductActionType.Purchase, product1)
+                ..products.add(product2)
+                ..transactionAttributes = transactionAttributes
+                ..currency = 'US'
+                ..screenName = 'One Click Purchase'
+                ..customAttributes = {"foo": "bar", "fuzz": "baz"}
+                ..customFlags = {
+                  "flag1": "val1",
+                  "flag2": ["val2", "val3"]
+                }
+                ..shouldUploadEvent = false;
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Error', () {
