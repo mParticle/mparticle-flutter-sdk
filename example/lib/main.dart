@@ -161,7 +161,7 @@ class _MyAppState extends State<MyApp> {
                   PromotionActionType.View, promotion1)
                 ..promotions.add(promotion2)
                 ..currency = 'US'
-                ..screenName = 'OneClickPurchase'
+                ..screenName = 'PromotionScreen'
                 ..customAttributes = {"foo": "bar", "fuzz": "baz"}
                 ..customFlags = {
                   "flag1": "val1",
@@ -179,7 +179,7 @@ class _MyAppState extends State<MyApp> {
                   CommerceEvent.withImpression(impression1)
                     ..impressions.add(impression2)
                     ..currency = 'US'
-                    ..screenName = 'One Click Purchase'
+                    ..screenName = 'ImpressionScreen'
                     ..customAttributes = {"foo": "bar", "fuzz": "baz"}
                     ..customFlags = {
                       "flag1": "val1",
