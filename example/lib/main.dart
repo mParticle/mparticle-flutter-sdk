@@ -18,6 +18,7 @@ import 'package:mparticle_flutter_sdk/identity/alias_request.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_api_result.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_api_error_response.dart';
 import 'package:mparticle_flutter_sdk/identity/client_error_codes.dart';
+import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
 
 void main() {
   runApp(MyApp());
@@ -380,6 +381,10 @@ class _MyAppState extends State<MyApp> {
               user?.getLastSeen((time) {
                 print(time);
               });
+            }),
+            buildButton('set att status', () async {
+              mpInstance?.setATTStatus(
+                  attStatus: MPATTAuthorizationStatus.Authorized);
             }),
           ],
         ),

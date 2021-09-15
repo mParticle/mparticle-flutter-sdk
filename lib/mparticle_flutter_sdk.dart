@@ -158,8 +158,8 @@ class MparticleFlutterSdk {
     required MPATTAuthorizationStatus attStatus,
     int? timestampInMillis,
   }) async {
-    return await _channel.invokeMethod('setAttStatus', {
-      'attStatus': attStatus,
+    return await _channel.invokeMethod('setATTStatus', {
+      'attStatus': MPATTAuthorizationStatus.values.indexOf(attStatus),
       'timestampInMillis': timestampInMillis,
     });
   }
