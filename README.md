@@ -281,7 +281,6 @@ ScreenEvent screenEvent = ScreenEvent('Screen event logged')
   ..customAttributes = { 'key1': 'value1' }
   ..customFlags = { 'flag1': 'value1' };
 mpInstance?.logScreenEvent(screenEvent);
-}
 ```
 
 ## Commerce Events
@@ -320,7 +319,7 @@ final Promotion promotion2 = Promotion('15632', 'Gregor Roman', 'Eco Living', 'm
 CommerceEvent commerceEvent = CommerceEvent.withPromotion(PromotionActionType.View, promotion1)
     ..promotions.add(promotion2)
     ..currency = 'US'
-    ..screenName = 'OneClickPurchase';
+    ..screenName = 'PromotionScreen';
 mpInstance?.logCommerceEvent(commerceEvent);
 ```
 
@@ -338,7 +337,7 @@ final Impression impression2 = Impression('citrus', [product1]);
 CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
   ..impressions.add(impression2)
   ..currency = 'US'
-  ..screenName = 'One Click Purchase';
+  ..screenName = 'ImpressionScreen';
 mpInstance?.logCommerceEvent(commerceEvent);
 ```
 
@@ -352,64 +351,68 @@ var user = await mpInstance?.getCurrentUser();
 User Attributes:
 
 ```dart
-user.setUserAttribute('age', '45');
+user?.setUserAttribute('age', '45');
 ```
 
 ```dart
-user.setUserAttributeArray('Test key', ['Test value 1', 'Test value 2']);
+user?.setUserAttributeArray('Test key', ['Test value 1', 'Test value 2']);
 ```
 
 ```dart
-user.setUserTag('tag1');
+user?.setUserTag('tag1');
 ```
 
 ```dart
-user.getUserAttributes('tag1');
+user?.getUserAttributes();
 ```
 
 
 ```dart
-user.removeUserAttribute('age')
+user?.removeUserAttribute('age')
 ```
 
 ```dart
-user.getUserIdentities().then((identities) {
+user?.getUserIdentities().then((identities) {
     print(identities); // Map<IdentityType, String>
 });
 ```
 
-## IdentityRequest
+
+## IDSync
+IDSync is mParticle’s identity framework, enabling our customers to create a unified view of the customer. To read more about IDSync, see [here](https://docs.mparticle.com/guides/idsync/introduction).
+
+All IDSync calls require an `Identity Request`.
+
+### IdentityRequest
 
 ```dart
+import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
+
 var identityRequest = MparticleFlutterSdk.identityRequest;
 identityRequest
     .setIdentity(IdentityType.CustomerId, 'customerid5')
     .setIdentity(IdentityType.Email, 'email5@gmail.com');
 ```
 
-## Identity
-
-```dart
-mpInstance.getCurrentUser((currentUser) => {
-    print(currentUser?.getMPID());
-});
-```
+After an IdentityRequest is passed to one of the following IDSync methods -  `identify`, `login`, `logout`, or `modify`.
 
 Import the `SuccessResponse` and `FailureResponse` classes to write proper callbacks for Identity methods.  For brevity, we included an example of full error handling in only the `identify` example below, but this error handling can be used for any of the Identity calls.
 
+### Identify
+The following is a full Identify example with error and success handling.
 ```dart
-import 'package:mparticle_flutter_sdk/identity/success_response.dart';
-import 'package:mparticle_flutter_sdk/identity/failure_response.dart';
+import 'package:mparticle_flutter_sdk/identity/identity_api_result.dart';
+import 'package:mparticle_flutter_sdk/identity/identity_api_error_response.dart';
 
 var request = MparticleFlutterSdk.identityRequest();
 
 mpInstance?.identity
     .identify(identityRequest: identityRequest)
     .then(
-        (SuccessResponse successResponse) =>
+        (IdentityApiResult successResponse) =>
             print("Success Response: $successResponse"),
         onError: (error) {
-            var failureResponse = error as FailureResponse;
+            var failureResponse = error as IdentityAPIErrorResponse;
             print("Failure Response: $failureResponse");
 
             // It is possible for either a client error or a server error to occur during identity calls.
@@ -455,6 +458,7 @@ mpInstance?.identity
     );
 ```
 
+### Login
 ```dart
 var identityRequest = MparticleFlutterSdk.identityRequest;
 identityRequest
@@ -464,15 +468,16 @@ identityRequest
 mpInstance?.identity
     .login(identityRequest: identityRequest)
     .then(
-        (SuccessResponse successResponse) =>
+        (IdentityApiResult successResponse) =>
             print("Success Response: $successResponse"),
         onError: (error) {
-            var failureResponse = error as FailureResponse;
+            var failureResponse = error as IdentityAPIErrorResponse;
             print("Failure Response: $failureResponse");
         }
     );
 ```
 
+### Modify
 ```dart
 var identityRequest = MparticleFlutterSdk.identityRequest;
 identityRequest
@@ -482,15 +487,16 @@ identityRequest
 mpInstance?.identity
     .modify(identityRequest: identityRequest)
     .then(
-        (SuccessResponse successResponse) =>
+        (IdentityApiResult successResponse) =>
             print("Success Response: $successResponse"),
         onError: (error) {
-            var failureResponse = error as FailureResponse;
+            var failureResponse = error as IdentityAPIErrorResponse;
             print("Failure Response: $failureResponse");
         }
     );
 ```
 
+### Logout
 ```dart
 var identityRequest = MparticleFlutterSdk.identityRequest;
 // depending on your identity strategy, you may have identities added to your identityRequestk
@@ -498,16 +504,30 @@ var identityRequest = MparticleFlutterSdk.identityRequest;
 mpInstance?.identity
     .logout(identityRequest: identityRequest)
     .then(
-        (SuccessResponse successResponse) =>
+        (IdentityApiResult successResponse) =>
             print("Success Response: $successResponse"),
         onError: (error) {
-            var failureResponse = error as FailureResponse;
+            var failureResponse = error as IdentityAPIErrorResponse;
             print("Failure Response: $failureResponse");
         }
     );
 ```
 
-
+### Aliasing Users
+This is a feature to transition data from "anonymous" users to "known" users.  To learn more about user aliasing, see [here](https://docs.mparticle.com/guides/idsync/aliasing/).
+```dart
+mpInstance?.identity.login(identityRequest: identityRequest).then(
+    (IdentityApiResult successResponse) {
+        String? previousMPID = successResponse.previousUser?.getMPID();
+        if (previousMPID != null) {
+            var userAliasRequest = AliasRequest(
+                previousMPID, successResponse.user.getMPID()
+            );
+            mpInstance?.identity.aliasUsers(aliasRequest: userAliasRequest);
+        }
+    }
+);
+```
 
 # Native-only Methods
 A few methods are currently supported only on iOS/Android SDKs:
@@ -515,14 +535,16 @@ A few methods are currently supported only on iOS/Android SDKs:
 * Get the SDK's opt out status -
 
     ```dart
-    var isOptedOut = await mpInstance.getOptOut;
-    MParticle.setOptOut(!isOptedOut);
+    var isOptedOut = await mpInstance?.getOptOut;
+    mpInstance?.setOptOut(optOutBoolean: !isOptedOut!);
     ```
 
 * Check if a kit is active
 
     ```dart
-    mpInstance.isKitActive(kitId).then((isActive) {
+    import 'package:mparticle_flutter_sdk/kits/kits.dart';
+
+    mpInstance?.isKitActive(kit: Kits['Braze']!).then((isActive) {
         print(isActive);
     });
     ```
@@ -534,13 +556,25 @@ A few methods are currently supported only on iOS/Android SDKs:
     ### Android
 
     ```dart
-    mpInstance.logPushRegistration(pushToken, senderId);
+    mpInstance?.logPushRegistration(pushToken: 'pushToken123', senderId: 'senderId123');
     ```
 
     ### iOS
 
     ```dart
-    mpInstance.logPushRegistration(pushToken, null);
+    mpInstance?.logPushRegistration(pushToken: 'pushToken123', senderId: null);
+    ```
+
+* Set App Tracking Transparency (ATT) Status
+
+    For iOS, you can set a user's ATT status as follows:
+    import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
+
+    ```dart
+    
+    mpInstance?.setATTStatus(
+          attStatus: MPATTAuthorizationStatus.Authorized,
+          timestampInMillis: DateTime.now().millisecondsSinceEpoch);
     ```
 
 
