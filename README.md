@@ -337,7 +337,7 @@ final Impression impression2 = Impression('citrus', [product1]);
 CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
   ..impressions.add(impression2)
   ..currency = 'US'
-  ..screenName = 'ImpressionScren';
+  ..screenName = 'ImpressionScreen';
 mpInstance?.logCommerceEvent(commerceEvent);
 ```
 
