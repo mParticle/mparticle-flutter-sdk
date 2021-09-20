@@ -1,3 +1,4 @@
+/// A Product for use with a commerce event
 class Product {
   Product(this.name, this.sku, this.price, [this.quantity]);
 
