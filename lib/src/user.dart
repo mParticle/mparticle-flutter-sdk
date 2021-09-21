@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
+import 'package:mparticle_flutter_sdk/consent/gdpr_consent.dart';
+import 'package:mparticle_flutter_sdk/consent/ccpa_consent.dart';
 
 /// Returns a user given an [mpid].
 class User {
@@ -91,5 +93,69 @@ class User {
   void setUserTag(String key) async {
     await _channel
         .invokeMethod('setUserTag', {"attributeKey": key, "mpid": this.mpid});
+  }
+
+  /// Returns all GDPR Consent states with their purpose.
+  Future<Map> getGDPRConsentState() async {
+    String consentStateString =
+        await _channel.invokeMethod('getGDPRConsentState', {"mpid": this.mpid});
+    Map consentStateMap = jsonDecode(consentStateString);
+    return consentStateMap;
+  }
+
+  /// Set a GDPR consent object to a purpose on the user
+  ///
+  /// Sets a GDPR consent object [consent] to a purpose [purpose] on the user
+  void addGDPRConsentState(GDPRConsent consent, String purpose) async {
+    return await _channel.invokeMethod('addGDPRConsentState', {
+      'consented': consent.consented,
+      'document': consent.document,
+      'timestamp': consent.timestamp,
+      'location': consent.location,
+      'hardwareId': consent.hardwareId,
+      'purpose': purpose,
+      'mpid': this.mpid,
+    });
+  }
+
+  /// Remove a GDPR consent object from a purpose on the user
+  ///
+  /// Remove a GDPR consent object from a purpose [purpose] on the user
+  void removeGDPRConsentState(String purpose) async {
+    return await _channel.invokeMethod('removeGDPRConsentState', {
+      'purpose': purpose,
+      'mpid': this.mpid,
+    });
+  }
+
+  /// Returns the CCPA Consent state.
+  Future<Map> getCCPAConsentState() async {
+    String consentStateString =
+        await _channel.invokeMethod('getCCPAConsentState', {"mpid": this.mpid});
+    Map consentStateMap = jsonDecode(consentStateString);
+    return consentStateMap;
+  }
+
+  /// Set a CCPA consent object on the user
+  ///
+  /// Sets a CCPA consent object [consent] on the user
+  void addCCPAConsentState(CCPAConsent consent) async {
+    return await _channel.invokeMethod('addCCPAConsentState', {
+      'consented': consent.consented,
+      'document': consent.document,
+      'timestamp': consent.timestamp,
+      'location': consent.location,
+      'hardwareId': consent.hardwareId,
+      'mpid': this.mpid,
+    });
+  }
+
+  /// Remove the CCPA consent object from the user
+  ///
+  /// Remove the CCPA consent object from the user
+  void removeCCPAConsentState() async {
+    return await _channel.invokeMethod('removeCCPAConsentState', {
+      'mpid': this.mpid,
+    });
   }
 }
