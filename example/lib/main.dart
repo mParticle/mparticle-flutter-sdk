@@ -19,6 +19,8 @@ import 'package:mparticle_flutter_sdk/identity/identity_api_result.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_api_error_response.dart';
 import 'package:mparticle_flutter_sdk/identity/client_error_codes.dart';
 import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
+import 'package:mparticle_flutter_sdk/consent/gdpr_consent.dart';
+import 'package:mparticle_flutter_sdk/consent/ccpa_consent.dart';
 
 void main() {
   runApp(MyApp());
@@ -381,6 +383,67 @@ class _MyAppState extends State<MyApp> {
               user?.getLastSeen((time) {
                 print(time);
               });
+            }),
+            buildButton('user - get GDPR Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              var gdprConsent = await user?.getGDPRConsentState();
+              gdprConsent?.forEach((key, value) {
+                print('purpose');
+                print(key);
+                print('GDPR Consent');
+                value?.forEach((key, value) {
+                  print('key');
+                  print(key);
+                  print('value');
+                  print(value);
+                });
+              });
+            }),
+            buildButton('user - add denied GDPR Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              var gdprConsent = GDPRConsent(false);
+              gdprConsent.document = 'document test';
+              gdprConsent.hardwareId = 'hardwareID';
+              gdprConsent.location = 'loction test';
+              gdprConsent.timestamp = DateTime.now().millisecondsSinceEpoch;
+              user?.addGDPRConsentState(gdprConsent, 'test');
+            }),
+            buildButton('user - add approved GDPR Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              var gdprConsent = GDPRConsent(true);
+              user?.addGDPRConsentState(gdprConsent, 'test');
+            }),
+            buildButton('user - remove GDPR Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              user?.removeGDPRConsentState('test');
+            }),
+            buildButton('user - get CCPA Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              var ccpaConsent = await user?.getCCPAConsentState();
+              ccpaConsent?.forEach((key, value) {
+                print('key');
+                print(key);
+                print('value');
+                print(value);
+              });
+            }),
+            buildButton('user - add denied CCPA Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              var ccpaConsent = CCPAConsent(false);
+              ccpaConsent.document = 'document test';
+              ccpaConsent.hardwareId = 'hardwareID';
+              ccpaConsent.location = 'loction test';
+              ccpaConsent.timestamp = DateTime.now().millisecondsSinceEpoch;
+              user?.addCCPAConsentState(ccpaConsent);
+            }),
+            buildButton('user - add approved CCPA Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              var ccpaConsent = CCPAConsent(true);
+              user?.addCCPAConsentState(ccpaConsent);
+            }),
+            buildButton('user - remove CCPA Consent State', () async {
+              var user = await mpInstance?.getCurrentUser();
+              user?.removeCCPAConsentState();
             }),
             buildButton('set att status', () async {
               mpInstance?.setATTStatus(

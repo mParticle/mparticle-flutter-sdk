@@ -234,6 +234,117 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
            let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
             user.setUserTag(attributeKey)
         }
+    case "getGDPRConsentState":
+        if let callArguments = call.arguments as? [String: Any],
+           let mpidString = callArguments["mpid"] as? String,
+           let mpid = Int(mpidString),
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
+            var gdprConsentDictionary = [String: Any]()
+            if let gdprConsent = user.consentState()?.gdprConsentState() {
+                for purpose in gdprConsent.keys {
+                    let consentObject = gdprConsent[purpose]
+                    var consentDictionary = [String: Any]()
+                    consentDictionary["consented"] = consentObject?.consented
+                    consentDictionary["document"] = consentObject?.document
+                    consentDictionary["timestamp"] = consentObject?.timestamp.timeIntervalSince1970
+                    consentDictionary["location"] = consentObject?.location
+                    consentDictionary["hardwareId"] = consentObject?.hardwareId
+                    gdprConsentDictionary[purpose] = consentDictionary
+                }
+            }
+
+            result(asStringForStringKey(jsonDictionary: gdprConsentDictionary))
+        } else {
+            result("")
+        }
+    case "addGDPRConsentState":
+        if let callArguments = call.arguments as? [String: Any],
+           let consented = callArguments["consented"] as? Bool,
+           let purpose = callArguments["purpose"] as? String,
+           let mpidString = callArguments["mpid"] as? String,
+           let mpid = Int64(mpidString),
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
+               let consentGDPR = MPGDPRConsent()
+               consentGDPR.consented  = consented
+               consentGDPR.document = callArguments["document"] as? String
+               if let timestampNumber = callArguments["timestamp"] as? NSNumber {
+                let timestamp = Date(timeIntervalSince1970: timestampNumber.doubleValue/1000)
+                consentGDPR.timestamp = timestamp
+               }
+               consentGDPR.location = callArguments["location"] as? String
+               consentGDPR.hardwareId = callArguments["hardwareId"] as? String
+
+               let consentState = MPConsentState()
+               consentState.addGDPRConsentState(consentGDPR, purpose: purpose)
+               if let ccpa = user.consentState()?.ccpaConsentState() {
+                   consentState.setCCPA(ccpa)
+               }
+               user.setConsentState(consentState)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+        }
+    case "removeGDPRConsentState":
+        if let callArguments = call.arguments as? [String: Any],
+           let purpose = callArguments["purpose"] as? String,
+           let mpidString = callArguments["mpid"] as? String,
+           let mpid = Int64(mpidString),
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
+            user.consentState()?.removeGDPRConsentState(withPurpose: purpose)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+        }
+    case "getCCPAConsentState":
+        if let callArguments = call.arguments as? [String: Any],
+           let mpidString = callArguments["mpid"] as? String,
+           let mpid = Int(mpidString),
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
+            var ccpaConsentDictionary = [String: Any]()
+            if let consentObject = user.consentState()?.ccpaConsentState() {
+                ccpaConsentDictionary["consented"] = consentObject.consented
+                ccpaConsentDictionary["document"] = consentObject.document
+                ccpaConsentDictionary["timestamp"] = consentObject.timestamp.timeIntervalSince1970
+                ccpaConsentDictionary["location"] = consentObject.location
+                ccpaConsentDictionary["hardwareId"] = consentObject.hardwareId
+            }
+
+            result(asStringForStringKey(jsonDictionary: ccpaConsentDictionary))
+        } else {
+            result("")
+        }
+    case "addCCPAConsentState":
+        if let callArguments = call.arguments as? [String: Any],
+           let consented = callArguments["consented"] as? Bool,
+           let mpidString = callArguments["mpid"] as? String,
+           let mpid = Int64(mpidString),
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
+               let consentCCPA = MPCCPAConsent()
+               consentCCPA.consented  = consented
+               consentCCPA.document = callArguments["document"] as? String
+               if let timestampNumber = callArguments["timestamp"] as? NSNumber {
+                let timestamp = Date(timeIntervalSince1970: timestampNumber.doubleValue/1000)
+                consentCCPA.timestamp = timestamp
+               }
+               consentCCPA.location = callArguments["location"] as? String
+               consentCCPA.hardwareId = callArguments["hardwareId"] as? String
+               
+               let consentState = MPConsentState()
+               consentState.setCCPA(consentCCPA)
+               if let gdpr = user.consentState()?.gdprConsentState() {
+                   consentState.setGDPR(gdpr)
+               }
+               user.setConsentState(consentState)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+        }
+    case "removeCCPAConsentState":
+        if let callArguments = call.arguments as? [String: Any],
+           let mpidString = callArguments["mpid"] as? String,
+           let mpid = Int64(mpidString),
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
+            user.consentState()?.removeCCPAConsentState()
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+        }
     case "aliasUsers":
         if let callArguments = call.arguments as? [String: Any],
            let aliasRequestArguments = callArguments["aliasRequest"] as? [String: Any],
