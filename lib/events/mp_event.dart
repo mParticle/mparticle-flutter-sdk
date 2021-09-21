@@ -1,5 +1,6 @@
 import 'event_type.dart';
 
+/// This class represents an event to be logged using the mParticle SDK
 class MPEvent {
   String eventName;
   final EventType? eventType;

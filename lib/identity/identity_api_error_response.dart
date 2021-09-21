@@ -1,8 +1,8 @@
 import 'package:mparticle_flutter_sdk/identity/client_error_codes.dart';
 
-/// An object returned when an identity request fails for some reason.
+/// A class that returns when an identity request fails for some reason.
 ///
-//  This is passed to the handler for both client and server errors.
+///  This is passed to the handler for both client and server errors.
 class IdentityAPIErrorResponse {
   int? httpCode;
   String? mpid;
@@ -21,7 +21,6 @@ class IdentityAPIErrorResponse {
   }
 }
 
-/// An Error class to be used for the [FailureResponse] [errors] property.
 class Error {
   String code;
   String message;

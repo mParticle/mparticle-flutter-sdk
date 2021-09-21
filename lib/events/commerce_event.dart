@@ -6,6 +6,9 @@ import 'package:mparticle_flutter_sdk/events/transaction_attributes.dart';
 
 import 'impression.dart';
 
+/// A commerce event
+///
+/// A commerce event can either contain Products, Promotions, or Impressions
 class CommerceEvent {
   CommerceEvent.withProduct(this.productActionType, Product product)
       : promotionActionType = null {

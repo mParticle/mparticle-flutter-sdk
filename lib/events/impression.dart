@@ -1,5 +1,8 @@
 import 'package:mparticle_flutter_sdk/events/product.dart';
 
+/// An Impression for use with a commerce event
+///
+/// An Impression assigns an [impressionListName] to a list of [products]
 class Impression {
   Impression(this.impressionListName, this.products);
 

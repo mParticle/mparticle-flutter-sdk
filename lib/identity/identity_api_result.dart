@@ -1,5 +1,7 @@
 import 'package:mparticle_flutter_sdk/src/user.dart';
 
+/// A class that returns when an identity request succeeds.
+
 class IdentityApiResult {
   late User user;
   User? previousUser;

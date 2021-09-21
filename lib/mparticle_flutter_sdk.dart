@@ -252,6 +252,9 @@ class Identity {
         identityRequest.identities, _channel, 'modify');
   }
 
+  /// Transitions anonymous user to known user inside an `aliasRequest`
+  ///
+  /// See https://docs.mparticle.com/guides/idsync/aliasing/ for more information
   Future<void> aliasUsers({required AliasRequest aliasRequest}) async {
     var aliasRequestObj = {
       "sourceMpid": aliasRequest.sourceMpid,
