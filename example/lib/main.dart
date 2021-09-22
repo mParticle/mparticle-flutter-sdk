@@ -390,13 +390,19 @@ class _MyAppState extends State<MyApp> {
               gdprConsent?.forEach((key, value) {
                 print('purpose');
                 print(key);
-                print('GDPR Consent');
-                value?.forEach((key, value) {
-                  print('key');
-                  print(key);
-                  print('value');
-                  print(value);
-                });
+                print('GDPR Consent Object');
+                print('Consented');
+                print(value.consented);
+                if (value.timestamp != null) {
+                  print('Timestamp');
+                  print(value.timestamp);
+                }
+                print('Document');
+                print(value.document);
+                print('Hardware ID');
+                print(value.hardwareId);
+                print('Location');
+                print(value.location);
               });
             }),
             buildButton('user - add denied GDPR Consent State', () async {
@@ -420,12 +426,23 @@ class _MyAppState extends State<MyApp> {
             buildButton('user - get CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
               var ccpaConsent = await user?.getCCPAConsentState();
-              ccpaConsent?.forEach((key, value) {
-                print('key');
-                print(key);
-                print('value');
-                print(value);
-              });
+              if (ccpaConsent != null) {
+                print('CCPA Consent Object');
+                print('Consented');
+                print(ccpaConsent.consented);
+                if (ccpaConsent.timestamp != null) {
+                  print('Timestamp');
+                  print(ccpaConsent.timestamp);
+                }
+                print('Document');
+                print(ccpaConsent.document);
+                print('Hardware ID');
+                print(ccpaConsent.hardwareId);
+                print('Location');
+                print(ccpaConsent.location);
+              } else {
+                print('No CCPA Consent Set');
+              }
             }),
             buildButton('user - add denied CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();

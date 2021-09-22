@@ -96,11 +96,26 @@ class User {
   }
 
   /// Returns all GDPR Consent states with their purpose.
-  Future<Map> getGDPRConsentState() async {
+  Future<Map<String, GDPRConsent>> getGDPRConsentState() async {
     String consentStateString =
         await _channel.invokeMethod('getGDPRConsentState', {"mpid": this.mpid});
     Map consentStateMap = jsonDecode(consentStateString);
-    return consentStateMap;
+    var consentStates = Map<String, GDPRConsent>();
+    consentStateMap.forEach((key, value) {
+      GDPRConsent? consentState;
+      if (value['consented'] != null) {
+        consentState = GDPRConsent(value['consented']);
+        consentState.document = value['document'];
+        consentState.hardwareId = value['hardwareId'];
+        consentState.location = value['location'];
+        if (value['timestamp'] != null) {
+          consentState.timestamp = value['timestamp'].toInt();
+        }
+        consentStates[key] = consentState;
+      }
+    });
+
+    return consentStates;
   }
 
   /// Set a GDPR consent object to a purpose on the user
@@ -129,11 +144,21 @@ class User {
   }
 
   /// Returns the CCPA Consent state.
-  Future<Map> getCCPAConsentState() async {
+  Future<CCPAConsent?> getCCPAConsentState() async {
     String consentStateString =
         await _channel.invokeMethod('getCCPAConsentState', {"mpid": this.mpid});
     Map consentStateMap = jsonDecode(consentStateString);
-    return consentStateMap;
+    CCPAConsent? consentState;
+    if (consentStateMap['consented'] != null) {
+      consentState = CCPAConsent(consentStateMap['consented']);
+      consentState.document = consentStateMap['document'];
+      consentState.hardwareId = consentStateMap['hardwareId'];
+      consentState.location = consentStateMap['location'];
+      if (consentStateMap['timestamp'] != null) {
+        consentState.timestamp = consentStateMap['timestamp'].toInt();
+      }
+    }
+    return consentState;
   }
 
   /// Set a CCPA consent object on the user
