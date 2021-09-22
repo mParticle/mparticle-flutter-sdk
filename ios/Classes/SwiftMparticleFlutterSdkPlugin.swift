@@ -12,7 +12,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "isInitialized":
-        result(MParticle.sharedInstance() != nil)
+        result(true)
     case "getAppName":
         result(Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String)
     case "getOptOut":
@@ -211,7 +211,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
     case "setUserAttribute":
         if let callArguments = call.arguments as? [String: Any],
            let attributeKey = callArguments["attributeKey"] as? String,
-           let attributeValue = callArguments["attributeValue"] as? Any,
+           let attributeValue = callArguments["attributeValue"],
            let mpidString = callArguments["mpid"] as? String,
            let mpid = Int64(mpidString),
            let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
@@ -252,7 +252,6 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                     gdprConsentDictionary[purpose] = consentDictionary
                 }
             }
-
             result(asStringForStringKey(jsonDictionary: gdprConsentDictionary))
         } else {
             result("")
@@ -265,11 +264,10 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
            let mpid = Int64(mpidString),
            let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
                let consentGDPR = MPGDPRConsent()
-               consentGDPR.consented  = consented
+               consentGDPR.consented = consented
                consentGDPR.document = callArguments["document"] as? String
                if let timestampNumber = callArguments["timestamp"] as? NSNumber {
-                let timestamp = Date(timeIntervalSince1970: timestampNumber.doubleValue/1000)
-                consentGDPR.timestamp = timestamp
+                   consentGDPR.timestamp = Date(timeIntervalSince1970: timestampNumber.doubleValue/1000)
                }
                consentGDPR.location = callArguments["location"] as? String
                consentGDPR.hardwareId = callArguments["hardwareId"] as? String
@@ -306,7 +304,6 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                 ccpaConsentDictionary["location"] = consentObject.location
                 ccpaConsentDictionary["hardwareId"] = consentObject.hardwareId
             }
-
             result(asStringForStringKey(jsonDictionary: ccpaConsentDictionary))
         } else {
             result("")
@@ -321,8 +318,8 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                consentCCPA.consented  = consented
                consentCCPA.document = callArguments["document"] as? String
                if let timestampNumber = callArguments["timestamp"] as? NSNumber {
-                let timestamp = Date(timeIntervalSince1970: timestampNumber.doubleValue/1000)
-                consentCCPA.timestamp = timestamp
+                   let timestamp = Date(timeIntervalSince1970: timestampNumber.doubleValue/1000)
+                   consentCCPA.timestamp = timestamp
                }
                consentCCPA.location = callArguments["location"] as? String
                consentCCPA.hardwareId = callArguments["hardwareId"] as? String
@@ -361,13 +358,11 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                                              destinationMPID: NSNumber(value:destinationMPIDInteger),
                                              startTime: startTime,
                                              endTime: endTime)
-                
                 MParticle.sharedInstance().identity.aliasUsers(request)
             } else {
                 if let sourceUser = MParticle.sharedInstance().identity.getUser(NSNumber(value:sourceMPIDInteger)),
                    let destinationUser = MParticle.sharedInstance().identity.getUser(NSNumber(value:destinationMPIDInteger)) {
                     let request = MPAliasRequest(sourceUser:sourceUser, destinationUser:destinationUser)
-                    
                     MParticle.sharedInstance().identity.aliasUsers(request)
                 }
             }
@@ -540,7 +535,7 @@ private func createIdentityRequest(identitiesKeyedOnType: [NSNumber: String]) ->
 
 private func convertToIdentityResultJson(result: MPIdentityApiResult?, error: Error?) -> String {
     let responseDict = NSMutableDictionary()
-    if let nsError = error as? NSError {
+    if let nsError = error as NSError? {
       let code = nsError.code
       responseDict.setValue(code, forKey: "http_code")
       let errorDict = NSMutableDictionary()
