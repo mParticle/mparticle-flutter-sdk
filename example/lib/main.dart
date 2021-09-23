@@ -19,8 +19,7 @@ import 'package:mparticle_flutter_sdk/identity/identity_api_result.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_api_error_response.dart';
 import 'package:mparticle_flutter_sdk/identity/client_error_codes.dart';
 import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
-import 'package:mparticle_flutter_sdk/consent/gdpr_consent.dart';
-import 'package:mparticle_flutter_sdk/consent/ccpa_consent.dart';
+import 'package:mparticle_flutter_sdk/consent/consent.dart';
 
 void main() {
   runApp(MyApp());
@@ -407,7 +406,7 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = GDPRConsent(false);
+              var gdprConsent = Consent(false);
               gdprConsent.document = 'document test';
               gdprConsent.hardwareId = 'hardwareID';
               gdprConsent.location = 'loction test';
@@ -416,7 +415,7 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add approved GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = GDPRConsent(true);
+              var gdprConsent = Consent(true);
               user?.addGDPRConsentState(gdprConsent, 'test');
             }),
             buildButton('user - remove GDPR Consent State', () async {
@@ -446,7 +445,7 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = CCPAConsent(false);
+              var ccpaConsent = Consent(false);
               ccpaConsent.document = 'document test';
               ccpaConsent.hardwareId = 'hardwareID';
               ccpaConsent.location = 'loction test';
@@ -455,7 +454,7 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add approved CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = CCPAConsent(true);
+              var ccpaConsent = Consent(true);
               user?.addCCPAConsentState(ccpaConsent);
             }),
             buildButton('user - remove CCPA Consent State', () async {

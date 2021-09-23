@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/src/identity/identity_helpers.dart';
-import 'package:mparticle_flutter_sdk/consent/gdpr_consent.dart';
-import 'package:mparticle_flutter_sdk/consent/ccpa_consent.dart';
+import 'package:mparticle_flutter_sdk/consent/consent.dart';
 
 /// Returns a user given an [mpid].
 class User {
@@ -96,15 +95,15 @@ class User {
   }
 
   /// Returns all GDPR Consent states with their purpose.
-  Future<Map<String, GDPRConsent>> getGDPRConsentState() async {
+  Future<Map<String, Consent>> getGDPRConsentState() async {
     String consentStateString =
         await _channel.invokeMethod('getGDPRConsentState', {"mpid": this.mpid});
     Map consentStateMap = jsonDecode(consentStateString);
-    var consentStates = Map<String, GDPRConsent>();
+    var consentStates = Map<String, Consent>();
     consentStateMap.forEach((key, value) {
-      GDPRConsent? consentState;
+      Consent? consentState;
       if (value['consented'] != null) {
-        consentState = GDPRConsent(value['consented']);
+        consentState = Consent(value['consented']);
         consentState.document = value['document'];
         consentState.hardwareId = value['hardwareId'];
         consentState.location = value['location'];
@@ -121,7 +120,7 @@ class User {
   /// Set a GDPR consent object to a purpose on the user
   ///
   /// Sets a GDPR consent object [consent] to a purpose [purpose] on the user
-  void addGDPRConsentState(GDPRConsent consent, String purpose) async {
+  void addGDPRConsentState(Consent consent, String purpose) async {
     return await _channel.invokeMethod('addGDPRConsentState', {
       'consented': consent.consented,
       'document': consent.document,
@@ -144,13 +143,13 @@ class User {
   }
 
   /// Returns the CCPA Consent state.
-  Future<CCPAConsent?> getCCPAConsentState() async {
+  Future<Consent?> getCCPAConsentState() async {
     String consentStateString =
         await _channel.invokeMethod('getCCPAConsentState', {"mpid": this.mpid});
     Map consentStateMap = jsonDecode(consentStateString);
-    CCPAConsent? consentState;
+    Consent? consentState;
     if (consentStateMap['consented'] != null) {
-      consentState = CCPAConsent(consentStateMap['consented']);
+      consentState = Consent(consentStateMap['consented']);
       consentState.document = consentStateMap['document'];
       consentState.hardwareId = consentStateMap['hardwareId'];
       consentState.location = consentStateMap['location'];
@@ -164,7 +163,7 @@ class User {
   /// Set a CCPA consent object on the user
   ///
   /// Sets a CCPA consent object [consent] on the user
-  void addCCPAConsentState(CCPAConsent consent) async {
+  void addCCPAConsentState(Consent consent) async {
     return await _channel.invokeMethod('addCCPAConsentState', {
       'consented': consent.consented,
       'document': consent.document,
