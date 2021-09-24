@@ -413,10 +413,10 @@ class _MyAppState extends State<MyApp> {
               gdprConsent.timestamp = DateTime.now().millisecondsSinceEpoch;
               user?.addGDPRConsentState(gdprConsent, 'test');
             }),
-            buildButton('user - add approved GDPR Consent State', () async {
+            buildButton('user - add 2nd approved GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
               var gdprConsent = Consent(true);
-              user?.addGDPRConsentState(gdprConsent, 'test');
+              user?.addGDPRConsentState(gdprConsent, 'test 2');
             }),
             buildButton('user - remove GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();

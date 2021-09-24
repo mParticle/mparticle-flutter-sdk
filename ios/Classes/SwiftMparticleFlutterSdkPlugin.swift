@@ -272,12 +272,16 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                consentGDPR.location = callArguments["location"] as? String
                consentGDPR.hardwareId = callArguments["hardwareId"] as? String
 
-               let consentState = MPConsentState()
-               consentState.addGDPRConsentState(consentGDPR, purpose: purpose)
-               if let ccpa = user.consentState()?.ccpaConsentState() {
-                   consentState.setCCPA(ccpa)
+               let newConsentState = MPConsentState()
+               if let existingConsentState = user.consentState() {
+                   if let priorCCPA = existingConsentState.ccpaConsentState() {
+                       newConsentState.setCCPA(priorCCPA)
+                   }
+                   newConsentState.setGDPR(existingConsentState.gdprConsentState())
                }
-               user.setConsentState(consentState)
+               
+               newConsentState.addGDPRConsentState(consentGDPR, purpose: purpose)
+               user.setConsentState(newConsentState)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
@@ -286,8 +290,10 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
            let purpose = callArguments["purpose"] as? String,
            let mpidString = callArguments["mpid"] as? String,
            let mpid = Int64(mpidString),
-           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
-            user.consentState()?.removeGDPRConsentState(withPurpose: purpose)
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)),
+           let consentState = user.consentState() {
+            consentState.removeGDPRConsentState(withPurpose: purpose)
+            user.setConsentState(consentState)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
@@ -323,13 +329,13 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                }
                consentCCPA.location = callArguments["location"] as? String
                consentCCPA.hardwareId = callArguments["hardwareId"] as? String
-               
-               let consentState = MPConsentState()
-               consentState.setCCPA(consentCCPA)
-               if let gdpr = user.consentState()?.gdprConsentState() {
-                   consentState.setGDPR(gdpr)
-               }
-               user.setConsentState(consentState)
+            
+            let newConsentState = MPConsentState()
+            if let existingConsentState = user.consentState() {
+                newConsentState.setGDPR(existingConsentState.gdprConsentState())
+            }
+            newConsentState.setCCPA(consentCCPA)
+            user.setConsentState(newConsentState)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
@@ -337,8 +343,10 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         if let callArguments = call.arguments as? [String: Any],
            let mpidString = callArguments["mpid"] as? String,
            let mpid = Int64(mpidString),
-           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)) {
-            user.consentState()?.removeCCPAConsentState()
+           let user = MParticle.sharedInstance().identity.getUser(NSNumber(value:mpid)),
+           let consentState = user.consentState() {
+            consentState.removeCCPAConsentState()
+            user.setConsentState(consentState)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
