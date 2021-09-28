@@ -3,7 +3,8 @@ import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
 
 // Android integer values for product action types differ from Dart Enums
 // https://github.com/mParticle/mparticle-android-sdk/blob/6bd755a6350024bee8dbb263b7a059536f7f9b07/android-core/src/main/java/com/mparticle/commerce/Product.java#L33-L42
-String getAndroidSDKProductActionTypeString(ProductActionType productActionType) {
+String getAndroidSDKProductActionTypeString(
+    ProductActionType productActionType) {
   switch (productActionType) {
     case ProductActionType.AddToCart:
       return "add_to_cart";
@@ -30,7 +31,8 @@ String getAndroidSDKProductActionTypeString(ProductActionType productActionType)
 
 // Android integer values for product action types differ from Dart Enums
 // https://github.com/mParticle/mparticle-android-sdk/blob/6bd755a6350024bee8dbb263b7a059536f7f9b07/android-core/src/main/java/com/mparticle/commerce/Promotion.java#L45-L50
-String getAndroidSDKPromotionActionTypeString(PromotionActionType productActionType) {
+String getAndroidSDKPromotionActionTypeString(
+    PromotionActionType productActionType) {
   switch (productActionType) {
     case PromotionActionType.Click:
       return "click";

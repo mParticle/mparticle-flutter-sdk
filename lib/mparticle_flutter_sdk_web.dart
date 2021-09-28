@@ -35,6 +35,8 @@ class MparticleFlutterSdkWeb {
         JsObject.fromBrowserObject(context['mParticle']['Identity']);
     final mpCommerce =
         JsObject.fromBrowserObject(context['mParticle']['eCommerce']);
+    final mpConsent =
+        JsObject.fromBrowserObject(context['mParticle']['Consent']);
 
     // Calls to the mParticle JS Identity methods are async, so we must await
     // a Future that contains a Completer. The Completer completes inside the JS callback
@@ -392,6 +394,127 @@ class MparticleFlutterSdkWeb {
           ]);
         }
 
+        break;
+
+      case 'getGDPRConsentState':
+        var gdprConsentStateString = '{}';
+        var arguments = call.arguments;
+        var mpid = arguments['mpid'];
+        var user = mpIdentity.callMethod('getUser', [mpid]);
+        var consentState = user.callMethod('getConsentState');
+        if (consentState != null) {
+          var gdprConsentState = consentState.callMethod('getGDPRConsentState');
+          if (gdprConsentState != null) {
+            gdprConsentStateString =
+                context['JSON'].callMethod('stringify', [gdprConsentState]);
+
+            var gdprConsentStateMap = jsonDecode(gdprConsentStateString);
+            gdprConsentStateMap.forEach((purpose, value) {
+              gdprConsentStateMap[purpose] = {};
+              gdprConsentStateMap[purpose]['consented'] = value['Consented'];
+              gdprConsentStateMap[purpose]['document'] = value['Document'];
+              gdprConsentStateMap[purpose]['location'] = value['Location'];
+              gdprConsentStateMap[purpose]['hardwareId'] = value['HardwareId'];
+              gdprConsentStateMap[purpose]['timestamp'] = value['Timestamp'];
+            });
+            gdprConsentStateString = jsonEncode(gdprConsentStateMap);
+          }
+        }
+
+        return gdprConsentStateString;
+
+      case 'addGDPRConsentState':
+        var arguments = call.arguments;
+        var consented = arguments['consented'];
+        var document = arguments['document'];
+        var timestamp = arguments['timestamp'];
+        var location = arguments['location'];
+        var hardwareId = arguments['hardwareId'];
+        var purpose = arguments['purpose'];
+        var mpid = arguments['mpid'];
+        var gdprConsent = mpConsent.callMethod('createGDPRConsent',
+            [consented, timestamp, document, location, hardwareId]);
+        var user = mpIdentity.callMethod('getUser', [mpid]);
+        var consentState = user.callMethod('getConsentState');
+        if (consentState == null) {
+          consentState = mpConsent.callMethod('createConsentState');
+        }
+        consentState.callMethod('addGDPRConsentState', [purpose, gdprConsent]);
+        user.callMethod('setConsentState', [consentState]);
+        break;
+
+      case 'removeGDPRConsentState':
+        var arguments = call.arguments;
+        var purpose = arguments['purpose'];
+        var mpid = arguments['mpid'];
+        var user = mpIdentity.callMethod('getUser', [mpid]);
+        var consentState = user.callMethod('getConsentState');
+        if (consentState != null) {
+          consentState.callMethod('removeGDPRConsentState', [purpose]);
+          user.callMethod('setConsentState', [consentState]);
+        }
+        break;
+
+      case 'getCCPAConsentState':
+        var ccpaConsentStateString = '{}';
+        var arguments = call.arguments;
+        var mpid = arguments['mpid'];
+        var user = mpIdentity.callMethod('getUser', [mpid]);
+        var consentState = user.callMethod('getConsentState');
+        if (consentState != null) {
+          var ccpaConsentState = consentState.callMethod('getCCPAConsentState');
+          if (ccpaConsentState != null) {
+            ccpaConsentStateString =
+                context['JSON'].callMethod('stringify', [ccpaConsentState]);
+            var ccpaConsentStateMap = jsonDecode(ccpaConsentStateString);
+
+            var ccpaConsentStateForDart = {};
+            ccpaConsentStateForDart['consented'] =
+                ccpaConsentStateMap['Consented'];
+            ccpaConsentStateForDart['document'] =
+                ccpaConsentStateMap['Document'];
+            ccpaConsentStateForDart['location'] =
+                ccpaConsentStateMap['Location'];
+            ccpaConsentStateForDart['hardwareId'] =
+                ccpaConsentStateMap['HardwareId'];
+            ccpaConsentStateForDart['timestamp'] =
+                ccpaConsentStateMap['Timestamp'];
+            ccpaConsentStateString = jsonEncode(ccpaConsentStateForDart);
+          }
+        }
+
+        return ccpaConsentStateString;
+
+      case 'addCCPAConsentState':
+        var arguments = call.arguments;
+        var consented = arguments['consented'];
+        var document = arguments['document'];
+        var timestamp = arguments['timestamp'];
+        var location = arguments['location'];
+        var hardwareId = arguments['hardwareId'];
+        var mpid = arguments['mpid'];
+
+        var ccpaConsent = mpConsent.callMethod('createCCPAConsent',
+            [consented, timestamp, document, location, hardwareId]);
+
+        var user = mpIdentity.callMethod('getUser', [mpid]);
+        var consentState = user.callMethod('getConsentState');
+        if (consentState == null) {
+          consentState = mpConsent.callMethod('createConsentState');
+        }
+        consentState.callMethod('setCCPAConsentState', [ccpaConsent]);
+        user.callMethod('setConsentState', [consentState]);
+        break;
+
+      case 'removeCCPAConsentState':
+        var arguments = call.arguments;
+        var mpid = arguments['mpid'];
+        var user = mpIdentity.callMethod('getUser', [mpid]);
+        var consentState = user.callMethod('getConsentState');
+        if (consentState != null) {
+          consentState.callMethod('removeCCPAConsentState');
+          user.callMethod('setConsentState', [consentState]);
+        }
         break;
       default:
         throw PlatformException(

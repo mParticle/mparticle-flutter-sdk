@@ -406,11 +406,12 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = Consent(false);
-              gdprConsent.document = 'document test';
-              gdprConsent.hardwareId = 'hardwareID';
-              gdprConsent.location = 'loction test';
-              gdprConsent.timestamp = DateTime.now().millisecondsSinceEpoch;
+              var gdprConsent = (Consent(false))
+                ..document = 'document test'
+                ..hardwareId = 'hardwareID'
+                ..location = 'loction test'
+                ..timestamp = DateTime.now().millisecondsSinceEpoch;
+              print('yoooo');
               user?.addGDPRConsentState(gdprConsent, 'test');
             }),
             buildButton('user - add 2nd approved GDPR Consent State', () async {
@@ -445,11 +446,11 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = Consent(false);
-              ccpaConsent.document = 'document test';
-              ccpaConsent.hardwareId = 'hardwareID';
-              ccpaConsent.location = 'loction test';
-              ccpaConsent.timestamp = DateTime.now().millisecondsSinceEpoch;
+              var ccpaConsent = (Consent(false))
+                ..document = 'document test'
+                ..hardwareId = 'hardwareID'
+                ..location = 'loction test'
+                ..timestamp = DateTime.now().millisecondsSinceEpoch;
               user?.addCCPAConsentState(ccpaConsent);
             }),
             buildButton('user - add approved CCPA Consent State', () async {
