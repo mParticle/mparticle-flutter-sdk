@@ -180,7 +180,10 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         user.consentState.ccpaConsentState
           ?.toJSON()
           ?.toString()
-          ?.let { result.success(it) } ?: result.success(JSONObject().toString())
+          ?.let {
+            result.success(it)
+          }
+          ?: result.success(JSONObject().toString())
       }
       "addCCPAConsentState" -> getUser(call, result)?.let { user ->
         val consentState = call.toCCPAConsent(result)
@@ -194,12 +197,16 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           .let {
             user.setConsentState(it)
           }
+        result.success(true)
       }
       "removeCCPAConsentState" -> getUser(call, result)?.let { user ->
         ConsentState.withConsentState(user.consentState)
           .removeCCPAConsentState()
           .build()
-          .let { user.setConsentState(it) }
+          .let {
+            user.setConsentState(it)
+          }
+        result.success(true)
       }
       else -> {
         result.notImplemented()
