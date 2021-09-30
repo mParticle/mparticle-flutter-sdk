@@ -22,6 +22,9 @@ import com.mparticle.MParticleOptions
 import com.mparticle.MPEvent
 import com.mparticle.UserAttributeListener
 import com.mparticle.commerce.*
+import com.mparticle.consent.CCPAConsent
+import com.mparticle.consent.ConsentState
+import com.mparticle.consent.GDPRConsent
 
 import org.json.JSONObject
 import kotlin.IllegalArgumentException
@@ -135,6 +138,76 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           jsonObj.put(entry.key.toString(), value)
         }.let { result.success((it ?: JSONObject()).toString()) }
       "logCommerceEvent" -> this.logCommerceEvent(call, result)
+      "getGDPRConsentState" -> getUser(call, result)?.let { user ->
+        user.consentState.gdprConsentState
+          .toList()
+          .fold(JSONObject()) { json, (key, value) ->
+            json.put(key, value.toJSON())
+          }
+          .let {
+            result.success(it.toString())
+          }
+      }?: result.error(TAG, "User not found", null)
+      "addGDPRConsentState" -> getUser(call, result)?.let { user ->
+        val consentState = call.toGDPRConsent(result)
+        if (consentState == null) {
+          result.error(TAG, "ConsentState should not be null", null)
+          return
+        }
+        ConsentState.withConsentState(user.consentState)
+          .addGDPRConsentState(consentState.first, consentState.second)
+          .build()
+          .let {
+            user.setConsentState(it)
+          }
+        result.success(true)
+      }
+      "removeGDPRConsentState" -> {
+        getUser(call, result)?.let { user ->
+          val purpose = call.argument<String>("purpose")
+          if (purpose != null) {
+            ConsentState.withConsentState(user.consentState)
+              .removeGDPRConsentState(purpose)
+              .build()
+              .let { user.setConsentState(it) }
+            result.success(true)
+          } else {
+            result.error(TAG, "Missing \"purpose\" required to remove GDPRConsentState", null)
+          }
+        }
+      }
+      "getCCPAConsentState" -> getUser(call, result)?.let { user ->
+        user.consentState.ccpaConsentState
+          ?.toJSON()
+          ?.toString()
+          ?.let {
+            result.success(it)
+          }
+          ?: result.success(JSONObject().toString())
+      }
+      "addCCPAConsentState" -> getUser(call, result)?.let { user ->
+        val consentState = call.toCCPAConsent(result)
+        if (consentState == null) {
+          result.error(TAG, "ConsentState should not be null", null)
+          return
+        }
+        ConsentState.withConsentState(user.consentState)
+          .setCCPAConsentState(consentState)
+          .build()
+          .let {
+            user.setConsentState(it)
+          }
+        result.success(true)
+      }
+      "removeCCPAConsentState" -> getUser(call, result)?.let { user ->
+        ConsentState.withConsentState(user.consentState)
+          .removeCCPAConsentState()
+          .build()
+          .let {
+            user.setConsentState(it)
+          }
+        result.success(true)
+      }
       else -> {
         result.notImplemented()
       }
@@ -645,6 +718,59 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       Impression(impressionListName, products[0]).also { impression ->
         products.subList(1, products.size).forEach { impression.addProduct(it)}
       }
+    }
+  }
+
+  fun CCPAConsent.toJSON() =
+    JSONObject()
+      .put("consented", isConsented)
+      .put("document", document)
+      .put("hardwareId", hardwareId)
+      .put("location", location)
+      .put("timestamp", timestamp)
+
+  fun GDPRConsent.toJSON() =
+    JSONObject()
+      .put("consented", isConsented)
+      .put("document", document)
+      .put("hardwareId", hardwareId)
+      .put("location", location)
+      .put("timestamp", timestamp)
+
+  fun MethodCall.toCCPAConsent(result: Result): CCPAConsent? {
+    return try {
+      argument<Boolean>("consented")?.let {
+        CCPAConsent.builder(it)
+          .document(argument<String>("document"))
+          .hardwareId(argument<String>("hardwareId"))
+          .location(argument<String>("location"))
+          .timestamp(argument<Long>("timestamp"))
+          .build()
+      } ?: null?.apply { result.error(TAG, "Missing \"consented\" value for arguments: ${arguments}", null) }
+    } catch (ex: Exception) {
+      result.error(TAG, ex.message, null)
+      null
+    }
+  }
+
+  fun MethodCall.toGDPRConsent(result: Result): Pair<String, GDPRConsent>? {
+    return try {
+      val purpose = argument<String>("purpose")
+      if (purpose == null) {
+        null.apply { result.error(TAG, "Missing \"purpose\" value for Consent", null)}
+      } else {
+        argument<Boolean>("consented")?.let {
+          purpose to GDPRConsent.builder(it)
+            .document(argument<String>("document"))
+            .hardwareId(argument<String>("hardwareId"))
+            .location(argument<String>("location"))
+            .timestamp(argument<Long>("timestamp"))
+            .build()
+        } ?: null.apply { result.error(TAG, "Missing \"consented\" value for Consent", null) }
+      }
+    } catch (ex: Exception) {
+      result.error(TAG, ex.message, null)
+      null
     }
   }
 }
