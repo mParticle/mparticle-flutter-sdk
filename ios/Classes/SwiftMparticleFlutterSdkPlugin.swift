@@ -405,17 +405,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             // Optional Products on Commerce Event
             if let rawProducts = commerceArguments["products"] as? [[String: Any]] {
                 for rawProduct in rawProducts {
-                    if let name = rawProduct["name"] as? String,
-                       let sku = rawProduct["sku"] as? String,
-                       let price = rawProduct["price"] as? NSNumber {
-                        let newProduct = MPProduct.init()
-                        newProduct.name = name
-                        newProduct.sku = sku
-                        newProduct.price = price
-                        if let quantity = rawProduct["quantity"] as? NSNumber {
-                            newProduct.quantity = quantity
-                        }
-
+                    if let newProduct = convertToMPProduct(productJSON: rawProduct) {
                         event.addProduct(newProduct)
                     }
                 }
@@ -459,14 +449,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                     if let listName = rawImpression["impressionListName"] as? String,
                        let rawProducts = rawImpression["products"] as? [[String: Any]] {
                         for rawProduct in rawProducts {
-                            if let name = rawProduct["name"] as? String,
-                               let sku = rawProduct["sku"] as? String,
-                               let quantity = rawProduct["quantity"] as? NSNumber,
-                               let price = rawProduct["price"] as? NSNumber {
-                                let newProduct = MPProduct.init(name: name,
-                                                                sku: sku,
-                                                                quantity: quantity,
-                                                                price: price)
+                            if let newProduct = convertToMPProduct(productJSON: rawProduct) {
                                 event.addImpression(newProduct, listName: listName)
                             }
                         }
@@ -569,4 +552,35 @@ private func convertToIdentityResultJson(result: MPIdentityApiResult?, error: Er
     } catch _ {
         return "{\"errors\": [{\"code\": 0, \"message\": \"error serializing Identity response\"]}"
     }
+}
+
+private func convertToMPProduct(productJSON: [String: Any]) -> MPProduct? {
+    if let name = productJSON["name"] as? String,
+       let sku = productJSON["sku"] as? String,
+       let price = productJSON["price"] as? NSNumber {
+        let newProduct = MPProduct.init()
+        newProduct.name = name
+        newProduct.sku = sku
+        newProduct.price = price
+        if let quantity = productJSON["quantity"] as? NSNumber {
+            newProduct.quantity = quantity
+        }
+        if let variant = productJSON["variant"] as? String {
+            newProduct.variant = variant
+        }
+        if let category = productJSON["category"] as? String {
+            newProduct.category = category
+        }
+        if let brand = productJSON["brand"] as? String {
+            newProduct.brand = brand
+        }
+        if let position = productJSON["position"] as? NSNumber {
+            newProduct.position = position.uintValue
+        }
+        if let couponCode = productJSON["couponCode"] as? String {
+            newProduct.couponCode = couponCode
+        }
+        return newProduct
+    }
+    return nil
 }
