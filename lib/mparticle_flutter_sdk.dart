@@ -165,9 +165,9 @@ class MparticleFlutterSdk {
   }
 
   /// Sets the opt out status with an [optOutBoolean]
-  Future<void> setOptOut({
-    required bool optOutBoolean,
-  }) async {
+  Future<void> setOptOut(
+    bool optOutBoolean,
+  ) async {
     return await _channel
         .invokeMethod('setOptOut', {'optOutBoolean': optOutBoolean});
   }
@@ -201,14 +201,15 @@ class MparticleFlutterSdk {
 class IdentityRequest {
   Map<IdentityType, String> identities = new Map();
 
-  IdentityRequest setIdentity(IdentityType identity, String value) {
-    this.identities[identity] = value;
+  IdentityRequest setIdentity(
+      {required IdentityType identityType, required String value}) {
+    this.identities[identityType] = value;
     return this;
   }
 
-  String? getIdentity(IdentityType identity) {
-    if (this.identities[identity] != null) {
-      return this.identities[identity];
+  String? getIdentity(IdentityType identityType) {
+    if (this.identities[identityType] != null) {
+      return this.identities[identityType];
     }
   }
 
@@ -224,30 +225,30 @@ class Identity {
   static const MethodChannel _channel =
       const MethodChannel('mparticle_flutter_sdk');
 
-  Future<IdentityApiResult> identify({
-    required IdentityRequest identityRequest,
-  }) async {
+  Future<IdentityApiResult> identify(
+    IdentityRequest identityRequest,
+  ) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'identify');
   }
 
-  Future<IdentityApiResult> login({
-    required IdentityRequest identityRequest,
-  }) async {
+  Future<IdentityApiResult> login(
+    IdentityRequest identityRequest,
+  ) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'login');
   }
 
-  Future<IdentityApiResult> logout({
-    required IdentityRequest identityRequest,
-  }) async {
+  Future<IdentityApiResult> logout(
+    IdentityRequest identityRequest,
+  ) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'logout');
   }
 
-  Future<IdentityApiResult> modify({
-    required IdentityRequest identityRequest,
-  }) async {
+  Future<IdentityApiResult> modify(
+    IdentityRequest identityRequest,
+  ) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'modify');
   }
@@ -255,7 +256,7 @@ class Identity {
   /// Transitions anonymous user to known user inside an `aliasRequest`
   ///
   /// See https://docs.mparticle.com/guides/idsync/aliasing/ for more information
-  Future<void> aliasUsers({required AliasRequest aliasRequest}) async {
+  Future<void> aliasUsers(AliasRequest aliasRequest) async {
     var aliasRequestObj = {
       "sourceMpid": aliasRequest.sourceMpid,
       "destinationMpid": aliasRequest.destinationMpid,

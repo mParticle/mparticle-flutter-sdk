@@ -4,14 +4,18 @@ import 'package:mparticle_flutter_sdk/events/product.dart';
 ///
 /// An Impression assigns an [impressionListName] to a list of [products]
 class Impression {
-  Impression(this.impressionListName, this.products);
+  Impression({required this.impressionListName, required this.products});
 
-  final String impressionListName;
-  final List<Product> products;
+  /// A string name given to the list where the given Products displayed.
+  String impressionListName;
+
+  /// Product(s) to be associate with the Impression.
+  List<Product> products;
 
   static Impression fromJson(Map<String, dynamic> json) {
-    return Impression(json['impressionListName'] as String,
-        json['products'] as List<Product>);
+    return Impression(
+        impressionListName: json['impressionListName'] as String,
+        products: json['products'] as List<Product>);
   }
 
   Map<String, dynamic> toJson() {

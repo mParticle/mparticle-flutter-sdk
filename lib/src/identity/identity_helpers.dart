@@ -76,18 +76,18 @@ sendIdentityRequest(Map<IdentityType, String> identitiesByEnum,
     }
 
     var error = IdentityAPIErrorResponse(
-        httpCode,
-        response["mpid"],
-        (response["errors"] as List?)
+        httpCode: httpCode,
+        mpid: response["mpid"],
+        errors: (response["errors"] as List?)
                 ?.map((e) => Error(e["code"], e["message"]))
                 .toList() ??
             List.empty(),
-        clientErrorCode);
+        clientErrorCode: clientErrorCode);
 
     return Future.error(error);
   } else {
-    var success =
-        IdentityApiResult(response["mpid"], response["previous_mpid"]);
+    var success = IdentityApiResult(
+        mpid: response["mpid"], previousMpid: response["previous_mpid"]);
     return success;
   }
 }

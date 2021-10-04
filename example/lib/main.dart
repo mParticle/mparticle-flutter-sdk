@@ -115,42 +115,54 @@ class _MyAppState extends State<MyApp> {
               child: Text('EVENT LOGGING'),
             ),
             buildButton('Log Event', () {
-              MPEvent event = MPEvent('Test event logged', EventType.Navigation)
-                ..customAttributes = {'key1': 'value1'}
-                ..customFlags = {'flag1': 'flagValue1'};
+              MPEvent event = MPEvent(
+                  eventName: 'Test event logged',
+                  eventType: EventType.Navigation,
+                  customAttributes: {'key1': 'value1'},
+                  customFlags: {'flag1': 'flagValue1'});
               mpInstance?.logEvent(event);
             }),
             buildButton('Log Event - No Upload', () {
-              MPEvent event = MPEvent('Test event logged', EventType.Navigation)
-                ..customAttributes = {'key1': 'value1'}
-                ..customFlags = {'flag1': 'flagValue1'}
+              MPEvent event = MPEvent(
+                  eventName: 'Test event logged',
+                  eventType: EventType.Navigation,
+                  customAttributes: {'key1': 'value1'},
+                  customFlags: {'flag1': 'flagValue1'})
                 ..shouldUploadEvent = false;
               mpInstance?.logEvent(event);
             }),
             buildButton('Log Screen Event', () {
-              ScreenEvent screenEvent = ScreenEvent('Screen event logged')
-                ..customAttributes = {'key1': 'value1'}
-                ..customFlags = {'flag1': 'flagValue1'};
+              ScreenEvent screenEvent =
+                  ScreenEvent(eventName: 'Screen event logged')
+                    ..customAttributes = {'key1': 'value1'}
+                    ..customFlags = {'flag1': 'flagValue1'};
               mpInstance?.logScreenEvent(screenEvent);
             }),
             buildButton('Log Commerce - Product', () {
-              final Product product1 = Product('Orange', '123abc', 2.4, 1);
+              final Product product1 = Product(
+                  name: 'Orange', sku: '123abc', price: 2.4, quantity: 1);
               final Product product2 = Product(
-                  'Apple',
-                  '456abc',
-                  4.1,
-                  2,
-                  'variant',
-                  'category',
-                  'brand',
-                  1,
-                  'couponCode',
-                  {'key1': 'value1'});
+                  name: 'Apple',
+                  sku: '456abc',
+                  price: 4.1,
+                  quantity: 2,
+                  variant: 'variant',
+                  category: 'category',
+                  brand: 'brand',
+                  position: 1,
+                  couponCode: 'couponCode',
+                  attributes: {'key1': 'value1'});
               final TransactionAttributes transactionAttributes =
-                  TransactionAttributes('123456', 'affiliation', '12412342',
-                      1.34, 43.232, 242.2323);
+                  TransactionAttributes(
+                      transactionId: '123456',
+                      affiliation: 'affiliation',
+                      couponCode: '12412342',
+                      shipping: 1.34,
+                      tax: 43.23,
+                      revenue: 242.23);
               CommerceEvent commerceEvent = CommerceEvent.withProduct(
-                  ProductActionType.Purchase, product1)
+                  productActionType: ProductActionType.Purchase,
+                  product: product1)
                 ..products.add(product2)
                 ..transactionAttributes = transactionAttributes
                 ..currency = 'US'
@@ -163,13 +175,20 @@ class _MyAppState extends State<MyApp> {
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - Promotion', () {
-              final Promotion promotion1 =
-                  Promotion('12312', 'Jennifer Slater', 'BOGO Bonanza', 'top');
-              final Promotion promotion2 =
-                  Promotion('15632', 'Gregor Roman', 'Eco Living', 'mid');
+              final Promotion promotion1 = Promotion(
+                  promotionId: '12312',
+                  creative: 'Jennifer Slater',
+                  name: 'BOGO Bonanza',
+                  position: 'top');
+              final Promotion promotion2 = Promotion(
+                  promotionId: '15632',
+                  creative: 'Gregor Roman',
+                  name: 'Eco Living',
+                  position: 'mid');
 
               CommerceEvent commerceEvent = CommerceEvent.withPromotion(
-                  PromotionActionType.View, promotion1)
+                  promotionActionType: PromotionActionType.View,
+                  promotion: promotion1)
                 ..promotions.add(promotion2)
                 ..currency = 'US'
                 ..screenName = 'PromotionScreen'
@@ -181,23 +200,26 @@ class _MyAppState extends State<MyApp> {
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - Impression', () {
-              final Product product1 = Product('Orange', '123abc', 2.4, 1);
+              final Product product1 = Product(
+                  name: 'Orange', sku: '123abc', price: 2.4, quantity: 1);
               final Product product2 = Product(
-                  'Apple',
-                  '456abc',
-                  4.1,
-                  2,
-                  'variant',
-                  'category',
-                  'brand',
-                  1,
-                  'couponCode',
-                  {'key1': 'value1'});
-              final Impression impression1 =
-                  Impression('produce', [product1, product2]);
-              final Impression impression2 = Impression('citrus', [product1]);
+                  name: 'Apple',
+                  sku: '456abc',
+                  price: 4.1,
+                  quantity: 2,
+                  variant: 'variant',
+                  category: 'category',
+                  brand: 'brand',
+                  position: 1,
+                  couponCode: 'couponCode',
+                  attributes: {'key1': 'value1'});
+              final Impression impression1 = Impression(
+                  impressionListName: 'produce',
+                  products: [product1, product2]);
+              final Impression impression2 = Impression(
+                  impressionListName: 'citrus', products: [product1]);
               CommerceEvent commerceEvent =
-                  CommerceEvent.withImpression(impression1)
+                  CommerceEvent.withImpression(impression: impression1)
                     ..impressions.add(impression2)
                     ..currency = 'US'
                     ..screenName = 'ImpressionScreen'
@@ -209,13 +231,21 @@ class _MyAppState extends State<MyApp> {
               mpInstance?.logCommerceEvent(commerceEvent);
             }),
             buildButton('Log Commerce - No Upload', () {
-              final Product product1 = Product('Orange', '123abc', 2.4, 1);
-              final Product product2 = Product('Apple', '456abc', 4.1, 2);
+              final Product product1 = Product(
+                  name: 'Orange', sku: '123abc', price: 2.4, quantity: 1);
+              final Product product2 = Product(
+                  name: 'Apple', sku: '456abc', price: 4.1, quantity: 2);
               final TransactionAttributes transactionAttributes =
-                  TransactionAttributes('123456', 'affiliation', '12412342',
-                      1.34, 43.232, 242.2323);
+                  TransactionAttributes(
+                      transactionId: '123456',
+                      affiliation: 'affiliation',
+                      couponCode: '12412342',
+                      shipping: 1.34,
+                      tax: 43.23,
+                      revenue: 242.23);
               CommerceEvent commerceEvent = CommerceEvent.withProduct(
-                  ProductActionType.Purchase, product1)
+                  productActionType: ProductActionType.Purchase,
+                  product: product1)
                 ..products.add(product2)
                 ..transactionAttributes = transactionAttributes
                 ..currency = 'US'
@@ -245,10 +275,10 @@ class _MyAppState extends State<MyApp> {
               });
             }),
             buildButton('Set opt out', () {
-              mpInstance?.setOptOut(optOutBoolean: true);
+              mpInstance?.setOptOut(true);
             }),
             buildButton('Set Opt In', () {
-              mpInstance?.setOptOut(optOutBoolean: false);
+              mpInstance?.setOptOut(false);
             }),
             buildButton('Get opt out', () async {
               print(await mpInstance?.getOptOut);
@@ -262,32 +292,42 @@ class _MyAppState extends State<MyApp> {
             buildButton('Identify', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
               identityRequest
-                  .setIdentity(IdentityType.CustomerId, 'customerid')
-                  .setIdentity(IdentityType.Email, 'email@gmail.com');
+                  .setIdentity(
+                      identityType: IdentityType.CustomerId,
+                      value: 'customerid')
+                  .setIdentity(
+                      identityType: IdentityType.Email,
+                      value: 'email@gmail.com');
 
-              mpInstance?.identity
-                  .identify(identityRequest: identityRequest)
-                  .then(identityCallbackSuccess,
-                      onError: identityCallbackFailure);
+              mpInstance?.identity.identify(identityRequest).then(
+                  identityCallbackSuccess,
+                  onError: identityCallbackFailure);
             }),
             buildButton('Login', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
               identityRequest
-                  .setIdentity(IdentityType.CustomerId, 'customerid2')
-                  .setIdentity(IdentityType.Email, 'email2@gmail.com');
-              mpInstance?.identity.login(identityRequest: identityRequest).then(
+                  .setIdentity(
+                      identityType: IdentityType.CustomerId,
+                      value: 'customerid2')
+                  .setIdentity(
+                      identityType: IdentityType.Email,
+                      value: 'email2@gmail.com');
+              mpInstance?.identity.login(identityRequest).then(
                   identityCallbackSuccess,
                   onError: identityCallbackFailure);
             }),
             buildButton('Modify', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
               identityRequest
-                  .setIdentity(IdentityType.CustomerId, 'customerid3')
-                  .setIdentity(IdentityType.Email, 'email3@gmail.com');
-              mpInstance?.identity
-                  .modify(identityRequest: identityRequest)
-                  .then(identityCallbackSuccess,
-                      onError: identityCallbackFailure);
+                  .setIdentity(
+                      identityType: IdentityType.CustomerId,
+                      value: 'customerid3')
+                  .setIdentity(
+                      identityType: IdentityType.Email,
+                      value: 'email3@gmail.com');
+              mpInstance?.identity.modify(identityRequest).then(
+                  identityCallbackSuccess,
+                  onError: identityCallbackFailure);
             }),
             buildButton('Logout', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
@@ -296,37 +336,44 @@ class _MyAppState extends State<MyApp> {
               // To remove this error, comment the next 3 lines out where identities
               // are set on the identityRequest.
               identityRequest
-                  .setIdentity(IdentityType.CustomerId, 'customerid4')
-                  .setIdentity(IdentityType.Email, 'email4@gmail.com');
+                  .setIdentity(
+                      identityType: IdentityType.CustomerId,
+                      value: 'customerid4')
+                  .setIdentity(
+                      identityType: IdentityType.Email,
+                      value: 'email4@gmail.com');
 
-              mpInstance?.identity
-                  .logout(identityRequest: identityRequest)
-                  .then(identityCallbackSuccess,
-                      onError: identityCallbackFailure);
+              mpInstance?.identity.logout(identityRequest).then(
+                  identityCallbackSuccess,
+                  onError: identityCallbackFailure);
             }),
             buildButton('Alias Users with MPIDs and Times', () {
               var startTime = DateTime.now().millisecondsSinceEpoch - 60000;
               var endTime = DateTime.now().millisecondsSinceEpoch;
 
-              var userAliasRequest =
-                  AliasRequest('sourceMPID', 'destinationMPID');
+              var userAliasRequest = AliasRequest(
+                  sourceMpid: 'sourceMPID', destinationMpid: 'destinationMPID');
               userAliasRequest.setStartTime(startTime);
               userAliasRequest.setEndTime(endTime);
-              mpInstance?.identity.aliasUsers(aliasRequest: userAliasRequest);
+              mpInstance?.identity.aliasUsers(userAliasRequest);
             }),
             buildButton('Login then Alias Users with just MPIDs', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
               identityRequest
-                  .setIdentity(IdentityType.CustomerId, 'customerid5')
-                  .setIdentity(IdentityType.Email, 'email5@gmail.com');
-              mpInstance?.identity.login(identityRequest: identityRequest).then(
+                  .setIdentity(
+                      identityType: IdentityType.CustomerId,
+                      value: 'customerid5')
+                  .setIdentity(
+                      identityType: IdentityType.Email,
+                      value: 'email5@gmail.com');
+              mpInstance?.identity.login(identityRequest).then(
                   (IdentityApiResult successResponse) {
                 String? previousMPID = successResponse.previousUser?.getMPID();
                 if (previousMPID != null) {
                   var userAliasRequest = AliasRequest(
-                      previousMPID, successResponse.user.getMPID());
-                  mpInstance?.identity
-                      .aliasUsers(aliasRequest: userAliasRequest);
+                      sourceMpid: previousMPID,
+                      destinationMpid: successResponse.user.getMPID());
+                  mpInstance?.identity.aliasUsers(userAliasRequest);
                 }
               }, onError: (error) {
                 var failureResponse = error as IdentityAPIErrorResponse;
@@ -342,15 +389,16 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('setUserAttribute', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.setUserAttribute('points', '1');
+              user?.setUserAttribute(key: 'points', value: '1');
             }),
             buildButton('Set User Tag', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.setUserTag('tag1');
+              user?.setUserTag(tag: 'tag1');
             }),
             buildButton('Set User Attribute Array', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.setUserAttributeArray('arrayOfStrings', ['a', 'b', 'c']);
+              user?.setUserAttributeArray(
+                  key: 'arrayOfStrings', value: ['a', 'b', 'c']);
             }),
             buildButton('Get User Attributes', () async {
               var user = await mpInstance?.getCurrentUser();
@@ -385,7 +433,7 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('incrementUserAttribute by 1', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.incrementUserAttribute('points', 1);
+              user?.incrementUserAttribute(key: 'points', value: 1);
             }),
             buildButton('logPushNotification', () async {
               mpInstance?.logPushRegistration(
@@ -393,15 +441,17 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - getFirstSeen time', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.getFirstSeen((time) {
+              int? time = await user?.getFirstSeen();
+              if (time != null) {
                 print(time);
-              });
+              }
             }),
             buildButton('user - getLastSeen time', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.getLastSeen((time) {
+              int? time = await user?.getLastSeen();
+              if (time != null) {
                 print(time);
-              });
+              }
             }),
             buildButton('user - get GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
@@ -426,22 +476,22 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = (Consent(false))
+              var gdprConsent = (Consent(consented: false))
                 ..document = 'document test'
                 ..hardwareId = 'hardwareID'
                 ..location = 'loction test'
                 ..timestamp = DateTime.now().millisecondsSinceEpoch;
-              print('yoooo');
-              user?.addGDPRConsentState(gdprConsent, 'test');
+              user?.addGDPRConsentState(consent: gdprConsent, purpose: 'test');
             }),
             buildButton('user - add 2nd approved GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = Consent(true);
-              user?.addGDPRConsentState(gdprConsent, 'test 2');
+              var gdprConsent = Consent(consented: true);
+              user?.addGDPRConsentState(
+                  consent: gdprConsent, purpose: 'test 2');
             }),
             buildButton('user - remove GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              user?.removeGDPRConsentState('test');
+              user?.removeGDPRConsentState(purpose: 'test');
             }),
             buildButton('user - get CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
@@ -466,17 +516,17 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = (Consent(false))
+              var ccpaConsent = (Consent(consented: false))
                 ..document = 'document test'
                 ..hardwareId = 'hardwareID'
                 ..location = 'loction test'
                 ..timestamp = DateTime.now().millisecondsSinceEpoch;
-              user?.addCCPAConsentState(ccpaConsent);
+              user?.addCCPAConsentState(consent: ccpaConsent);
             }),
             buildButton('user - add approved CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = Consent(true);
-              user?.addCCPAConsentState(ccpaConsent);
+              var ccpaConsent = Consent(consented: true);
+              user?.addCCPAConsentState(consent: ccpaConsent);
             }),
             buildButton('user - remove CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
