@@ -34,9 +34,10 @@ void main() {
 
   group('mParticle Dart API Layer', () {
     test('logEvent', () async {
-      MPEvent event = MPEvent('Clicked Search Bar', EventType.Search)
-        ..customAttributes = {'key1': 'value1'}
-        ..customFlags = {'flag1': 'value1'};
+      MPEvent event =
+          MPEvent(eventName: 'Clicked Search Bar', eventType: EventType.Search)
+            ..customAttributes = {'key1': 'value1'}
+            ..customFlags = {'flag1': 'value1'};
 
       await mp.logEvent(event);
       expect(
@@ -60,7 +61,12 @@ void main() {
       final Product product2 =
           Product(name: 'Apple', sku: '456abc', price: 10.5, quantity: 2);
       final TransactionAttributes transactionAttributes = TransactionAttributes(
-          '123456', 'affiliation', '12412342', 1.34, 43.232, 242.2323);
+          transactionId: '123456',
+          affiliation: 'affiliation',
+          couponCode: '12412342',
+          shipping: 1.34,
+          tax: 43.232,
+          revenue: 242.2);
       CommerceEvent commerceEvent = CommerceEvent.withProduct(
           productActionType: ProductActionType.Purchase, product: product1)
         ..products.add(product2)
@@ -160,12 +166,15 @@ void main() {
     test('log impression commerce event', () async {
       final Product product1 =
           Product(name: 'Orange', sku: '123abc', price: 2.4, quantity: 1);
-      final Impression impression1 = Impression('produce', [product1]);
-      final Impression impression2 = Impression('citrus', [product1]);
-      CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
-        ..impressions.add(impression2)
-        ..currency = 'US'
-        ..screenName = 'One Click Purchase';
+      final Impression impression1 =
+          Impression(impressionListName: 'produce', products: [product1]);
+      final Impression impression2 =
+          Impression(impressionListName: 'citrus', products: [product1]);
+      CommerceEvent commerceEvent =
+          CommerceEvent.withImpression(impression: impression1)
+            ..impressions.add(impression2)
+            ..currency = 'US'
+            ..screenName = 'One Click Purchase';
       mp.logCommerceEvent(commerceEvent);
       expect(
         methodCall,
@@ -262,7 +271,8 @@ void main() {
     });
 
     test('alias users', () async {
-      var userAliasRequest = AliasRequest('sourceMPID', 'destinationMPID');
+      var userAliasRequest = AliasRequest(
+          sourceMpid: 'sourceMPID', destinationMpid: 'destinationMPID');
       userAliasRequest.setStartTime(123);
       userAliasRequest.setEndTime(456);
       mp.identity.aliasUsers(userAliasRequest);
