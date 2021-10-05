@@ -299,9 +299,10 @@ class _MyAppState extends State<MyApp> {
                       identityType: IdentityType.Email,
                       value: 'email@gmail.com');
 
-              mpInstance?.identity.identify(identityRequest).then(
-                  identityCallbackSuccess,
-                  onError: identityCallbackFailure);
+              mpInstance?.identity
+                  .identify(identityRequest: identityRequest)
+                  .then(identityCallbackSuccess,
+                      onError: identityCallbackFailure);
             }),
             buildButton('Login', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
@@ -312,7 +313,7 @@ class _MyAppState extends State<MyApp> {
                   .setIdentity(
                       identityType: IdentityType.Email,
                       value: 'email2@gmail.com');
-              mpInstance?.identity.login(identityRequest).then(
+              mpInstance?.identity.login(identityRequest: identityRequest).then(
                   identityCallbackSuccess,
                   onError: identityCallbackFailure);
             }),
@@ -325,9 +326,10 @@ class _MyAppState extends State<MyApp> {
                   .setIdentity(
                       identityType: IdentityType.Email,
                       value: 'email3@gmail.com');
-              mpInstance?.identity.modify(identityRequest).then(
-                  identityCallbackSuccess,
-                  onError: identityCallbackFailure);
+              mpInstance?.identity
+                  .modify(identityRequest: identityRequest)
+                  .then(identityCallbackSuccess,
+                      onError: identityCallbackFailure);
             }),
             buildButton('Logout', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
@@ -343,9 +345,10 @@ class _MyAppState extends State<MyApp> {
                       identityType: IdentityType.Email,
                       value: 'email4@gmail.com');
 
-              mpInstance?.identity.logout(identityRequest).then(
-                  identityCallbackSuccess,
-                  onError: identityCallbackFailure);
+              mpInstance?.identity
+                  .logout(identityRequest: identityRequest)
+                  .then(identityCallbackSuccess,
+                      onError: identityCallbackFailure);
             }),
             buildButton('Alias Users with MPIDs and Times', () {
               var startTime = DateTime.now().millisecondsSinceEpoch - 60000;
@@ -366,7 +369,7 @@ class _MyAppState extends State<MyApp> {
                   .setIdentity(
                       identityType: IdentityType.Email,
                       value: 'email5@gmail.com');
-              mpInstance?.identity.login(identityRequest).then(
+              mpInstance?.identity.login(identityRequest: identityRequest).then(
                   (IdentityApiResult successResponse) {
                 String? previousMPID = successResponse.previousUser?.getMPID();
                 if (previousMPID != null) {

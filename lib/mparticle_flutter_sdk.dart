@@ -207,7 +207,7 @@ class IdentityRequest {
     return this;
   }
 
-  String? getIdentity(IdentityType identityType) {
+  String? getIdentity({required IdentityType identityType}) {
     if (this.identities[identityType] != null) {
       return this.identities[identityType];
     }
@@ -225,30 +225,30 @@ class Identity {
   static const MethodChannel _channel =
       const MethodChannel('mparticle_flutter_sdk');
 
-  Future<IdentityApiResult> identify(
-    IdentityRequest identityRequest,
-  ) async {
+  Future<IdentityApiResult> identify({
+    required IdentityRequest identityRequest,
+  }) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'identify');
   }
 
-  Future<IdentityApiResult> login(
-    IdentityRequest identityRequest,
-  ) async {
+  Future<IdentityApiResult> login({
+    required IdentityRequest identityRequest,
+  }) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'login');
   }
 
-  Future<IdentityApiResult> logout(
-    IdentityRequest identityRequest,
-  ) async {
+  Future<IdentityApiResult> logout({
+    required IdentityRequest identityRequest,
+  }) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'logout');
   }
 
-  Future<IdentityApiResult> modify(
-    IdentityRequest identityRequest,
-  ) async {
+  Future<IdentityApiResult> modify({
+    required IdentityRequest identityRequest,
+  }) async {
     return await sendIdentityRequest(
         identityRequest.identities, _channel, 'modify');
   }
