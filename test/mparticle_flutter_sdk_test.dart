@@ -275,7 +275,7 @@ void main() {
           sourceMpid: 'sourceMPID', destinationMpid: 'destinationMPID');
       userAliasRequest.setStartTime(123);
       userAliasRequest.setEndTime(456);
-      mp.identity.aliasUsers(userAliasRequest);
+      mp.identity.aliasUsers(aliasRequest: userAliasRequest);
       expect(
         methodCall,
         isMethodCall('aliasUsers', arguments: {

@@ -358,7 +358,7 @@ class _MyAppState extends State<MyApp> {
                   sourceMpid: 'sourceMPID', destinationMpid: 'destinationMPID');
               userAliasRequest.setStartTime(startTime);
               userAliasRequest.setEndTime(endTime);
-              mpInstance?.identity.aliasUsers(userAliasRequest);
+              mpInstance?.identity.aliasUsers(aliasRequest: userAliasRequest);
             }),
             buildButton('Login then Alias Users with just MPIDs', () {
               var identityRequest = MparticleFlutterSdk.identityRequest;
@@ -376,7 +376,8 @@ class _MyAppState extends State<MyApp> {
                   var userAliasRequest = AliasRequest(
                       sourceMpid: previousMPID,
                       destinationMpid: successResponse.user.getMPID());
-                  mpInstance?.identity.aliasUsers(userAliasRequest);
+                  mpInstance?.identity
+                      .aliasUsers(aliasRequest: userAliasRequest);
                 }
               }, onError: (error) {
                 var failureResponse = error as IdentityAPIErrorResponse;
