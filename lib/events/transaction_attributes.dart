@@ -18,7 +18,7 @@ class TransactionAttributes {
   /// The coupon code string.
   final String? couponCode;
 
-  ///The shipping amount of the commerce event transaction.
+  /// The shipping amount of the commerce event transaction.
   final double? shipping;
 
   /// The tax amount of the commerce event transaction.

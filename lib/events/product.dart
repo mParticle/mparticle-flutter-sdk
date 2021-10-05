@@ -33,7 +33,7 @@ class Product {
   /// The product brand.
   final String? brand;
 
-  /// The prosition of the product on the screen.
+  /// The position of the product on the screen.
   final int? position;
 
   /// The coupon associated with the product.
