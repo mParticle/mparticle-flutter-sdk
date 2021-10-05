@@ -139,12 +139,25 @@ class MparticleFlutterSdkWeb {
         ]);
         break;
       case 'logEvent':
-        mParticle.callMethod('logEvent', [
-          call.arguments['eventName'],
-          call.arguments['eventType'],
-          JsObject.jsify(call.arguments['customAttributes']),
-          JsObject.jsify(call.arguments['customFlags']),
-        ]);
+        var shouldUploadBoolean = call.arguments['shouldUploadEvent'];
+        if (shouldUploadBoolean != null) {
+          mParticle.callMethod('logEvent', [
+            call.arguments['eventName'],
+            call.arguments['eventType'],
+            JsObject.jsify(call.arguments['customAttributes']),
+            JsObject.jsify(call.arguments['customFlags']),
+            JsObject.jsify(
+                {'shouldUploadEvent': call.arguments['shouldUploadEvent']})
+          ]);
+        } else {
+          mParticle.callMethod('logEvent', [
+            call.arguments['eventName'],
+            call.arguments['eventType'],
+            JsObject.jsify(call.arguments['customAttributes']),
+            JsObject.jsify(call.arguments['customFlags']),
+          ]);
+        }
+
         break;
       case 'logScreenEvent':
         mParticle.callMethod('logPageView', [
