@@ -34,9 +34,10 @@ void main() {
 
   group('mParticle Dart API Layer', () {
     test('logEvent', () async {
-      MPEvent event = MPEvent('Clicked Search Bar', EventType.Search)
-        ..customAttributes = {'key1': 'value1'}
-        ..customFlags = {'flag1': 'value1'};
+      MPEvent event =
+          MPEvent(eventName: 'Clicked Search Bar', eventType: EventType.Search)
+            ..customAttributes = {'key1': 'value1'}
+            ..customFlags = {'flag1': 'value1'};
 
       await mp.logEvent(event);
       expect(
@@ -55,16 +56,23 @@ void main() {
     });
 
     test('log product action commerce event', () async {
-      final Product product1 = Product('Orange', '123abc', 5.0, 1);
-      final Product product2 = Product('Apple', '456abc', 10.5, 2);
+      final Product product1 =
+          Product(name: 'Orange', sku: '123abc', price: 5.0, quantity: 1);
+      final Product product2 =
+          Product(name: 'Apple', sku: '456abc', price: 10.5, quantity: 2);
       final TransactionAttributes transactionAttributes = TransactionAttributes(
-          '123456', 'affiliation', '12412342', 1.34, 43.232, 242.2323);
-      CommerceEvent commerceEvent =
-          CommerceEvent.withProduct(ProductActionType.Purchase, product1)
-            ..products.add(product2)
-            ..transactionAttributes = transactionAttributes
-            ..currency = 'US'
-            ..screenName = 'One Click Purchase';
+          transactionId: '123456',
+          affiliation: 'affiliation',
+          couponCode: '12412342',
+          shipping: 1.34,
+          tax: 43.232,
+          revenue: 242.2);
+      CommerceEvent commerceEvent = CommerceEvent.withProduct(
+          productActionType: ProductActionType.Purchase, product: product1)
+        ..products.add(product2)
+        ..transactionAttributes = transactionAttributes
+        ..currency = 'US'
+        ..screenName = 'One Click Purchase';
       mp.logCommerceEvent(commerceEvent);
       expect(
         methodCall,
@@ -96,16 +104,22 @@ void main() {
     });
 
     test('log promotion commerce event', () async {
-      final Promotion promotion1 =
-          Promotion('12312', 'Jennifer Slater', 'BOGO Bonanza', 'top');
-      final Promotion promotion2 =
-          Promotion('15632', 'Gregor Roman', 'Eco Living', 'mid');
+      final Promotion promotion1 = Promotion(
+          promotionId: '12312',
+          creative: 'Jennifer Slater',
+          name: 'BOGO Bonanza',
+          position: 'top');
+      final Promotion promotion2 = Promotion(
+          promotionId: '15632',
+          creative: 'Gregor Roman',
+          name: 'Eco Living',
+          position: 'mid');
 
-      CommerceEvent commerceEvent =
-          CommerceEvent.withPromotion(PromotionActionType.View, promotion1)
-            ..promotions.add(promotion2)
-            ..currency = 'US'
-            ..screenName = 'Promotion Screen Name';
+      CommerceEvent commerceEvent = CommerceEvent.withPromotion(
+          promotionActionType: PromotionActionType.View, promotion: promotion1)
+        ..promotions.add(promotion2)
+        ..currency = 'US'
+        ..screenName = 'Promotion Screen Name';
       mp.logCommerceEvent(commerceEvent);
       expect(
         methodCall,
@@ -150,13 +164,17 @@ void main() {
     });
 
     test('log impression commerce event', () async {
-      final Product product1 = Product('Orange', '123abc', 2.4, 1);
-      final Impression impression1 = Impression('produce', [product1]);
-      final Impression impression2 = Impression('citrus', [product1]);
-      CommerceEvent commerceEvent = CommerceEvent.withImpression(impression1)
-        ..impressions.add(impression2)
-        ..currency = 'US'
-        ..screenName = 'One Click Purchase';
+      final Product product1 =
+          Product(name: 'Orange', sku: '123abc', price: 2.4, quantity: 1);
+      final Impression impression1 =
+          Impression(impressionListName: 'produce', products: [product1]);
+      final Impression impression2 =
+          Impression(impressionListName: 'citrus', products: [product1]);
+      CommerceEvent commerceEvent =
+          CommerceEvent.withImpression(impression: impression1)
+            ..impressions.add(impression2)
+            ..currency = 'US'
+            ..screenName = 'One Click Purchase';
       mp.logCommerceEvent(commerceEvent);
       expect(
         methodCall,
@@ -210,7 +228,7 @@ void main() {
     });
 
     test('log screen event', () async {
-      ScreenEvent screenEvent = ScreenEvent('Screen event logged')
+      ScreenEvent screenEvent = ScreenEvent(eventName: 'Screen event logged')
         ..customAttributes = {'key1': 'value1'}
         ..customFlags = {'flag1': 'value1'};
       mp.logScreenEvent(screenEvent);
@@ -237,7 +255,7 @@ void main() {
     });
 
     test('set opt out', () async {
-      mp.setOptOut(optOutBoolean: true);
+      mp.setOptOut(true);
       expect(
         methodCall,
         isMethodCall('setOptOut', arguments: {'optOutBoolean': true}),
@@ -253,7 +271,8 @@ void main() {
     });
 
     test('alias users', () async {
-      var userAliasRequest = AliasRequest('sourceMPID', 'destinationMPID');
+      var userAliasRequest = AliasRequest(
+          sourceMpid: 'sourceMPID', destinationMpid: 'destinationMPID');
       userAliasRequest.setStartTime(123);
       userAliasRequest.setEndTime(456);
       mp.identity.aliasUsers(aliasRequest: userAliasRequest);

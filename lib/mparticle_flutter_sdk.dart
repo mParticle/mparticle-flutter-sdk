@@ -165,9 +165,9 @@ class MparticleFlutterSdk {
   }
 
   /// Sets the opt out status with an [optOutBoolean]
-  Future<void> setOptOut({
-    required bool optOutBoolean,
-  }) async {
+  Future<void> setOptOut(
+    bool optOutBoolean,
+  ) async {
     return await _channel
         .invokeMethod('setOptOut', {'optOutBoolean': optOutBoolean});
   }
@@ -201,14 +201,15 @@ class MparticleFlutterSdk {
 class IdentityRequest {
   Map<IdentityType, String> identities = new Map();
 
-  IdentityRequest setIdentity(IdentityType identity, String value) {
-    this.identities[identity] = value;
+  IdentityRequest setIdentity(
+      {required IdentityType identityType, required String value}) {
+    this.identities[identityType] = value;
     return this;
   }
 
-  String? getIdentity(IdentityType identity) {
-    if (this.identities[identity] != null) {
-      return this.identities[identity];
+  String? getIdentity({required IdentityType identityType}) {
+    if (this.identities[identityType] != null) {
+      return this.identities[identityType];
     }
   }
 
