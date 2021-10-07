@@ -619,13 +619,14 @@ mpInstance?.identity
     String? previousMPID =
         successResponse.previousUser?.getMPID();
     if (previousMPID != null) {
-    var userAliasRequest = AliasRequest(
-        sourceMpid: previousMPID,
-        destinationMpid: successResponse.user.getMPID());
-    mpInstance?.identity
-        .aliasUsers(aliasRequest: userAliasRequest);
+        var userAliasRequest = AliasRequest(
+            sourceMpid: previousMPID,
+            destinationMpid: successResponse.user.getMPID());
+        mpInstance?.identity
+            .aliasUsers(aliasRequest: userAliasRequest);
+        }
     }
-});
+);
 ```
 
 ### Consent
