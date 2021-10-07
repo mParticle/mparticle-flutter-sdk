@@ -687,12 +687,24 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     val price = get("price")?.toString()?.toDoubleOrNull()
     val name = get("name")?.toString()
     val sku = get("sku")?.toString()
+    val variant = get("variant")?.toString()
+    val category = get("category")?.toString()
+    val brand = get("brand")?.toString()
+    val position = get("position")?.toString()?.toInt()
+    val couponCode = get("couponCode")?.toString()
+    val attributes = get("attributes") as Map<String, String>?
     return if (name == null || sku == null || price == null) {
       throw IllegalArgumentException("""Product requires "name", "sku" and "price" values""")
     } else {
       Product.Builder(name, sku, price)
         .also { product ->
           quantity?.let { product.quantity(it) }
+          variant?.let { product.variant(it) }
+          category?.let { product.category(it) }
+          brand?.let { product.brand(it) }
+          position?.let { product.position(it) }
+          couponCode?.let { product.couponCode(it) }
+          attributes?.let { product.customAttributes(it) }
         }
         .build()
     }
