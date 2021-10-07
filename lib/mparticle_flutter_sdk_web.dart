@@ -221,6 +221,10 @@ class MparticleFlutterSdkWeb {
             'setUserAttribute',
             [call.arguments["attributeKey"], call.arguments["attributeValue"]]);
         break;
+      case 'removeUserAttribute':
+        mpIdentity.callMethod('getUser', [call.arguments["mpid"]]).callMethod(
+            'removeUserAttribute', [call.arguments["attributeKey"]]);
+        break;
       case 'setUserAttributeArray':
         mpIdentity.callMethod('getUser', [call.arguments["mpid"]]).callMethod(
             'setUserAttributeList', [
