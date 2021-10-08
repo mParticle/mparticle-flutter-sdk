@@ -481,7 +481,9 @@ After an IdentityRequest is passed to one of the following IDSync methods -  `id
 Import the `SuccessResponse` and `FailureResponse` classes to write proper callbacks for Identity methods.  For brevity, we included an example of full error handling in only the `identify` example below, but this error handling can be used for any of the Identity calls.
 
 #### Identify
-The following is a full Identify example with error and success handling.  You can adapt the following example with login, modify, and logout.
+
+The following is a full Identify example with error and success handling.  You can adapt the following example with `login`, `modify`, and `logout`.
+
 ```dart
 import 'package:mparticle_flutter_sdk/identity/identity_api_result.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_api_error_response.dart';
