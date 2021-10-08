@@ -117,17 +117,17 @@ class _MyAppState extends State<MyApp> {
             buildButton('Log Event', () {
               MPEvent event = MPEvent(
                   eventName: 'Test event logged',
-                  eventType: EventType.Navigation,
-                  customAttributes: {'key1': 'value1'},
-                  customFlags: {'flag1': 'flagValue1'});
+                  eventType: EventType.Navigation)
+                ..customAttributes = {'key1': 'value1'}
+                ..customFlags = {'flag1': 'value1'};
               mpInstance?.logEvent(event);
             }),
             buildButton('Log Event - No Upload', () {
               MPEvent event = MPEvent(
                   eventName: 'Test event logged',
-                  eventType: EventType.Navigation,
-                  customAttributes: {'key1': 'value1'},
-                  customFlags: {'flag1': 'flagValue1'})
+                  eventType: EventType.Navigation)
+                ..customAttributes = {'key1': 'value1'}
+                ..customFlags = {'flag1': 'flagValue1'}
                 ..shouldUploadEvent = false;
               mpInstance?.logEvent(event);
             }),
@@ -139,8 +139,8 @@ class _MyAppState extends State<MyApp> {
               mpInstance?.logScreenEvent(screenEvent);
             }),
             buildButton('Log Commerce - Product', () {
-              final Product product1 = Product(
-                  name: 'Orange', sku: '123abc', price: 2.4, quantity: 1);
+              final Product product1 =
+                  Product(name: 'Orange', sku: '123abc', price: 2.4);
               final Product product2 = Product(
                   name: 'Apple',
                   sku: '456abc',
@@ -379,6 +379,14 @@ class _MyAppState extends State<MyApp> {
                   mpInstance?.identity
                       .aliasUsers(aliasRequest: userAliasRequest);
                 }
+                var identityRequest = MparticleFlutterSdk.identityRequest;
+                identityRequest
+                    .setIdentity(
+                        identityType: IdentityType.CustomerId,
+                        value: 'customerid2')
+                    .setIdentity(
+                        identityType: IdentityType.Email,
+                        value: 'email2@gmail.com');
               }, onError: (error) {
                 var failureResponse = error as IdentityAPIErrorResponse;
                 print("Failure Response: $failureResponse");
@@ -394,6 +402,10 @@ class _MyAppState extends State<MyApp> {
             buildButton('setUserAttribute', () async {
               var user = await mpInstance?.getCurrentUser();
               user?.setUserAttribute(key: 'points', value: '1');
+            }),
+            buildButton('removeUserAttribute', () async {
+              var user = await mpInstance?.getCurrentUser();
+              user?.removeUserAttribute(key: 'points');
             }),
             buildButton('Set User Tag', () async {
               var user = await mpInstance?.getCurrentUser();
@@ -459,7 +471,8 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - get GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = await user?.getGDPRConsentState();
+              Map<String, Consent>? gdprConsent =
+                  await user?.getGDPRConsentState();
               gdprConsent?.forEach((key, value) {
                 print('purpose');
                 print(key);
@@ -480,16 +493,19 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = (Consent(consented: false))
-                ..document = 'document test'
-                ..hardwareId = 'hardwareID'
-                ..location = 'loction test'
-                ..timestamp = DateTime.now().millisecondsSinceEpoch;
+              Consent gdprConsent = Consent(
+                  consented: false,
+                  document: 'document test',
+                  hardwareId: 'hardwareID',
+                  location: 'loction test',
+                  timestamp: DateTime.now().millisecondsSinceEpoch);
+
               user?.addGDPRConsentState(consent: gdprConsent, purpose: 'test');
             }),
             buildButton('user - add 2nd approved GDPR Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var gdprConsent = Consent(consented: true);
+              var gdprConsent = (Consent(consented: true))
+                ..document = 'document test2';
               user?.addGDPRConsentState(
                   consent: gdprConsent, purpose: 'test 2');
             }),
@@ -499,7 +515,7 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - get CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = await user?.getCCPAConsentState();
+              Consent? ccpaConsent = await user?.getCCPAConsentState();
               if (ccpaConsent != null) {
                 print('CCPA Consent Object');
                 print('Consented');
@@ -520,11 +536,12 @@ class _MyAppState extends State<MyApp> {
             }),
             buildButton('user - add denied CCPA Consent State', () async {
               var user = await mpInstance?.getCurrentUser();
-              var ccpaConsent = (Consent(consented: false))
-                ..document = 'document test'
-                ..hardwareId = 'hardwareID'
-                ..location = 'loction test'
-                ..timestamp = DateTime.now().millisecondsSinceEpoch;
+              Consent ccpaConsent = Consent(
+                  consented: false,
+                  document: 'document test',
+                  hardwareId: 'hardwareID',
+                  location: 'loction test',
+                  timestamp: DateTime.now().millisecondsSinceEpoch);
               user?.addCCPAConsentState(consent: ccpaConsent);
             }),
             buildButton('user - add approved CCPA Consent State', () async {
