@@ -68,7 +68,8 @@ class User {
   ///
   /// Removes a user attribute given a [key].
   void removeUserAttribute({required String key}) async {
-    await _channel.invokeMethod('removeUserAttribute', {"attributeKey": key});
+    await _channel.invokeMethod(
+        'removeUserAttribute', {"attributeKey": key, "mpid": this.mpid});
   }
 
   /// Sets a user attribute.
