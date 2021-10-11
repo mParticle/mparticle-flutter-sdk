@@ -324,12 +324,7 @@ class MparticleFlutterSdkWeb {
         List? products = [];
         if (rawProducts != null && rawProducts.length > 0) {
           rawProducts.forEach((rawProduct) {
-            var product = mpCommerce.callMethod('createProduct', [
-              rawProduct['name'],
-              rawProduct['sku'],
-              rawProduct['price'],
-              rawProduct['quantity']
-            ]);
+            var product = createJSProduct(mpCommerce, rawProduct);
             products.add(product);
           });
         }
@@ -386,12 +381,8 @@ class MparticleFlutterSdkWeb {
               if (rawImpressionProducts != null &&
                   rawImpressionProducts.length > 0) {
                 rawImpressionProducts.forEach((rawImpressionProduct) {
-                  var product = mpCommerce.callMethod('createProduct', [
-                    rawImpressionProduct['name'],
-                    rawImpressionProduct['sku'],
-                    rawImpressionProduct['price'],
-                    rawImpressionProduct['quantity']
-                  ]);
+                  var product =
+                      createJSProduct(mpCommerce, rawImpressionProduct);
                   impressionProducts.add(product);
                 });
               }
@@ -541,4 +532,28 @@ class MparticleFlutterSdkWeb {
         );
     }
   }
+}
+
+createJSProduct(mpCommerce, rawProduct) {
+  JsObject? getAttributes(attributes) {
+    if (attributes != null) {
+      return JsObject.jsify(attributes);
+    } else {
+      return null;
+    }
+  }
+
+  var product = mpCommerce.callMethod('createProduct', [
+    rawProduct['name'],
+    rawProduct['sku'],
+    rawProduct['price'],
+    rawProduct['quantity'],
+    rawProduct['variant'],
+    rawProduct['category'],
+    rawProduct['brand'],
+    rawProduct['position'],
+    rawProduct['couponCode'],
+    getAttributes(rawProduct['attributes'])
+  ]);
+  return product;
 }
