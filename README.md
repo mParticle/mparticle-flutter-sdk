@@ -1,10 +1,8 @@
 # mparticle_flutter_sdk
 
-***Please note that this is the alpha version of the mParticle Flutter Plugin.  Public APIs are subject to change before v1.0.0 is released.***
-
 Flutter allows developers to use a single code base to deploy to multiple platforms.  Now, with the mParticle Flutter Plugin, you can leverage a single API to deploy your data to hundreds of integrations from your iOS, Android, and Web apps.
 
-See the table below to see what features are currently supported. The Flutter mParticle plugin is under ongoing development and the goal is to fully support all the below features on all 3 core platforms.
+See the table below to see what features are currently supported
 
 ### Supported Features
 | Method | Android | iOS | Web | Notes |
