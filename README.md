@@ -145,7 +145,7 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
             NSLog("Identify complete. userId = %@ error = %@", apiResult?.user.userId.stringValue ?? "Null User ID", error?.localizedDescription ?? "No Error Available")
         }
         mParticleOptions.onAttributionComplete = { (attributionResult, error) in
-                    NSLog(@"Attribution Complete. attributionResults = %@", attributionResult.linkInfo)
+            NSLog("Attribution Complete. attributionResults = %@", attributionResult?.linkInfo ?? "Null attributionResults")
         }
         
        //Start the SDK
