@@ -1,3 +1,8 @@
+## 1.0.0-beta.1  (2021-10-20)
+
+* feat: Add support for Consent across iOS, Android, and Web
+* BREAKING CHANGE: From 0.2.0-alpha.1 to 1.0.0-beta - Migrated public APIs from using positional parameters to named parameters to ensure more developer-friendly APIs. See README.md for new implementation.
+
 ## 0.2.0-alpha.1  (2021-09-22)
 
 * feat: Add support for eCommerce across iOS, Android, and Web
