@@ -580,6 +580,12 @@ private func convertToMPProduct(productJSON: [String: Any]) -> MPProduct? {
         if let couponCode = productJSON["couponCode"] as? String {
             newProduct.couponCode = couponCode
         }
+
+        if let attributes = productJSON["attributes"] as? [String:Any] {
+            for (key, value) in attributes {
+                newProduct[key] = value
+            }
+        }
         return newProduct
     }
     return nil
