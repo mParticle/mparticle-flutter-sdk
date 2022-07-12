@@ -1,3 +1,7 @@
+## 1.0.1  (2022-07-12)
+
+* fix: resolve iOS mapping product attributes
+  
 ## 1.0.0-beta.1  (2021-10-20)
 
 * feat: Add support for Consent across iOS, Android, and Web
