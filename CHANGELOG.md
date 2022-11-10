@@ -1,3 +1,8 @@
+## 1.0.2  (2022-11-10)
+
+* fix: migrate from jcenter to mavenCentral, update misc files for Android 13, update Github Actions (#34)
+* fix: Update license and static analysis issues (#36)
+
 ## 1.0.1  (2022-07-12)
 
 * fix: resolve iOS mapping product attributes
