@@ -18,7 +18,6 @@ import 'events/mp_event.dart';
 import 'events/screen_event.dart';
 import 'identity/alias_request.dart';
 import 'identity/identity_api_result.dart';
-import 'identity/identity_type.dart';
 
 /// The interface that implements the mParticle Dart SDK.
 class MparticleFlutterSdk {
@@ -211,6 +210,7 @@ class IdentityRequest {
     if (this.identities[identityType] != null) {
       return this.identities[identityType];
     }
+    return null;
   }
 
   Map<IdentityType, String> getIdentities() {
