@@ -1,3 +1,7 @@
+## 1.0.3  (2022-12-15)
+
+* fix: Update mparticle_flutter_sdk.podspec (#37)
+
 ## 1.0.2  (2022-11-10)
 
 * fix: migrate from jcenter to mavenCentral, update misc files for Android 13, update Github Actions (#34)
