@@ -100,7 +100,7 @@ jobs:
         run: flutter test
       - name: Build unsigned example Xcode archive
         working-directory: example
-        run: flutter build ipa --release --no-codesign
+        run: flutter build ipa --no-codesign
       - name: Check if unsigned example Xcode archive exists
         working-directory: example
         run: |
