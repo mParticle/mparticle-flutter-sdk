@@ -32,6 +32,7 @@ jobs:
         with:
           flutter-version: ${{ matrix.flutter_sdk_version }}
           channel: ${{ matrix.flutter_channel }}
+          cache: true
       - name: Install dependencies
         run: flutter pub get
       - name: Run tests
