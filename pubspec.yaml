@@ -1,6 +1,6 @@
 name: mparticle_flutter_sdk
 description: mParticle Flutter Plugin - SDK wrapper for iOS, Android, and Web platforms
-version: 1.0.4-dev
+version: 1.0.4
 homepage: https://github.com/mParticle/mparticle-flutter-sdk
 repository: https://github.com/mParticle/mparticle-flutter-sdk
 
