@@ -135,6 +135,7 @@ jobs:
         working-directory: example
         run: flutter test
       - name: Build example web
+        working-directory: example
         run: flutter build web
       - name: Check if example web exists
         working-directory: example
