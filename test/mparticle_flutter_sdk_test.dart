@@ -22,13 +22,19 @@ void main() {
   MparticleFlutterSdk mp = MparticleFlutterSdk();
 
   setUp(() async {
-    channel.setMockMethodCallHandler((MethodCall call) async {
-      methodCall = call;
-    });
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      channel,
+      (MethodCall call) async {
+        methodCall = call;
+        return null;
+      },
+    );
   });
 
   tearDown(() {
-    channel.setMockMethodCallHandler(null);
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(channel, null);
     methodCall = null;
   });
 

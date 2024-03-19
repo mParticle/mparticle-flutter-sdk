@@ -1,52 +1,161 @@
 name: Build and Test
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+defaults:
+  run:
+    shell: bash
+env:
+  PUB_ENVIRONMENT: bot.github
+  # pinned to latest stable version
+  FLUTTER_SDK_VERSION: 3.19.3
+
 jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_SDK_VERSION }}
+          channel: "stable"
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run tests
+        run: flutter test
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi
   build-android:
+    needs: test
     name: Build Android flutter app
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
-          java-version: "12.x"
-      - uses: subosito/flutter-action@v2
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.3.8"
-          channel: 'stable'
-      - run: |
-          cd example
-          flutter pub get
-          flutter test
-          flutter build apk
-          flutter build appbundle
+          flutter-version: ${{ env.FLUTTER_SDK_VERSION }}
+          channel: "stable"
+          cache: true
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Test example
+        working-directory: example
+        run: flutter test
+      - name: Build example APK
+        working-directory: example
+        run: flutter build apk
+      - name: Check if example APK exists
+        working-directory: example
+        run: |
+          set -e
+          if [ ! -f build/app/outputs/apk/release/app-release.apk ]; then
+            echo "APK file not found!"
+            exit 1
+          fi
+      - name: Build example App Bundle
+        working-directory: example
+        run: flutter build appbundle
+      - name: Check if example App Bundle exists
+        working-directory: example
+        run: |
+          set -e
+          if [ ! -f build/app/outputs/bundle/release/app-release.aab ]; then
+            echo "App Bundle not found!"
+            exit 1
+          fi
+      - name: Cleanup
+        if: ${{ always() }}
+        working-directory: example
+        run: |
+          rm -rf build
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi
   build-ios:
+    needs: test
     name: Build iOS flutter app
-    runs-on: macos-latest
+    runs-on: macos-14
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-java@v1
+      - uses: actions/checkout@v4
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
         with:
-          java-version: "12.x"
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.3.8"
-          channel: 'stable'
-      - run: |
-          cd example
-          flutter pub get
-          flutter test
-          flutter build apk
-          flutter build ios --release --no-codesign
+          flutter-version: ${{ env.FLUTTER_SDK_VERSION }}
+          channel: "stable"
+          cache: true
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Test
+        working-directory: example
+        run: flutter test
+      - name: Build unsigned example Xcode archive
+        working-directory: example
+        run: flutter build ipa --no-codesign
+      - name: Check if unsigned example Xcode archive exists
+        working-directory: example
+        run: |
+          set -e
+          if [ ! -d build/ios/archive/Runner.xcarchive ]; then
+            echo "Xcode archive not found!"
+            exit 1
+          fi
+      - name: Cleanup
+        if: ${{ always() }}
+        working-directory: example
+        run: |
+          rm -rf build
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi
   build-web:
+    needs: test
     name: Build web flutter app
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v4
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: "3.3.8"
-          channel: 'stable'
-      - run: |
-          cd example
-          flutter pub get
-          flutter build web
+          flutter-version: ${{ env.FLUTTER_SDK_VERSION }}
+          channel: "stable"
+          cache: true
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Test example
+        working-directory: example
+        run: flutter test
+      - name: Build example web
+        working-directory: example
+        run: flutter build web
+      - name: Check if example web exists
+        working-directory: example
+        run: |
+          set -e
+          if [ ! -f build/web/flutter.js ]; then
+            echo "Web build not found!"
+            exit 1
+          fi
+      - name: Cleanup
+        if: ${{ always() }}
+        working-directory: example
+        run: |
+          rm -rf build
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi
