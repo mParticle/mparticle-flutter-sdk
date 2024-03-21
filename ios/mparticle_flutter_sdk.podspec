@@ -9,14 +9,14 @@ Pod::Spec.new do |s|
   s.description      = <<-DESC
 mParticle Flutter Wrapper
                        DESC
-  s.homepage         = 'http://example.com'
+  s.homepage         = 'https://www.mparticle.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Your Company' => 'email@example.com' }
+  s.author           = { 'mParticle' => 'support@mparticle.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.5'
-  s.platform = :ios, '8.0'
+  s.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.21'
+  s.platform = :ios, '9.0'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }
