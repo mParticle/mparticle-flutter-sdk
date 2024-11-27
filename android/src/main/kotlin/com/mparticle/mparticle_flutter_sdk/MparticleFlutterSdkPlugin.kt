@@ -103,10 +103,10 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         result.success(sanitizeMapToString(ConvertToUserIdentities(identities)))
       } ?: result.success("")
       "getFirstSeen" -> this.getUser(call, result).let { user ->
-        result.success(user?.getFirstSeenTime().toString() ?: "")
+        result.success(user?.getFirstSeenTime().toString())
       }
       "getLastSeen" -> this.getUser(call, result).let { user ->
-        result.success(user?.getLastSeenTime().toString() ?: "")
+        result.success(user?.getLastSeenTime().toString())
       }
       "removeUserAttribute" -> this.getUser(call, result).let { user ->
         val key: String? = call.argument("attributeKey")
@@ -282,20 +282,43 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
   private fun logCommerceEvent(call: MethodCall, result: Result) {
     try {
       val map = call.argument<Map<String, Any?>>("commerceEvent") ?: mapOf()
-      val promotions: MutableList<Promotion>? =
-        (map["promotions"] as List<Map<String, Any?>?>?)?.map { it?.toPromotion() }
-          ?.filterNotNull()
-          ?.toMutableList()
-      val products: MutableList<Product>? =
-        (map["products"] as List<Map<String, Any?>?>?)?.map { it?.toProduct() }
-          ?.filterNotNull()
-          ?.toMutableList()
+      val promotions =
+        (map["promotions"] as? List<*>)
+                ?.filterIsInstance<Map<String,  Any?>>()
+                ?.map { it.toPromotion() }
+                ?.filterNotNull()
+                ?.toMutableList()
+
+      val products =
+        (map["products"] as? List<*>)
+                ?.filterIsInstance<Map<String, Any?>>()
+                ?.map { it.toProduct() }
+                ?.filterNotNull()
+                ?.toMutableList()
+
       val impressions: MutableList<Impression>? =
-        (map["impressions"] as List<Map<String, Any?>?>?)?.map { it?.toImpression() }
-          ?.filterNotNull()
-          ?.toMutableList()
+        (map["impressions"] as? List<*>)
+                ?.filterIsInstance<Map<String, Any?>>()
+                ?.map { it.toImpression() }
+                ?.filterNotNull()
+                ?.toMutableList()
+
+      val transactionAttributesRaw = map["transactionAttributes"]
+
       val transactionAttributes: TransactionAttributes? =
-        (map["transactionAttributes"] as Map<String, Any?>?)?.toTransactionAttributes()
+        if (transactionAttributesRaw is Map<*, *>) {
+          @Suppress("UNCHECKED_CAST") // Suppress within the validated context
+          try {
+            (transactionAttributesRaw as? Map<String, Any?>)?.toTransactionAttributes()
+          } catch (e: Exception) {
+            println("Error converting transactionAttributes: ${e.message}")
+            null
+          }
+        } else {
+          println("transactionAttributes is not a Map: $transactionAttributesRaw")
+          null
+        }
+
       val nonInteractive = map["nonInteractive"]?.toString()?.toBoolean()
       val shouldUploadEvent = map["shouldUploadEvent"]?.toString()?.toBoolean()
       val productListSource = map["productListSource"]?.toString()
@@ -306,8 +329,18 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       val screenName = map["screenName"]?.toString()
       val checkoutStep = map["checkoutStep"]?.toString()?.toInt()
       val checkoutOptions = map["checkoutOptions"]?.toString()
-      val customAttributes: HashMap<String, String?>? = map["customAttributes"] as HashMap<String, String?>?
-      val customFlags: HashMap<String, Any?>? = map["customFlags"] as HashMap<String, Any?>?
+      val customAttributes: HashMap<String, String?>? =
+        (map["customAttributes"] as? Map<*, *>)
+                ?.mapNotNull { (key, value) ->
+                  if (key is String && (value is String?)) key to value else null
+                }
+                ?.toMap(HashMap())
+
+      val customFlags: HashMap<String, Any?>? =
+        (map["customFlags"] as? Map<*, *>)
+                ?.mapNotNull { (key, value) -> if (key is String) key to value else null }
+                ?.toMap(HashMap())
+
       val commerceEvent = when {
         !productActionType.isNullOrEmpty() && !products.isNullOrEmpty() -> CommerceEvent.Builder(productActionType.toString(), products.removeAt(0))
         !promotionActionType.isNullOrEmpty()&& !promotions.isNullOrEmpty() -> CommerceEvent.Builder(promotionActionType.toString(), promotions.removeAt(0))
@@ -387,6 +420,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun getOptOut(call: MethodCall, result: Result) {
     try {
       val optOut = MParticle.getInstance()?.getOptOut()
@@ -412,6 +446,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun upload(call: MethodCall, result: Result) {
     try {
       MParticle.getInstance().let { instance ->
@@ -531,6 +566,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
   }
 
+  @Suppress("UNUSED_PARAMETER")
   private fun getCurrentUser(call: MethodCall, result: Result): MParticleUser? {
     try {
       MParticle.getInstance().let { instance ->
@@ -692,7 +728,13 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     val brand = get("brand")?.toString()
     val position = get("position")?.toString()?.toInt()
     val couponCode = get("couponCode")?.toString()
-    val attributes = get("attributes") as Map<String, String>?
+    val attributes: Map<String, String>? =
+        (get("attributes") as? Map<*, *>)
+                ?.mapNotNull { (key, value) ->
+                  if (key is String && value is String) key to value else null
+                }
+                ?.toMap()
+
     return if (name == null || sku == null || price == null) {
       throw IllegalArgumentException("""Product requires "name", "sku" and "price" values""")
     } else {
@@ -723,7 +765,15 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
   @Throws(IllegalArgumentException::class)
   fun Map<String, Any?>.toImpression(): Impression {
     val impressionListName = get("impressionListName")?.toString()
-    val products = (get("products") as? ArrayList<*>)?.map { (it as? Map<String, Any?>)?.toProduct() ?: throw java.lang.IllegalArgumentException(""""products" entry: $it is malformed """) }
+
+    val products: List<Product>? =
+        (get("products") as? List<*>)?.mapNotNull { entry ->
+          (entry as? Map<*, *>)
+                  ?.mapNotNull { (key, value) -> if (key is String) key to value else null }
+                  ?.toMap()
+                  ?.toProduct()
+        }
+
     return if (impressionListName == null || products == null || products.isEmpty()) {
       throw IllegalArgumentException("""Impression requires an "impressionListName" and at least on "product" """)
     } else {
@@ -751,14 +801,17 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
 
   fun MethodCall.toCCPAConsent(result: Result): CCPAConsent? {
     return try {
-      argument<Boolean>("consented")?.let {
-        CCPAConsent.builder(it)
+      argument<Boolean>("consented")?.let { consented ->
+        CCPAConsent.builder(consented)
           .document(argument<String>("document"))
           .hardwareId(argument<String>("hardwareId"))
           .location(argument<String>("location"))
           .timestamp(argument<Long>("timestamp"))
           .build()
-      } ?: null?.apply { result.error(TAG, "Missing \"consented\" value for arguments: ${arguments}", null) }
+      } ?: run {
+          result.error(TAG, "Missing \"consented\" value for arguments: $arguments", null)
+          null
+      }
     } catch (ex: Exception) {
       result.error(TAG, ex.message, null)
       null
