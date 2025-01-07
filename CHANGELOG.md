@@ -1,7 +1,15 @@
+## 1.0.6  (2024-07-10)
+
+* fix: Resolve linting issues (#48)
+
+## 1.0.5  (2024-07-10)
+
+* fix: type 'Null' is not a subtype of type 'String' in getCurrentUser (#46)
+
 ## 1.0.4  (2024-03-15)
 
 * chore: Update Android project to Android Gradle Plugin 8.2, update dependencies (#43)
-* 
+
 ## 1.0.3  (2022-12-15)
 
 * fix: Update mparticle_flutter_sdk.podspec (#37)
