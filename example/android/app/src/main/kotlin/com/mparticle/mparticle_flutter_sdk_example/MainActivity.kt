@@ -5,6 +5,7 @@ import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
+import io.flutter.embedding.android.FlutterFragmentActivity
 
 class ExampleApplication : Application() {
     override fun onCreate() {
@@ -20,5 +21,5 @@ class ExampleApplication : Application() {
 
 
 
-class MainActivity: FlutterActivity() {
+class MainActivity: FlutterFragmentActivity() {
 }
