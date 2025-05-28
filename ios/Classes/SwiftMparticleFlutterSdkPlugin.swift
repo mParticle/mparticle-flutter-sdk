@@ -488,6 +488,16 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
+    case "roktSelectPlacements":
+        if let callArguments = call.arguments as? [String: Any],
+           let placementId = callArguments["placementId"] as? String {
+            let attributes = callArguments["attributes"] as? [String: Any] ?? [:]
+            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes)
+            result(true)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing placementId", details: nil))
+        }
     default:
         print("mParticle flutter SDK for iOS does not support \(call.method)")
     }

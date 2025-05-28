@@ -558,6 +558,20 @@ class _MyAppState extends State<MyApp> {
               mpInstance?.setATTStatus(
                   attStatus: MPATTAuthorizationStatus.Authorized);
             }),
+            Center(
+              child: Text('ROKT'),
+            ),
+            buildButton('Select Placements', () async {
+              mpInstance?.rokt.selectPlacements(
+                placementId: 'mp-layout-test-2',
+                attributes: {
+                  'email': 'rob@ing.com',
+                  'key2': 'value2',
+                  'userId': '12345'
+                }
+              );
+              print('Rokt selectPlacements called');
+            }),
           ],
         ),
       ),

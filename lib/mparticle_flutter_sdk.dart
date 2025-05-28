@@ -50,6 +50,9 @@ class MparticleFlutterSdk {
   /// The identity API to make identity calls.
   Identity identity = new Identity._();
 
+  /// The Rokt API to make Rokt-specific calls.
+  Rokt rokt = new Rokt._();
+
   /// Returns the appName set in your web SDK.  There is no iOS or Android equivalent.
   Future<String?> get getAppName async {
     final String? appName = await _channel.invokeMethod('getAppName');
@@ -266,5 +269,29 @@ class Identity {
 
     return await _channel
         .invokeMethod('aliasUsers', {'aliasRequest': aliasRequestObj});
+  }
+}
+
+/// The Rokt API
+class Rokt {
+  Rokt._();
+
+  static const MethodChannel _channel =
+      const MethodChannel('mparticle_flutter_sdk');
+
+  /// Selects placements with a [placementId] and optional [attributes].
+  ///
+  /// This method calls the Rokt selectPlacements API on each platform:
+  /// - Web: mParticle.Rokt.selectPlacements()
+  /// - Android: MParticle.getInstance()?.Rokt().selectPlacements()
+  /// - iOS: MParticle.sharedInstance().rokt.selectPlacements()
+  Future<void> selectPlacements({
+    required String placementId,
+    Map<String, dynamic>? attributes,
+  }) async {
+    return await _channel.invokeMethod('roktSelectPlacements', {
+      'placementId': placementId,
+      'attributes': attributes,
+    });
   }
 }

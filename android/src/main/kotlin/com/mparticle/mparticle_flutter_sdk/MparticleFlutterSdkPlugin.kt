@@ -208,6 +208,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           }
         result.success(true)
       }
+      "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
       else -> {
         result.notImplemented()
       }
@@ -671,6 +672,33 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         result.success(identityApi.aliasUsers(request))
       }
     } ?: result.error(TAG, "No mParticle instance exists", null)
+  }
+
+  private fun roktSelectPlacements(call: MethodCall, result: Result) {
+    try {
+      val placementId: String? = call.argument("placementId")
+      val attributes: Map<String, Any?>? = call.argument("attributes")
+      Log.d(TAG, "roktSelectPlacements - placementId: $placementId")
+      Log.d(TAG, "roktSelectPlacements - attributes: $attributes")
+
+      if (placementId == null) {
+        result.error(TAG, "Missing placementId", null)
+        return
+      }
+      
+      val stringAttributes: MutableMap<String, String> = mutableMapOf()
+      attributes?.forEach { (key, value) ->
+        stringAttributes[key] = value?.toString() ?: ""
+      }
+      
+      Log.d(TAG, "roktSelectPlacements - stringAttributes: $stringAttributes")
+      MParticle.getInstance()?.let { instance ->
+        instance.Rokt()?.selectPlacements(placementId, stringAttributes)
+        result.success(true)
+      } ?: result.error(TAG, "No mParticle instance exists", null)
+    } catch (e: Exception) {
+      result.error(TAG, e.localizedMessage, null)
+    }
   }
 
   private fun ConvertIdentityHttpResponseToString(response: IdentityHttpResponse?): String {
