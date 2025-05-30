@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:mparticle_flutter_sdk/mparticle_flutter_sdk.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
 import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
@@ -443,7 +445,7 @@ class _MyAppState extends State<MyApp> {
               child: Text('NATIVE ONLY METHODS'),
             ),
             buildButton('is Braze kit active?', () async {
-              print(await mpInstance?.isKitActive(kit: Kits['Braze']!));
+              print(await mpInstance?.isKitActive(kit: Kits['Rokt']!));
             }),
             buildButton('Get opt out', () async {
               print(await mpInstance?.getOptOut);
@@ -561,16 +563,84 @@ class _MyAppState extends State<MyApp> {
             Center(
               child: Text('ROKT'),
             ),
-            buildButton('Select Placements', () async {
-              mpInstance?.rokt.selectPlacements(
-                placementId: 'mp-layout-test-2',
-                attributes: {
-                  'email': 'rob@ing.com',
-                  'key2': 'value2',
-                  'userId': '12345'
+            buildButton('Web - Select Placements', () async {
+              if (kIsWeb) {
+                // Ensure user is identified before calling Rokt
+                var identityRequest = MparticleFlutterSdk.identityRequest;
+                identityRequest.setIdentity(
+                    identityType: IdentityType.CustomerId,
+                    value: 'web-test-user-${DateTime.now().millisecondsSinceEpoch}');
+                
+                await mpInstance?.identity.identify(identityRequest: identityRequest);
+                
+                mpInstance?.rokt.selectPlacements(
+                  placementId: 'web-placement-test',
+                  attributes: {
+                    'email': 'web-user@example.com',
+                    'platform': 'web',
+                    'userId': 'web-12345'
+                  }
+                );
+                print('Web Rokt selectPlacements called');
+              } else {
+                print('This button is for Web platform only');
+              }
+            }),
+            buildButton('Android - Select Placements', () async {
+              if (!kIsWeb && Platform.isAndroid) {
+                // Ensure user is identified before calling Rokt
+                var identityRequest = MparticleFlutterSdk.identityRequest;
+                identityRequest.setIdentity(
+                    identityType: IdentityType.CustomerId,
+                    value: 'android-test-user-${DateTime.now().millisecondsSinceEpoch}');
+                
+                try {
+                  await mpInstance?.identity.identify(identityRequest: identityRequest);
+                  
+                  mpInstance?.rokt.selectPlacements(
+                    placementId: 'RoktExperience',
+                    attributes: {
+                      'email': 'android-user@example.com',
+                      'platform': 'android',
+                      'userId': 'android-67890',
+                      'deviceType': 'mobile'
+                    }
+                  );
+                  print('Android Rokt selectPlacements called');
+                } catch (e) {
+                  print('Error calling Android Rokt selectPlacements: $e');
                 }
-              );
-              print('Rokt selectPlacements called');
+              } else {
+                print('This button is for Android platform only');
+              }
+            }),
+            buildButton('iOS - Select Placements', () async {
+              if (!kIsWeb && Platform.isIOS) {
+                // Ensure user is identified before calling Rokt
+                var identityRequest = MparticleFlutterSdk.identityRequest;
+                identityRequest.setIdentity(
+                    identityType: IdentityType.CustomerId,
+                    value: 'ios-test-user-${DateTime.now().millisecondsSinceEpoch}');
+                
+                try {
+                  await mpInstance?.identity.identify(identityRequest: identityRequest);
+                  
+                  mpInstance?.rokt.selectPlacements(
+                    placementId: 'ios-placement-test',
+                    attributes: {
+                      'email': 'ios-user@example.com',
+                      'platform': 'ios',
+                      'userId': 'ios-54321',
+                      'deviceType': 'mobile'
+                    }
+                  );
+                  print('iOS Rokt selectPlacements called');
+                } catch (e) {
+                  print('Error calling iOS Rokt selectPlacements: $e');
+                }
+              } else {
+                print('This button is for iOS platform only');
+              }
             }),
           ],
         ),
