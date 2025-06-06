@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/mparticle_flutter_sdk.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
 import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatefulWidget {
 final myController = TextEditingController();
 
 class _MyAppState extends State<MyApp> {
+  // final EventChannel roktEventChannel = EventChannel('RoktEvents');
   bool _isInitialized = false;
 
   TextButton buildButton(text, onPressedFunction) {
@@ -59,7 +61,50 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     initMparticle();
+    // receiveRoktEvent();
   }
+
+  // void receiveRoktEvent() {
+  //   roktEventChannel.receiveBroadcastStream().listen((dynamic event) {
+  //     print("Rokt event received $event");
+  //     switch (event["event"]) {
+  //       case "ShowLoadingIndicator":
+  //         print("Event ${event["viewName"]}");
+  //         break;
+  //       case "HideLoadingIndicator":
+  //         print("Event ${event["viewName"]}");
+  //         break;
+  //       case "OfferEngagement":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "PositiveEngagement":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "FirstPositiveEngagement":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "PlacementInteractive":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "PlacementReady":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "PlacementClosed":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "PlacementCompleted":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "PlacementFailure":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //         break;
+  //       case "OpenUrl":
+  //         print("Event ${event["viewName"]}, ${event["placementId"]}");
+  //       default:
+  //         break;
+  //     }
+  //   });
+  // }
 
   MparticleFlutterSdk? mpInstance;
 
@@ -444,7 +489,7 @@ class _MyAppState extends State<MyApp> {
             Center(
               child: Text('NATIVE ONLY METHODS'),
             ),
-            buildButton('is Braze kit active?', () async {
+            buildButton('is rokt kit active?', () async {
               print(await mpInstance?.isKitActive(kit: Kits['Rokt']!));
             }),
             buildButton('Get opt out', () async {
@@ -626,7 +671,7 @@ class _MyAppState extends State<MyApp> {
                   await mpInstance?.identity.identify(identityRequest: identityRequest);
                   
                   mpInstance?.rokt.selectPlacements(
-                    placementId: 'ios-placement-test',
+                    placementId: 'RoktLayout',
                     attributes: {
                       'email': 'ios-user@example.com',
                       'platform': 'ios',
@@ -642,6 +687,22 @@ class _MyAppState extends State<MyApp> {
                 print('This button is for iOS platform only');
               }
             }),
+            // Center(
+            //   child: Text('ROKT WIDGETS'),
+            // ),
+            // const RoktWidget(
+            //   key: ValueKey('widget1'),
+            //   placeholderName: "Location1"
+            // ),
+            // const Text("Location 2"),
+            // RoktWidget(
+            //   key: const ValueKey('widget2'),
+            //   placeholderName: "Location2",
+            //   onWidgetCreated: () {
+            //     print("rokt_widget widget is created");
+            //   }
+            // ),
+            // const Text("The end")
           ],
         ),
       ),

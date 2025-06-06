@@ -70,6 +70,8 @@ flutter {
 dependencies {
     implementation 'com.mparticle:android-core:5+'
 
+    implementation 'com.mparticle:android-rokt-kit:5+'
+
     // Required for gathering Android Advertising ID (see below)
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
 

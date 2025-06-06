@@ -3,6 +3,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
@@ -18,7 +21,6 @@ import 'events/mp_event.dart';
 import 'events/screen_event.dart';
 import 'identity/alias_request.dart';
 import 'identity/identity_api_result.dart';
-
 /// The interface that implements the mParticle Dart SDK.
 class MparticleFlutterSdk {
   static MparticleFlutterSdk? _instance;

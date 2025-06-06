@@ -1,7 +1,12 @@
 allprojects {
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
+        // Rokt SDK repository for versions 4.8.1 and below
+        maven {
+            url "https://apps.rokt.com/msdk"
+        }
     }
 }
 
