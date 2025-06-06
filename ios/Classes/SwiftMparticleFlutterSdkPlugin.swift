@@ -491,7 +491,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
     case "roktSelectPlacements":
         if let callArguments = call.arguments as? [String: Any],
            let placementId = callArguments["placementId"] as? String {
-            let attributes = callArguments["attributes"] as? [String: Any] ?? [:]
+            let attributes = callArguments["attributes"] as? [String: String] ?? [:]
             MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes)
             result(true)
         } else {
