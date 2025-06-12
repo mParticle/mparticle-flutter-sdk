@@ -32,6 +32,7 @@ class MparticleFlutterSdk {
       if (_instance == null) {
         if (await _channel.invokeMethod('isInitialized') == true) {
           _instance = new MparticleFlutterSdk();
+          _instance!._setSdkVersion();
         }
       }
       return _instance;
@@ -193,6 +194,10 @@ class MparticleFlutterSdk {
     String attributionsString = await _channel.invokeMethod('getAttributions');
     Map attributionsMap = jsonDecode(attributionsString);
     return attributionsMap;
+  }
+
+  Future<void> _setSdkVersion() async {
+    return await _channel.invokeMethod('setSdkVersion');
   }
 }
 
