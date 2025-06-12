@@ -29,6 +29,11 @@ class LayoutController {
     _channel.setMethodCallHandler(_methodCallHandler);
   }
 
+  /// Dispose the controller
+  void dispose() {
+    _channel.setMethodCallHandler(null);
+  }
+
   Future<void> _methodCallHandler(MethodCall call) async {
     switch (call.method) {
       case 'viewHeightListener':

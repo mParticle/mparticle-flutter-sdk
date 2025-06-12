@@ -14,7 +14,7 @@ class RoktLayout(
     viewId: Int,
 ) : PlatformView,
     RoktLayoutDimensionCallBack {
-    val layout: RoktEmbeddedView? = if (context != null) RoktEmbeddedView(context) else null
+    val layout: RoktEmbeddedView? = context?.let { RoktEmbeddedView(it) }
     private var lastHeight = 0
     private val channel: MethodChannel = MethodChannel(messenger, "rokt_layout_$viewId")
 
@@ -46,6 +46,7 @@ class RoktLayout(
 
     override fun dispose() {
         layout?.dimensionCallBack = null
+        channel.setMethodCallHandler(null)
     }
 
     companion object {

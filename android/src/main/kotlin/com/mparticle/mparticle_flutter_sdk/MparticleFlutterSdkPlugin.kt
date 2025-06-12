@@ -702,7 +702,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       }
 
       MParticle.getInstance()?.let { instance ->
-        instance.Rokt().selectPlacements(placementId, stringAttributes, null,   placeHolders.takeIf { it.isNotEmpty() }, null)
+        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, null, null)
         result.success(true)
       } ?: result.error(TAG, "No mParticle instance exists", null)
     } catch (e: Exception) {

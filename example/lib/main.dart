@@ -117,6 +117,18 @@ class _MyAppState extends State<MyApp> {
                 child: Text('mParticle is initialized: $_isInitialized\n'),
               ),
               Center(
+                child: Text('ROKT'),
+              ),
+              buildButton('Rokt Layouts', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        RoktLayoutsScreen(mpInstance: mpInstance),
+                  ),
+                );
+              }),
+              Center(
                 child: Text('EVENT LOGGING'),
               ),
               buildButton('Log Event', () {
@@ -561,18 +573,6 @@ class _MyAppState extends State<MyApp> {
               buildButton('set att status', () async {
                 mpInstance?.setATTStatus(
                     attStatus: MPATTAuthorizationStatus.Authorized);
-              }),
-              Center(
-                child: Text('ROKT'),
-              ),
-              buildButton('Rokt Layouts', () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        RoktLayoutsScreen(mpInstance: mpInstance),
-                  ),
-                );
               }),
             ],
           );

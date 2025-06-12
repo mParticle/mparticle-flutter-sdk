@@ -46,12 +46,12 @@ class _RoktContainerState extends State<RoktLayout>
     _top = 0;
     _right = 0;
     _bottom = 0;
-    print('RoktLayout initState');
     super.initState();
   }
 
   @override
   void dispose() {
+    _layoutController?.dispose();
     _layoutController = null;
     super.dispose();
   }
@@ -74,7 +74,6 @@ class _RoktContainerState extends State<RoktLayout>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    print('RoktLayout build');
     return AnimatedOpacity(
         opacity: (_height > 1) ? 1.0 : 0.1,
         duration: Duration(milliseconds: 200),
@@ -88,7 +87,6 @@ class _RoktContainerState extends State<RoktLayout>
   }
 
   void _onPlatformViewCreated(int id) {
-    print('RoktLayout _onPlatformViewCreated');
     MparticleFlutterSdk.getInstance().then((value) => value?.attachPlaceholder(id: id, name: widget.placeholderName));
 
     _layoutController = LayoutController(

@@ -26,9 +26,6 @@ import 'identity/identity_api_result.dart';
 
 part './kits/rokt_layout.dart';
 
-/// Internal callBack for Rokt Sdk
-typedef RoktCallbackInternal = void Function(dynamic msg);
-
 /// The interface that implements the mParticle Dart SDK.
 class MparticleFlutterSdk {
   static MparticleFlutterSdk? _instance;
@@ -63,7 +60,6 @@ class MparticleFlutterSdk {
   /// The Rokt API to make Rokt-specific calls.
   Rokt rokt = new Rokt._();
 
-  final Map<int, RoktCallbackInternal> _callbacksById = {};
   static final Map<int, String> _placeholders = {};
 
   /// Returns the appName set in your web SDK.  There is no iOS or Android equivalent.
