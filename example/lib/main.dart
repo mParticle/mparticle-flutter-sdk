@@ -64,8 +64,6 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initMparticle() async {
-    // Add a small delay in initialising the instance
-    await Future.delayed(Duration(seconds: 2));
     mpInstance = await MparticleFlutterSdk.getInstance();
     if (mpInstance != null) {
       setState(() {

@@ -45,7 +45,7 @@ class _RoktContainerState extends State<RoktLayout>
 
   @override
   void initState() {
-    _height = 300;
+    _height = 1;
     _left = 0;
     _top = 0;
     _right = 0;
