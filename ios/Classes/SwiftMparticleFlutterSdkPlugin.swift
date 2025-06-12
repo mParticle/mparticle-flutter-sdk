@@ -488,6 +488,8 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
+    case "setSdkVersion":
+        MParticle._setWrapperSdk_internal(MPWrapperSdk.flutter, version: "")
     default:
         print("mParticle flutter SDK for iOS does not support \(call.method)")
     }
