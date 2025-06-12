@@ -7,6 +7,10 @@ typedef RoktPlatformViewCreatedCallback = void Function(int widgetId);
 typedef LayoutCreatedCallback = void Function();
 
 /// Rokt embedded layout custom view
+///
+/// This widget is only available on iOS and Android platforms.
+/// When used on other platforms (like web), it will display a message indicating
+/// that the platform is not supported.
 class RoktLayout extends StatefulWidget {
   /// name for the Rokt layout
   final String placeholderName;
@@ -41,7 +45,7 @@ class _RoktContainerState extends State<RoktLayout>
 
   @override
   void initState() {
-    _height = 1;
+    _height = 300;
     _left = 0;
     _top = 0;
     _right = 0;
@@ -152,7 +156,15 @@ class _RoktStatelessWidget extends StatelessWidget {
         creationParamsCodec: const StandardMessageCodec(),
       );
     }
-    return Text(
-        '$defaultTargetPlatform is not yet supported by the rokt sdk plugin');
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Center(
+        child: Text(
+          'RoktLayout is not supported on $defaultTargetPlatform',
+          style: const TextStyle(color: Colors.red),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
   }
 }
