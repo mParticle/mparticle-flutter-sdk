@@ -15,19 +15,18 @@ import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.IdentityHttpResponse
 import com.mparticle.identity.MParticleUser
-import com.mparticle.identity.TaskFailureListener
-import com.mparticle.identity.TaskSuccessListener
 import com.mparticle.MParticle
-import com.mparticle.MParticleOptions
 import com.mparticle.MPEvent
 import com.mparticle.UserAttributeListener
 import com.mparticle.commerce.*
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
+import com.mparticle.rokt.RoktEmbeddedView
 
 import org.json.JSONObject
 import kotlin.IllegalArgumentException
+import java.lang.ref.WeakReference
 
 
 /** MparticleFlutterSdkPlugin */
@@ -38,10 +37,16 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel: MethodChannel
   private val TAG = "MparticleFlutterSdkPlugin"
+  private lateinit var layoutFactory: RoktLayoutFactory
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "mparticle_flutter_sdk")
     channel.setMethodCallHandler(this)
+    layoutFactory = RoktLayoutFactory(flutterPluginBinding.binaryMessenger)
+    flutterPluginBinding.platformViewRegistry.registerViewFactory(
+        VIEW_TYPE,
+        layoutFactory,
+    )
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -208,6 +213,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           }
         result.success(true)
       }
+      "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
       else -> {
         result.notImplemented()
       }
@@ -673,6 +679,37 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     } ?: result.error(TAG, "No mParticle instance exists", null)
   }
 
+  private fun roktSelectPlacements(call: MethodCall, result: Result) {
+    try {
+      val placementId: String? = call.argument("placementId")
+      val attributes: Map<String, Any?>? = call.argument("attributes")
+      val placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>> = mutableMapOf()
+
+      call.argument<HashMap<Int, String>>("placeholders")?.entries?.forEach { entry ->
+        layoutFactory.nativeViews[entry.key]?.let { view ->
+          placeHolders[entry.value] = WeakReference(view)
+        }
+      }
+
+      if (placementId == null) {
+        result.error(TAG, "Missing placementId", null)
+        return
+      }
+
+      val stringAttributes: MutableMap<String, String> = mutableMapOf()
+      attributes?.forEach { (key, value) ->
+        stringAttributes[key] = value?.toString() ?: ""
+      }
+
+      MParticle.getInstance()?.let { instance ->
+        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, null, null)
+        result.success(true)
+      } ?: result.error(TAG, "No mParticle instance exists", null)
+    } catch (e: Exception) {
+      result.error(TAG, e.localizedMessage, null)
+    }
+  }
+
   private fun ConvertIdentityHttpResponseToString(response: IdentityHttpResponse?): String {
     val map = mutableMapOf<String, Any?>()
 
@@ -837,5 +874,9 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       result.error(TAG, ex.message, null)
       null
     }
+  }
+
+  companion object {
+    private const val VIEW_TYPE = "rokt_sdk.rokt.com/rokt_layout"
   }
 }

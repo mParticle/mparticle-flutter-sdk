@@ -1,7 +1,7 @@
 plugins {
     id "com.android.application"
-    id "dev.flutter.flutter-gradle-plugin"
     id "org.jetbrains.kotlin.android"
+    id "dev.flutter.flutter-gradle-plugin"
 }
 
 def localProperties = new Properties()
@@ -48,7 +48,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.mparticle.mparticle_flutter_sdk_example"
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 21
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -69,6 +69,8 @@ flutter {
 
 dependencies {
     implementation 'com.mparticle:android-core:5+'
+
+    implementation 'com.mparticle:android-rokt-kit:5+'
 
     // Required for gathering Android Advertising ID (see below)
     implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'

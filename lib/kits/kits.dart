@@ -3,6 +3,7 @@
 const Kits = {
   'UrbanAirship': 25,
   'Braze': 28,
+  'Rokt': 181,
   'Tune': 32,
   'Kochava': 37,
   'ComScore': 39,
