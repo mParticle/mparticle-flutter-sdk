@@ -1,7 +1,6 @@
 package com.mparticle.mparticle_flutter_sdk
 
 import androidx.annotation.NonNull
-import android.util.Log
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
@@ -18,6 +17,7 @@ import com.mparticle.identity.MParticleUser
 import com.mparticle.MParticle
 import com.mparticle.MPEvent
 import com.mparticle.UserAttributeListener
+import com.mparticle.WrapperSdk
 import com.mparticle.commerce.*
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
@@ -211,6 +211,10 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
           .let {
             user.setConsentState(it)
           }
+        result.success(true)
+      }
+      "setSdkVersion" -> {
+        setSdkVersion()
         result.success(true)
       }
       "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
@@ -873,6 +877,13 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     } catch (ex: Exception) {
       result.error(TAG, ex.message, null)
       null
+    }
+  }
+
+  private fun setSdkVersion() {
+    MParticle.getInstance()?.let { instance ->
+      // Version string deliberately left blank
+      instance.setWrapperSdk(WrapperSdk.WrapperFlutter, "")
     }
   }
 

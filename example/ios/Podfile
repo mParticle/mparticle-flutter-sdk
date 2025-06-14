@@ -33,6 +33,7 @@ target 'Runner' do
 
   pod 'mParticle-Apple-SDK'
   pod 'mParticle-Rokt'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 

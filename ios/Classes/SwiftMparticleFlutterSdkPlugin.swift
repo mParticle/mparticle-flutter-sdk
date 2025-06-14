@@ -498,6 +498,8 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         } else {
             print("Incorrect argument for \(call.method) iOS method")
         }
+    case "setSdkVersion":
+        MParticle._setWrapperSdk_internal(MPWrapperSdk.flutter, version: "")
     case "roktSelectPlacements":
         if let callArguments = call.arguments as? [String: Any],
            let placementId = callArguments["placementId"] as? String {
