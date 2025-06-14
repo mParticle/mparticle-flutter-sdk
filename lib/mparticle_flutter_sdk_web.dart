@@ -524,6 +524,18 @@ class MparticleFlutterSdkWeb {
           user.callMethod('setConsentState', [consentState]);
         }
         break;
+      case 'roktSelectPlacements':
+        final mpRokt = JsObject.fromBrowserObject(context['mParticle']['Rokt']);
+        final placementId = call.arguments['placementId'];
+        final attributes = call.arguments['attributes'] ?? {};
+        
+        mpRokt.callMethod('selectPlacements', [
+          JsObject.jsify({
+            'identifier': placementId,
+            'attributes': attributes
+          })
+        ]);
+        break;
       default:
         throw PlatformException(
           code: 'Unimplemented',

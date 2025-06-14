@@ -31,7 +31,9 @@ target 'Runner' do
   use_frameworks!
   use_modular_headers!
 
-  pod 'mParticle-Apple-SDK', '~> 8.34.0'
+  pod 'mParticle-Apple-SDK'
+  pod 'mParticle-Rokt'
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
