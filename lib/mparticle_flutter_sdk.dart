@@ -300,7 +300,7 @@ class Rokt {
   static const MethodChannel _channel =
       const MethodChannel('mparticle_flutter_sdk');
 
-  /// Selects placements with a [placementId] and optional [attributes].
+  /// Selects placements with a [placementId], optional [attributes], optional [roktConfig], and optional [fontFilePathMap].
   ///
   /// This method calls the Rokt selectPlacements API on each platform:
   /// - Web: mParticle.Rokt.selectPlacements()
@@ -310,11 +310,13 @@ class Rokt {
     required String placementId,
     Map<String, dynamic>? attributes,
     RoktConfig? roktConfig,
+    Map<String, String> fontFilePathMap = const {},
   }) async {
     var params = {
       'placementId': placementId,
       'attributes': attributes,
       'config': _roktConfigToMap(config: roktConfig),
+      'fontFilePathMap': fontFilePathMap,
     };
 
     if (MparticleFlutterSdk._placeholders.isNotEmpty) {

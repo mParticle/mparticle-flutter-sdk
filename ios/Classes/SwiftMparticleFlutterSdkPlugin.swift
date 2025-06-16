@@ -7,14 +7,16 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   fileprivate static let VIEW_CALL_DELEGATE = "rokt_sdk.rokt.com/rokt_layout"
   let roktLayoutFactory: RoktLayoutFactory
   let channel: FlutterMethodChannel
+  let registrar: FlutterPluginRegistrar
 
-  init(messenger: FlutterBinaryMessenger) {
+  init(messenger: FlutterBinaryMessenger, registrar: FlutterPluginRegistrar) {
     self.roktLayoutFactory = RoktLayoutFactory(messenger: messenger)
+    self.registrar = registrar
     self.channel = FlutterMethodChannel(name: "mparticle_flutter_sdk", binaryMessenger: messenger)
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let instance = SwiftMparticleFlutterSdkPlugin(messenger: registrar.messenger())
+    let instance = SwiftMparticleFlutterSdkPlugin(messenger: registrar.messenger(), registrar: registrar)
     registrar.addMethodCallDelegate(instance, channel: instance.channel)
     registrar.register(instance.roktLayoutFactory, withId: SwiftMparticleFlutterSdkPlugin.VIEW_CALL_DELEGATE)
   }
@@ -502,7 +504,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         MParticle._setWrapperSdk_internal(MPWrapperSdk.flutter, version: "")
     case "roktSelectPlacements":
         if let callArguments = call.arguments as? [String: Any],
-           let placementId = callArguments["placementId"] as? String {
+            let placementId = callArguments["placementId"] as? String {
             let attributes = callArguments["attributes"] as? [String: String] ?? [:]
 
             var placeholders: [String: MPRoktEmbeddedView] = [:]
@@ -530,6 +532,10 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             if let configMap = callArguments["config"] as? [String: Any] {
                 roktConfig = buildRoktConfig(configMap: configMap)
             }
+            let fontFilePathMap = callArguments["fontFilePathMap"] as? Dictionary<String, String>
+            if let typefaces = fontFilePathMap {
+                registerPartnerFonts(typefaces)
+            }
 
             MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, placements: placeholders, config: roktConfig, callbacks: callback)
             result(true)
@@ -539,6 +545,20 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         }
     default:
         print("mParticle flutter SDK for iOS does not support \(call.method)")
+    }
+  }
+
+  private func registerPartnerFonts(_ typefaces: Dictionary<String, String>) {
+    let bundle = Bundle.main
+    for (_, fileName) in typefaces {
+        let fontKey = registrar.lookupKey(forAsset: fileName)
+        let path = bundle.path(forResource: fontKey, ofType: nil)
+        var errorRef: Unmanaged<CFError>? = nil
+        guard let filePath = path, path?.isEmpty == false else {
+            continue
+        }
+        let fontUrl = NSURL(fileURLWithPath: filePath)
+        CTFontManagerRegisterFontsForURL(fontUrl, .process, &errorRef)
     }
   }
 }

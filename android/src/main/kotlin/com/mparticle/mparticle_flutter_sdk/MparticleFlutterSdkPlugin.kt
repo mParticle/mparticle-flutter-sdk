@@ -1,5 +1,7 @@
 package com.mparticle.mparticle_flutter_sdk
 
+import android.content.Context
+import android.graphics.Typeface
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -40,11 +42,15 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel: MethodChannel
   private val TAG = "MparticleFlutterSdkPlugin"
   private lateinit var layoutFactory: RoktLayoutFactory
+  private var flutterAssets: FlutterPlugin.FlutterAssets? = null
+  private var applicationContext: Context? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "mparticle_flutter_sdk")
     channel.setMethodCallHandler(this)
     layoutFactory = RoktLayoutFactory(flutterPluginBinding.binaryMessenger)
+    flutterAssets = flutterPluginBinding.flutterAssets
+    applicationContext = flutterPluginBinding.applicationContext
     flutterPluginBinding.platformViewRegistry.registerViewFactory(
         VIEW_TYPE,
         layoutFactory,
@@ -692,6 +698,18 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       val placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>> = mutableMapOf()
       val configMap = call.argument<HashMap<String, Any>>("config")
       val config = configMap?.let { buildRoktConfig(it) }
+      val customFonts = call.argument<HashMap<String, String>>("fontFilePathMap")
+        .orEmpty()
+        .mapNotNull { (key, fontPath) ->
+            applicationContext?.assets?.let { assets ->
+                flutterAssets?.getAssetFilePathByName(fontPath)?.let { assetPath ->
+                    runCatching {
+                        key to WeakReference(Typeface.createFromAsset(assets, assetPath))
+                    }.getOrNull()
+                }
+            }
+        }
+        .toMap()
 
       call.argument<HashMap<Int, String>>("placeholders")?.entries?.forEach { entry ->
         layoutFactory.nativeViews[entry.key]?.let { view ->
@@ -710,7 +728,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       }
 
       MParticle.getInstance()?.let { instance ->
-        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, null, config)
+        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)
         result.success(true)
       } ?: result.error(TAG, "No mParticle instance exists", null)
     } catch (e: Exception) {
