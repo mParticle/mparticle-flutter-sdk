@@ -309,10 +309,12 @@ class Rokt {
   Future<void> selectPlacements({
     required String placementId,
     Map<String, dynamic>? attributes,
+    RoktConfig? roktConfig,
   }) async {
     var params = {
       'placementId': placementId,
       'attributes': attributes,
+      'config': _roktConfigToMap(config: roktConfig),
     };
 
     if (MparticleFlutterSdk._placeholders.isNotEmpty) {
@@ -320,4 +322,72 @@ class Rokt {
     }
     return await _channel.invokeMethod('roktSelectPlacements', params);
   }
+
+  Map<String, dynamic>? _roktConfigToMap({required RoktConfig? config}) {
+    if (config == null) {
+      return null;
+    }
+    return {
+      'colorMode': config.colorMode.name,
+      'cacheConfig': config.cacheConfig != null
+          ? {
+        'cacheDurationInSeconds': config.cacheConfig?.cacheDurationInSeconds,
+        'cacheAttributes': config.cacheConfig?.cacheAttributes
+      }
+          : null
+    };
+  }
+}
+
+/// Cache configuration for the Rokt SDK
+///
+/// - Attributes
+///  - [int] cacheDurationInSeconds: duration in seconds for which the Rokt SDK should cache the experience. Default is 90 minutes
+///  - [Map<String, String>]? cacheAttributes: optional attributes to be used as cache key. If null, all the attributes will be used as the cache key
+@immutable
+class CacheConfig {
+  /// Duration in seconds for which the Rokt SDK should cache the experience
+  final int cacheDurationInSeconds;
+  /// Optional attributes to be used as cache key
+  final Map<String, String>? cacheAttributes;
+
+  /// Constructor
+  ///
+  /// - Parameters
+  ///  - [int] cacheDurationInSeconds: duration in seconds for which the Rokt SDK should cache the experience. Default is 90 minutes
+  ///  - [Map<String, String>]? cacheAttributes: optional attributes to be used as cache key. If null, all the attributes will be used as the cache key
+  const CacheConfig(
+      {this.cacheDurationInSeconds = 0, this.cacheAttributes = null});
+}
+
+/// Configuration settings for the Rokt SDK <br>
+///
+/// - Attributes
+///   - [ColorMode]? colorMode: preferred device color mode configuration
+///   - [CacheConfig]? cacheConfig: cache configuration for the Rokt SDK
+@immutable
+class RoktConfig {
+  /// The device color mode your application is using
+  final ColorMode colorMode;
+  /// The cache configuration for the Rokt SDK
+  final CacheConfig? cacheConfig;
+
+  /// Constructor
+  ///
+  /// - Parameters
+  ///   - [ColorMode]? colorMode: preferred device color mode configuration
+  ///   - [CacheConfig]? cacheConfig: cache configuration for the Rokt SDK
+  const RoktConfig({this.colorMode = ColorMode.system, this.cacheConfig = null});
+}
+
+/// Enum representing device color modes
+enum ColorMode {
+  /// Request Light mode configuration
+  light,
+
+  /// Request Dark mode configuration
+  dark,
+
+  /// Request System's current configuration
+  system
 }

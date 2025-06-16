@@ -525,8 +525,13 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
+            
+            var roktConfig: MPRoktConfig?
+            if let configMap = callArguments["config"] as? [String: Any] {
+                roktConfig = buildRoktConfig(configMap: configMap)
+            }
 
-            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, placements: placeholders, config: nil, callbacks: callback)
+            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, placements: placeholders, config: roktConfig, callbacks: callback)
             result(true)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
@@ -536,6 +541,37 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         print("mParticle flutter SDK for iOS does not support \(call.method)")
     }
   }
+}
+
+private func buildRoktConfig(configMap: [String: Any]) -> MPRoktConfig? {
+    let config = MPRoktConfig()
+    var isConfigEmpty = true
+    
+    if let colorModeString = configMap["colorMode"] as? String {
+        if #available(iOS 12.0, *) {
+            isConfigEmpty = false
+            switch colorModeString {
+            case "dark":
+                if #available(iOS 13.0, *) {
+                    config.colorMode = .dark
+                }
+            case "light":
+                config.colorMode = .light
+            default: // "system"
+                config.colorMode = .system
+            }
+        }
+    }
+
+    if let cacheConfigMap = configMap["cacheConfig"] as? [String: Any] {
+        isConfigEmpty = false
+        let cacheDuration = cacheConfigMap["cacheDurationInSeconds"] as? NSNumber ?? 0
+        let cacheAttributes = cacheConfigMap["cacheAttributes"] as? [String: String]
+        config.cacheAttributes = cacheAttributes
+        config.cacheDuration = cacheDuration
+    }
+
+    return isConfigEmpty ? nil : config
 }
 
 private func asStringForStringKey(jsonDictionary: [String : Any]) -> String {
