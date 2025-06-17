@@ -310,7 +310,7 @@ class Rokt {
     required String placementId,
     Map<String, dynamic>? attributes,
     RoktConfig? roktConfig,
-    Map<String, String> fontFilePathMap = const {},
+    Map<String, String>? fontFilePathMap,
   }) async {
     var params = {
       'placementId': placementId,
