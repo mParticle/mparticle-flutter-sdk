@@ -1,5 +1,7 @@
 package com.mparticle.mparticle_flutter_sdk
 
+import android.content.Context
+import android.graphics.Typeface
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -8,8 +10,8 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-import com.mparticle.identity.AliasRequest;
-import com.mparticle.identity.IdentityApi;
+import com.mparticle.identity.AliasRequest
+import com.mparticle.identity.IdentityApi
 import com.mparticle.identity.IdentityApiRequest
 import com.mparticle.identity.IdentityApiResult
 import com.mparticle.identity.IdentityHttpResponse
@@ -22,6 +24,8 @@ import com.mparticle.commerce.*
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
+import com.mparticle.rokt.CacheConfig
+import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
 
 import org.json.JSONObject
@@ -38,11 +42,15 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var channel: MethodChannel
   private val TAG = "MparticleFlutterSdkPlugin"
   private lateinit var layoutFactory: RoktLayoutFactory
+  private var flutterAssets: FlutterPlugin.FlutterAssets? = null
+  private var applicationContext: Context? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "mparticle_flutter_sdk")
     channel.setMethodCallHandler(this)
     layoutFactory = RoktLayoutFactory(flutterPluginBinding.binaryMessenger)
+    flutterAssets = flutterPluginBinding.flutterAssets
+    applicationContext = flutterPluginBinding.applicationContext
     flutterPluginBinding.platformViewRegistry.registerViewFactory(
         VIEW_TYPE,
         layoutFactory,
@@ -688,6 +696,20 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       val placementId: String? = call.argument("placementId")
       val attributes: Map<String, Any?>? = call.argument("attributes")
       val placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>> = mutableMapOf()
+      val configMap = call.argument<HashMap<String, Any>>("config")
+      val config = configMap?.let { buildRoktConfig(it) }
+      val customFonts = call.argument<HashMap<String, String>>("fontFilePathMap")
+        .orEmpty()
+        .mapNotNull { (key, fontPath) ->
+            applicationContext?.assets?.let { assets ->
+                flutterAssets?.getAssetFilePathByName(fontPath)?.let { assetPath ->
+                    runCatching {
+                        key to WeakReference(Typeface.createFromAsset(assets, assetPath))
+                    }.getOrNull()
+                }
+            }
+        }
+        .toMap()
 
       call.argument<HashMap<Int, String>>("placeholders")?.entries?.forEach { entry ->
         layoutFactory.nativeViews[entry.key]?.let { view ->
@@ -706,13 +728,34 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       }
 
       MParticle.getInstance()?.let { instance ->
-        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, null, null)
+        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)
         result.success(true)
       } ?: result.error(TAG, "No mParticle instance exists", null)
     } catch (e: Exception) {
       result.error(TAG, e.localizedMessage, null)
     }
   }
+
+  private fun buildRoktConfig(configMap: Map<String, Any>): RoktConfig {
+    val builder = RoktConfig.Builder()
+    (configMap["colorMode"] as? String)?.let {
+      builder.colorMode(it.toColorMode())
+    }
+    (configMap["cacheConfig"] as? Map<String, Any>)?.let { cacheConfig ->
+      val cacheDurationInSeconds = cacheConfig["cacheDurationInSeconds"] as? Int ?: 0
+      val cacheAttributes = cacheConfig["cacheAttributes"] as? Map<String, String> ?: null
+      builder.cacheConfig(CacheConfig(cacheDurationInSeconds.toLong(), cacheAttributes))
+    }
+
+    return builder.build()
+  }
+
+  private fun String.toColorMode(): RoktConfig.ColorMode =
+    when (this) {
+      "dark" -> RoktConfig.ColorMode.DARK
+      "light" -> RoktConfig.ColorMode.LIGHT
+      else -> RoktConfig.ColorMode.SYSTEM
+    }
 
   private fun ConvertIdentityHttpResponseToString(response: IdentityHttpResponse?): String {
     val map = mutableMapOf<String, Any?>()

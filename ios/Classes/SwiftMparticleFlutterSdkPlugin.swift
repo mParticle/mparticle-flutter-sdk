@@ -7,14 +7,16 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   fileprivate static let VIEW_CALL_DELEGATE = "rokt_sdk.rokt.com/rokt_layout"
   let roktLayoutFactory: RoktLayoutFactory
   let channel: FlutterMethodChannel
+  let registrar: FlutterPluginRegistrar
 
-  init(messenger: FlutterBinaryMessenger) {
+  init(messenger: FlutterBinaryMessenger, registrar: FlutterPluginRegistrar) {
     self.roktLayoutFactory = RoktLayoutFactory(messenger: messenger)
+    self.registrar = registrar
     self.channel = FlutterMethodChannel(name: "mparticle_flutter_sdk", binaryMessenger: messenger)
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let instance = SwiftMparticleFlutterSdkPlugin(messenger: registrar.messenger())
+    let instance = SwiftMparticleFlutterSdkPlugin(messenger: registrar.messenger(), registrar: registrar)
     registrar.addMethodCallDelegate(instance, channel: instance.channel)
     registrar.register(instance.roktLayoutFactory, withId: SwiftMparticleFlutterSdkPlugin.VIEW_CALL_DELEGATE)
   }
@@ -502,7 +504,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         MParticle._setWrapperSdk_internal(MPWrapperSdk.flutter, version: "")
     case "roktSelectPlacements":
         if let callArguments = call.arguments as? [String: Any],
-           let placementId = callArguments["placementId"] as? String {
+            let placementId = callArguments["placementId"] as? String {
             let attributes = callArguments["attributes"] as? [String: String] ?? [:]
 
             var placeholders: [String: MPRoktEmbeddedView] = [:]
@@ -525,8 +527,17 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
+            
+            var roktConfig: MPRoktConfig?
+            if let configMap = callArguments["config"] as? [String: Any] {
+                roktConfig = buildRoktConfig(configMap: configMap)
+            }
+            let fontFilePathMap = callArguments["fontFilePathMap"] as? Dictionary<String, String>
+            if let typefaces = fontFilePathMap {
+                registerPartnerFonts(typefaces)
+            }
 
-            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, placements: placeholders, config: nil, callbacks: callback)
+            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, placements: placeholders, config: roktConfig, callbacks: callback)
             result(true)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
@@ -536,6 +547,51 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         print("mParticle flutter SDK for iOS does not support \(call.method)")
     }
   }
+
+  private func registerPartnerFonts(_ typefaces: Dictionary<String, String>) {
+    let bundle = Bundle.main
+    for (_, fileName) in typefaces {
+        let fontKey = registrar.lookupKey(forAsset: fileName)
+        let path = bundle.path(forResource: fontKey, ofType: nil)
+        var errorRef: Unmanaged<CFError>? = nil
+        guard let filePath = path, path?.isEmpty == false else {
+            continue
+        }
+        let fontUrl = NSURL(fileURLWithPath: filePath)
+        CTFontManagerRegisterFontsForURL(fontUrl, .process, &errorRef)
+    }
+  }
+}
+
+private func buildRoktConfig(configMap: [String: Any]) -> MPRoktConfig? {
+    let config = MPRoktConfig()
+    var isConfigEmpty = true
+    
+    if let colorModeString = configMap["colorMode"] as? String {
+        if #available(iOS 12.0, *) {
+            isConfigEmpty = false
+            switch colorModeString {
+            case "dark":
+                if #available(iOS 13.0, *) {
+                    config.colorMode = .dark
+                }
+            case "light":
+                config.colorMode = .light
+            default: // "system"
+                config.colorMode = .system
+            }
+        }
+    }
+
+    if let cacheConfigMap = configMap["cacheConfig"] as? [String: Any] {
+        isConfigEmpty = false
+        let cacheDuration = cacheConfigMap["cacheDurationInSeconds"] as? NSNumber ?? 0
+        let cacheAttributes = cacheConfigMap["cacheAttributes"] as? [String: String]
+        config.cacheAttributes = cacheAttributes
+        config.cacheDuration = cacheDuration
+    }
+
+    return isConfigEmpty ? nil : config
 }
 
 private func asStringForStringKey(jsonDictionary: [String : Any]) -> String {
