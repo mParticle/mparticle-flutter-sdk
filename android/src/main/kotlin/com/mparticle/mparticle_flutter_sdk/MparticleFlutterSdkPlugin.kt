@@ -226,6 +226,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         result.success(true)
       }
       "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
+      "roktPurchaseFinalized" -> this.roktPurchaseFinalized(call, result)
       else -> {
         result.notImplemented()
       }
@@ -748,6 +749,26 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
     }
 
     return builder.build()
+  }
+
+  private fun roktPurchaseFinalized(call: MethodCall, result: Result) {
+    val placementId = call.argument<String>("placementId")
+    val catalogItemId = call.argument<String>("catalogItemId")
+    val success = call.argument<Boolean>("success") ?: true
+    if (placementId != null && catalogItemId != null) {
+      MParticle.getInstance()?.Rokt()?.purchaseFinalized(
+        placementId = placementId,
+        catalogItemId = catalogItemId,
+        status = success,
+      )
+      result.success("Success")
+    } else {
+      result.error(
+        "INVALID_PARAMS",
+        "placementId and catalogItemId are required",
+        null,
+      )
+    }
   }
 
   private fun String.toColorMode(): RoktConfig.ColorMode =
