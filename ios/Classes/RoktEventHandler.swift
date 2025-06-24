@@ -18,6 +18,7 @@ import mParticle_Apple_SDK
 class RoktEventHandler: NSObject, FlutterStreamHandler {
 
     private var eventListeners: [String: [FlutterEventSink]] = [:]
+    private let eventQueue = DispatchQueue(label: "com.mparticle.rokt.event.queue")
     private let EVENT_CHANNEL_NAME = "MPRoktEvents"
 
     init(messenger: FlutterBinaryMessenger) {
@@ -31,21 +32,25 @@ class RoktEventHandler: NSObject, FlutterStreamHandler {
     }
 
     func onListen(withArguments arguments: Any?, eventSink: @escaping FlutterEventSink) -> FlutterError? {
-        let key = String(describing: arguments ?? "nil")
-        var sinks = eventListeners[key] ?? []
-        sinks.append(eventSink)
-        eventListeners[key] = sinks
+        eventQueue.sync {
+            let key = String(describing: arguments ?? "nil")
+            var sinks = eventListeners[key] ?? []
+            sinks.append(eventSink)
+            eventListeners[key] = sinks
+        }
         return nil
     }
 
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        let key = String(describing: arguments ?? "nil")
-        if var sinks = eventListeners[key], !sinks.isEmpty {
-            sinks.removeLast()
-            if sinks.isEmpty {
-                eventListeners.removeValue(forKey: key)
-            } else {
-                eventListeners[key] = sinks
+        eventQueue.sync {
+            let key = String(describing: arguments ?? "nil")
+            if var sinks = eventListeners[key], !sinks.isEmpty {
+                sinks.removeLast()
+                if sinks.isEmpty {
+                    eventListeners.removeValue(forKey: key)
+                } else {
+                    eventListeners[key] = sinks
+                }
             }
         }
         return nil
@@ -81,8 +86,14 @@ class RoktEventHandler: NSObject, FlutterStreamHandler {
                 break
             }
 
-            self.eventListeners.values.joined().forEach { listener in
-                listener(params)
+            let allSinks = self.eventQueue.sync {
+                return Array(self.eventListeners.values.joined())
+            }
+
+            allSinks.forEach { listener in
+                DispatchQueue.main.async {
+                    listener(params)
+                }
             }
         }
     }
