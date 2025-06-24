@@ -8,11 +8,13 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   let roktLayoutFactory: RoktLayoutFactory
   let channel: FlutterMethodChannel
   let registrar: FlutterPluginRegistrar
+  private let roktEventHandler: RoktEventHandler
 
   init(messenger: FlutterBinaryMessenger, registrar: FlutterPluginRegistrar) {
     self.roktLayoutFactory = RoktLayoutFactory(messenger: messenger)
     self.registrar = registrar
     self.channel = FlutterMethodChannel(name: "mparticle_flutter_sdk", binaryMessenger: messenger)
+    self.roktEventHandler = RoktEventHandler(messenger: messenger)
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -536,6 +538,8 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             if let typefaces = fontFilePathMap {
                 registerPartnerFonts(typefaces)
             }
+
+            roktEventHandler.subscribeToEvents(identifier: placementId)
 
             MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, embeddedViews: placeholders, config: roktConfig, callbacks: callback)
             result(true)
