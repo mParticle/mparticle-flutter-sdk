@@ -3,6 +3,7 @@ package com.mparticle.mparticle_flutter_sdk
 import android.app.Activity
 import android.content.Context
 import android.graphics.Typeface
+import android.os.Build
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -60,7 +61,9 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         VIEW_TYPE,
         layoutFactory,
     )
-    roktEventHandler = RoktEventHandler(flutterPluginBinding.binaryMessenger)
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          roktEventHandler = RoktEventHandler(flutterPluginBinding.binaryMessenger)
+      }
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -750,12 +753,14 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
       }
 
       MParticle.getInstance()?.let { instance ->
-        activity?.let {
-          roktEventHandler?.subscribeToEvents(
-            events = instance.Rokt().events(placementId),
-            activity = it,
-            identifier = placementId,
-          )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          activity?.let {
+            roktEventHandler?.subscribeToEvents(
+              events = instance.Rokt().events(placementId),
+              activity = it,
+              identifier = placementId,
+            )
+          }
         }
 
         instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)

@@ -1,6 +1,8 @@
 package com.mparticle.mparticle_flutter_sdk
 
 import android.app.Activity
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
@@ -11,11 +13,13 @@ import io.flutter.plugin.common.EventChannel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import java.util.ArrayDeque
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedDeque
 
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class RoktEventHandler(private val messenger: BinaryMessenger) {
 
-    private val eventListeners = mutableMapOf<Any?, ArrayDeque<EventChannel.EventSink>>()
+    private val eventListeners = ConcurrentHashMap<Any?, ConcurrentLinkedDeque<EventChannel.EventSink>>()
     private val eventSubscriptions = mutableMapOf<String, Job?>()
 
     init {
@@ -75,18 +79,18 @@ class RoktEventHandler(private val messenger: BinaryMessenger) {
                     sink: EventChannel.EventSink?,
                 ) {
                     sink?.let {
-                        val sinks = eventListeners.getOrPut(arguments) { ArrayDeque() }
+                        val sinks = eventListeners.getOrPut(arguments ?: "") { ConcurrentLinkedDeque() }
                         sinks.addLast(it)
                     }
                 }
 
                 override fun onCancel(arguments: Any?) {
-                    val sinks = eventListeners[arguments]
+                    val sinks = eventListeners[arguments ?: ""]
                     if (sinks?.isNotEmpty() == true) {
                         sinks.removeLast()
                     }
                     if (sinks?.isEmpty() == true) {
-                        eventListeners.remove(arguments)
+                        eventListeners.remove(arguments ?: "")
                     }
                 }
             },
