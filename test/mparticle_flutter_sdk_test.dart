@@ -36,6 +36,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
     methodCall = null;
+    mp.clearPlaceholders();
   });
 
   group('mParticle Dart API Layer', () {
@@ -293,6 +294,66 @@ void main() {
           }
         }),
       );
+    });
+  });
+
+  group('Rokt API', () {
+    test('rokt select placements', () async {
+      final roktConfig = RoktConfig(
+          colorMode: ColorMode.dark,
+          cacheConfig: CacheConfig(
+              cacheDurationInSeconds: 100,
+              cacheAttributes: {'key1': 'value1'}));
+      await mp.rokt.selectPlacements(
+          placementId: 'placement1',
+          attributes: {'attr1': 'val1'},
+          roktConfig: roktConfig,
+          fontFilePathMap: {'font1': 'path1'});
+
+      expect(
+          methodCall,
+          isMethodCall('roktSelectPlacements', arguments: {
+            'placementId': 'placement1',
+            'attributes': {'attr1': 'val1'},
+            'config': {
+              'colorMode': 'dark',
+              'cacheConfig': {
+                'cacheDurationInSeconds': 100,
+                'cacheAttributes': {'key1': 'value1'}
+              }
+            },
+            'fontFilePathMap': {'font1': 'path1'},
+          }));
+    });
+
+    test('rokt select placements with placeholders', () async {
+      mp.attachPlaceholder(id: 1, name: "placeholder1");
+      await mp.rokt.selectPlacements(
+        placementId: 'placement1',
+      );
+
+      expect(
+          methodCall,
+          isMethodCall('roktSelectPlacements', arguments: {
+            'placementId': 'placement1',
+            'attributes': null,
+            'config': null,
+            'fontFilePathMap': null,
+            'placeholders': {1: 'placeholder1'},
+          }));
+    });
+
+    test('rokt purchase finalized', () async {
+      await mp.rokt.purchaseFinalized(
+          placementId: 'placement1', catalogItemId: 'catalog1', success: true);
+
+      expect(
+          methodCall,
+          isMethodCall('roktPurchaseFinalized', arguments: {
+            'placementId': 'placement1',
+            'catalogItemId': 'catalog1',
+            'success': true,
+          }));
     });
   });
 }

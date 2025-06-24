@@ -89,6 +89,12 @@ class MparticleFlutterSdk {
     _placeholders[id] = name;
   }
 
+  /// Clears all placeholders. Used for testing.
+  @visibleForTesting
+  void clearPlaceholders() {
+    _placeholders.clear();
+  }
+
   /// Logs a product commerce event with an [productActionType], a promotion commerce event with a [eventType], and an impression commerce event if neither of the prior are implemented.
   Future<void> logCommerceEvent(CommerceEvent commerceEvent) async {
     var commerceEventMessage = {
@@ -323,6 +329,27 @@ class Rokt {
       params['placeholders'] = MparticleFlutterSdk._placeholders;
     }
     return await _channel.invokeMethod('roktSelectPlacements', params);
+  }
+
+  /// Notifies Rokt that a purchase has been finalized
+  ///
+  /// Use this method to inform Rokt that a purchase has been completed or failed
+  /// - Parameters:
+  ///   - placementId: The placement ID associated with the purchase
+  ///   - catalogItemId: The catalog item ID that was purchased
+  ///   - success: Whether the purchase was successful
+  ///
+  /// Note: This method requires iOS 15+.
+  Future<void> purchaseFinalized({
+    required String placementId,
+    required String catalogItemId,
+    required bool success,
+  }) async {
+    return await _channel.invokeMethod('roktPurchaseFinalized', {
+      'placementId': placementId,
+      'catalogItemId': catalogItemId,
+      'success': success,
+    });
   }
 
   Map<String, dynamic>? _roktConfigToMap({required RoktConfig? config}) {

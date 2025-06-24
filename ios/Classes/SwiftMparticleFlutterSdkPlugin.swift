@@ -529,7 +529,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                     }
                 }
             }
-            
+
             var roktConfig: MPRoktConfig?
             if let configMap = callArguments["config"] as? [String: Any] {
                 roktConfig = buildRoktConfig(configMap: configMap)
@@ -540,11 +540,23 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             }
 
             roktEventHandler.subscribeToEvents(identifier: placementId)
+
             MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, embeddedViews: placeholders, config: roktConfig, callbacks: callback)
             result(true)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
             result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing placementId", details: nil))
+        }
+    case "roktPurchaseFinalized":
+        if let callArguments = call.arguments as? [String: Any],
+           let placementId = callArguments["placementId"] as? String,
+           let catalogItemId = callArguments["catalogItemId"] as? String,
+           let success = callArguments["success"] as? Bool {
+            MParticle.sharedInstance().rokt.purchaseFinalized(placementId, catalogItemId: catalogItemId, success: success)
+            result(true)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing placementId or catalogItemId or success", details: nil))
         }
     default:
         print("mParticle flutter SDK for iOS does not support \(call.method)")
@@ -569,7 +581,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
 private func buildRoktConfig(configMap: [String: Any]) -> MPRoktConfig? {
     let config = MPRoktConfig()
     var isConfigEmpty = true
-    
+
     if let colorModeString = configMap["colorMode"] as? String {
         if #available(iOS 12.0, *) {
             isConfigEmpty = false
