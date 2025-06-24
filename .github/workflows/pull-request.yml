@@ -88,9 +88,13 @@ jobs:
   build-ios:
     needs: test
     name: Build iOS flutter app
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Xcode 16
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: 16.3.0
       - name: Setup Flutter SDK
         uses: subosito/flutter-action@v2
         with:

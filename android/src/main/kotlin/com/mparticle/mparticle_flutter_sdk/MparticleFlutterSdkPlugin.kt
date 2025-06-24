@@ -1,7 +1,9 @@
 package com.mparticle.mparticle_flutter_sdk
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Typeface
+import android.os.Build
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -27,6 +29,8 @@ import com.mparticle.consent.GDPRConsent
 import com.mparticle.rokt.CacheConfig
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 import org.json.JSONObject
 import kotlin.IllegalArgumentException
@@ -34,7 +38,7 @@ import java.lang.ref.WeakReference
 
 
 /** MparticleFlutterSdkPlugin */
-class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
+class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware {
   /// The MethodChannel that will the communication between Flutter and native Android
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
@@ -44,6 +48,8 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
   private lateinit var layoutFactory: RoktLayoutFactory
   private var flutterAssets: FlutterPlugin.FlutterAssets? = null
   private var applicationContext: Context? = null
+  private var activity: Activity? = null
+  private var roktEventHandler: RoktEventHandler? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "mparticle_flutter_sdk")
@@ -55,6 +61,9 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         VIEW_TYPE,
         layoutFactory,
     )
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          roktEventHandler = RoktEventHandler(flutterPluginBinding.binaryMessenger)
+      }
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -230,6 +239,22 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
         result.notImplemented()
       }
     }
+  }
+
+  override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+    activity = binding.activity
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
+    activity = null
+  }
+
+  override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+    activity = binding.activity
+  }
+
+  override fun onDetachedFromActivity() {
+    activity = null
   }
 
   private fun logEvent(call: MethodCall, result: Result) {
@@ -728,6 +753,16 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler {
       }
 
       MParticle.getInstance()?.let { instance ->
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+          activity?.let {
+            roktEventHandler?.subscribeToEvents(
+              events = instance.Rokt().events(placementId),
+              activity = it,
+              identifier = placementId,
+            )
+          }
+        }
+
         instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)
         result.success(true)
       } ?: result.error(TAG, "No mParticle instance exists", null)

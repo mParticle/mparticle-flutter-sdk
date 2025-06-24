@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/services.dart';
 import 'dart:io' show Platform;
 import 'package:mparticle_flutter_sdk/mparticle_flutter_sdk.dart';
 import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
@@ -18,6 +19,7 @@ class RoktLayoutsScreen extends StatefulWidget {
 class _RoktLayoutsScreenState extends State<RoktLayoutsScreen> {
   final TextEditingController _placementIdController =
       TextEditingController(text: 'readmorelayout');
+  final EventChannel roktEventChannel = EventChannel('MPRoktEvents');
 
   Map<String, String> _getAttributesForPlatform() {
     if (kIsWeb) {
@@ -72,9 +74,21 @@ class _RoktLayoutsScreenState extends State<RoktLayoutsScreen> {
   }
 
   @override
+  void initState() {
+    _receiveRoktEvent();
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _placementIdController.dispose();
     super.dispose();
+  }
+
+  void _receiveRoktEvent() {
+    roktEventChannel.receiveBroadcastStream().listen((dynamic event) {
+      debugPrint("rokt_event: _receiveRoktEvent $event ");
+    });
   }
 
   Widget buildButton(String text, VoidCallback onPressed) {
