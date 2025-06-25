@@ -144,7 +144,7 @@ class _RoktLayoutsScreenState extends State<RoktLayoutsScreen> {
                       .identify(identityRequest: identityRequest);
 
                   widget.mpInstance?.rokt.selectPlacements(
-                      placementId: _placementIdController.text,
+                      identifier: _placementIdController.text,
                       attributes: _getAttributesForPlatform());
                   print('${_getPlatform()} Rokt selectPlacements called');
                 } catch (e) {
