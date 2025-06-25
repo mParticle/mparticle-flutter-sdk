@@ -305,7 +305,7 @@ void main() {
               cacheDurationInSeconds: 100,
               cacheAttributes: {'key1': 'value1'}));
       await mp.rokt.selectPlacements(
-          placementId: 'placement1',
+          identifier: 'placement1',
           attributes: {'attr1': 'val1'},
           roktConfig: roktConfig,
           fontFilePathMap: {'font1': 'path1'});
@@ -329,7 +329,7 @@ void main() {
     test('rokt select placements with placeholders', () async {
       mp.attachPlaceholder(id: 1, name: "placeholder1");
       await mp.rokt.selectPlacements(
-        placementId: 'placement1',
+        identifier: 'placement1',
       );
 
       expect(
