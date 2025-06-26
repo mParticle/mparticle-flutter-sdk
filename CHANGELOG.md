@@ -1,3 +1,13 @@
+## 1.1.0  (2025-06-26)
+
+* feat: Add support for Rokt
+  * feat: Add support for Rokt embedded layout in the Flutter SDK (#50)
+  * feat: Passthrough SDK wrapper type to native SDKs (#51)
+  * feat: Add RoktConfig support for selectPlacements in Flutter SDK (#52)
+  * feat: Add support for Rokt event channel subscription (#53)
+  * feat: Add Rokt purchaseFinalized method (#54)
+  * refactor: Update selectPlacements parameter from placementId to identifier (#55)
+
 ## 1.0.6  (2025-01-07)
 
 * fix: Resolve linting issues (#48)
