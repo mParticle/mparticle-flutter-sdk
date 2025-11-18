@@ -5,6 +5,8 @@ import mParticle_Apple_SDK
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
   private var eventSink: FlutterEventSink?
+    
+  var isInitialized = false
   
   override func application(
     _ application: UIApplication,
@@ -28,7 +30,7 @@ import mParticle_Apple_SDK
       object: nil
     )
 
-    let options = MParticleOptions(key: "api-key", secret: "secret")
+    let options = MParticleOptions(key: "", secret: "")
     options.logLevel = MPILogLevel.verbose
     MParticle.sharedInstance().start(with: options)
 
@@ -39,6 +41,9 @@ import mParticle_Apple_SDK
   
   func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
     self.eventSink = events
+    if isInitialized {
+      events(["initialized": true])
+    }
     return nil
   }
   
@@ -50,6 +55,7 @@ import mParticle_Apple_SDK
   // MARK: - mParticle Initialization
   
   @objc private func handleMParticleInitialized(notification: Notification) {
+    isInitialized = true
     if let eventSink = self.eventSink {
       eventSink(["initialized": true])
     }

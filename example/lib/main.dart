@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,18 +77,29 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initMparticle() async {
-    // Subscribe to mParticle initialization events from native code
-    _initializationSubscription = _initializationEventChannel
-        .receiveBroadcastStream()
-        .listen((event) {
-      if (event is Map && event['initialized'] == true) {
+    if (Platform.isIOS) {
+      // iOS: Subscribe to mParticle initialization events from native code
+      _initializationSubscription = _initializationEventChannel
+          .receiveBroadcastStream()
+          .listen((event) async {
+        if (event is Map && event['initialized'] == true) {
+          print("mParticle initialized from native layer");
+          mpInstance = await MparticleFlutterSdk.getInstance();
+          setState(() {
+            _isInitialized = true;
+          });
+        }
+      });
+    } else {
+      // Android and other platforms: Use original initialization
+      mpInstance = await MparticleFlutterSdk.getInstance();
+      
+      if (mpInstance != null) {
         setState(() {
           _isInitialized = true;
         });
       }
-    });
-    
-    mpInstance = await MparticleFlutterSdk.getInstance();
+    }
   }
 
   void identityCallbackSuccess(IdentityApiResult successResponse) {
