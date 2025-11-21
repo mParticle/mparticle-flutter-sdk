@@ -26,7 +26,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
     case "isInitialized":
-        result(MParticle.sharedInstance().initialized)
+        result(true)
     case "getAppName":
         result(Bundle.main.infoDictionary?[kCFBundleNameKey as String] as? String)
     case "getOptOut":
