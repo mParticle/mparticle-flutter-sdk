@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mparticle_flutter_sdk/mparticle_flutter_sdk.dart';
 import 'package:mparticle_flutter_sdk/events/event_type.dart';
 import 'package:mparticle_flutter_sdk/events/commerce_event.dart';
@@ -35,6 +37,11 @@ final myController = TextEditingController();
 
 class _MyAppState extends State<MyApp> {
   bool _isInitialized = false;
+  StreamSubscription? _initializationSubscription;
+  
+  // EventChannel for receiving mParticle initialization notifications
+  static const EventChannel _initializationEventChannel =
+      EventChannel('com.example.mparticle_initialization');
 
   TextButton buildButton(text, onPressedFunction) {
     return TextButton(
@@ -60,15 +67,38 @@ class _MyAppState extends State<MyApp> {
     initMparticle();
   }
 
+  @override
+  void dispose() {
+    _initializationSubscription?.cancel();
+    super.dispose();
+  }
+
   MparticleFlutterSdk? mpInstance;
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initMparticle() async {
-    mpInstance = await MparticleFlutterSdk.getInstance();
-    if (mpInstance != null) {
-      setState(() {
-        _isInitialized = true;
+    if (Platform.isIOS) {
+      // iOS: Subscribe to mParticle initialization events from native code
+      _initializationSubscription = _initializationEventChannel
+          .receiveBroadcastStream()
+          .listen((event) async {
+        if (event is Map && event['initialized'] == true) {
+          print("mParticle initialized from native layer");
+          mpInstance = await MparticleFlutterSdk.getInstance();
+          setState(() {
+            _isInitialized = true;
+          });
+        }
       });
+    } else {
+      // Android and other platforms: Use original initialization
+      mpInstance = await MparticleFlutterSdk.getInstance();
+      
+      if (mpInstance != null) {
+        setState(() {
+          _isInitialized = true;
+        });
+      }
     }
   }
 
