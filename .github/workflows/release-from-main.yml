@@ -75,9 +75,9 @@ jobs:
       - name: Install example dependencies
         working-directory: example
         run: flutter pub get
-      - name: Build unsigned Xcode archive
+      - name: Build unsigned iOS app
         working-directory: example
-        run: flutter build ipa --no-codesign
+        run: flutter build ios --no-codesign
 
   setup-and-version:
     needs: [build-android, build-ios]

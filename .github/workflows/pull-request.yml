@@ -107,17 +107,9 @@ jobs:
       - name: Test
         working-directory: example
         run: flutter test
-      - name: Build unsigned example Xcode archive
+      - name: Build unsigned example iOS app
         working-directory: example
-        run: flutter build ipa --no-codesign
-      - name: Check if unsigned example Xcode archive exists
-        working-directory: example
-        run: |
-          set -e
-          if [ ! -d build/ios/archive/Runner.xcarchive ]; then
-            echo "Xcode archive not found!"
-            exit 1
-          fi
+        run: flutter build ios --no-codesign
       - name: Cleanup
         if: ${{ always() }}
         working-directory: example
