@@ -107,9 +107,11 @@ jobs:
       - name: Test
         working-directory: example
         run: flutter test
-      - name: Build example iOS app for simulator
+      - name: Build example iOS app
         working-directory: example
-        run: flutter build ios --simulator
+        run: flutter build ios --no-codesign --release
+        env:
+          CODE_SIGNING_ALLOWED: "NO"
       - name: Cleanup
         if: ${{ always() }}
         working-directory: example

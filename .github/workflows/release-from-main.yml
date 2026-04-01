@@ -75,9 +75,11 @@ jobs:
       - name: Install example dependencies
         working-directory: example
         run: flutter pub get
-      - name: Build example iOS app for simulator
+      - name: Build example iOS app
         working-directory: example
-        run: flutter build ios --simulator
+        run: flutter build ios --no-codesign --release
+        env:
+          CODE_SIGNING_ALLOWED: "NO"
 
   setup-and-version:
     needs: [build-android, build-ios]
