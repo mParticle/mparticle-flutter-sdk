@@ -12,6 +12,7 @@ import 'package:mparticle_flutter_sdk/events/promotion_action_type.dart';
 import 'package:mparticle_flutter_sdk/events/impression.dart';
 import 'package:mparticle_flutter_sdk/events/screen_event.dart';
 import 'package:mparticle_flutter_sdk/identity/alias_request.dart';
+import 'package:mparticle_flutter_sdk/identity/identity_type.dart';
 import 'package:mparticle_flutter_sdk/apple/authorization_status.dart';
 
 void main() {
@@ -292,6 +293,131 @@ void main() {
             'startTime': 123,
             'endTime': 456,
           }
+        }),
+      );
+    });
+  });
+
+  group('Identity API', () {
+    test('identify with identityRequest', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+
+      IdentityRequest request = IdentityRequest()
+        ..setIdentity(
+            identityType: IdentityType.Email, value: 'test@example.com');
+      await mp.identity.identify(identityRequest: request);
+      expect(
+        methodCall,
+        isMethodCall('identify', arguments: {
+          'identityRequest': {7: 'test@example.com'}
+        }),
+      );
+    });
+
+    test('identify without identityRequest sends empty map', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+
+      await mp.identity.identify();
+      expect(
+        methodCall,
+        isMethodCall('identify', arguments: {
+          'identityRequest': {}
+        }),
+      );
+    });
+
+    test('login without identityRequest sends empty map', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+
+      await mp.identity.login();
+      expect(
+        methodCall,
+        isMethodCall('login', arguments: {
+          'identityRequest': {}
+        }),
+      );
+    });
+
+    test('logout without identityRequest sends empty map', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+
+      await mp.identity.logout();
+      expect(
+        methodCall,
+        isMethodCall('logout', arguments: {
+          'identityRequest': {}
+        }),
+      );
+    });
+
+    test('modify with identityRequest', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+
+      IdentityRequest request = IdentityRequest()
+        ..setIdentity(
+            identityType: IdentityType.Email, value: 'new@example.com');
+      await mp.identity.modify(identityRequest: request);
+      expect(
+        methodCall,
+        isMethodCall('modify', arguments: {
+          'identityRequest': {7: 'new@example.com'}
+        }),
+      );
+    });
+
+    test('logout with identityRequest', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+
+      IdentityRequest request = IdentityRequest()
+        ..setIdentity(
+            identityType: IdentityType.CustomerId, value: 'user-123');
+      await mp.identity.logout(identityRequest: request);
+      expect(
+        methodCall,
+        isMethodCall('logout', arguments: {
+          'identityRequest': {1: 'user-123'}
         }),
       );
     });
