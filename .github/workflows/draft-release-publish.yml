@@ -1,0 +1,81 @@
+name: Create draft release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump-type:
+        description: Specify if the version should be bumped as major, minor, patch
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish-draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump-version
+        uses: actions-ecosystem/action-bump-semver@v1
+        with:
+          current_version: ${{ steps.version-file.outputs.release-version }}
+          level: ${{ github.event.inputs.bump-type || 'patch' }}
+
+      - name: Save validated version to file
+        run: |
+          echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+
+      - name: Update changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@v3
+        with:
+          tag: ${{ steps.bump-version.outputs.new_version }}
+
+      - name: Update pubspec.yaml
+        run: |
+          sed -i 's/version: .*/version: ${{ steps.bump-version.outputs.new_version }}/' pubspec.yaml
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Run dry-run publish
+        run: |
+          flutter pub publish --dry-run
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: Prepare release ${{ steps.bump-version.outputs.new_version }}"
+          branch: release/${{ steps.bump-version.outputs.new_version }}
+          title: "chore: Prepare release ${{ steps.bump-version.outputs.new_version }}"
+          base: development
+          body: |
+            Preparing for release ${{ steps.bump-version.outputs.new_version }}
+            - Updated pubspec.yaml to new version
+            - Updated CHANGELOG.md
+            - Updated VERSION file
+            - Ran a dry-run publish
+          labels: |
+            release
