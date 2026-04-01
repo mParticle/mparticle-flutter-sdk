@@ -340,6 +340,27 @@ void main() {
       );
     });
 
+    test('login with identityRequest', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        channel,
+        (MethodCall call) async {
+          methodCall = call;
+          return '{"mpid": "123"}';
+        },
+      );
+      IdentityRequest request = IdentityRequest()
+        ..setIdentity(
+            identityType: IdentityType.Email, value: 'login@example.com');
+      await mp.identity.login(identityRequest: request);
+      expect(
+        methodCall,
+        isMethodCall('login', arguments: {
+          'identityRequest': {7: 'login@example.com'}
+        }),
+      );
+    });
+
     test('login without identityRequest sends empty map', () async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(
