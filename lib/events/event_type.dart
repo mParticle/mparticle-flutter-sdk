@@ -1,4 +1,4 @@
-/// Contains the event types for logging mParticle custom events
+// Contains the event types for logging mParticle custom events.
 enum EventType {
   Unknown,
   Navigation,

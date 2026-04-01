@@ -3,6 +3,7 @@ description: mParticle Flutter Plugin - SDK wrapper for iOS, Android, and Web pl
 version: 1.1.1
 homepage: https://github.com/mParticle/mparticle-flutter-sdk
 repository: https://github.com/mParticle/mparticle-flutter-sdk
+license: Apache-2.0
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

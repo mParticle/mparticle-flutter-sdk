@@ -1,4 +1,4 @@
-/// A Promotion for use with a commerce event
+// A Promotion for use with a commerce event.
 class Promotion {
   Promotion(
       {required this.promotionId, this.creative, this.name, this.position});

@@ -1,4 +1,4 @@
-/// Contains the identity types used for [identity requests]
+// Contains the identity types used for identity requests.
 enum IdentityType {
   Other,
   CustomerId,

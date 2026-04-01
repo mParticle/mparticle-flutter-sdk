@@ -1,4 +1,4 @@
-/// This class represents an Consent Object to be logged using the mParticle SDK
+// This class represents a Consent Object to be logged using the mParticle SDK.
 class Consent {
   /// Whether the user consented to data collection
   bool consented;
