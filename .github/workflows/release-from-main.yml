@@ -3,7 +3,7 @@ name: Release SDK
 on:
   push:
     branches:
-      - development
+      - main
     paths:
       - VERSION
 
