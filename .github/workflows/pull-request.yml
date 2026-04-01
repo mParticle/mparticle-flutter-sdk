@@ -109,9 +109,11 @@ jobs:
         run: flutter test
       - name: Build example iOS app
         working-directory: example
-        run: flutter build ios --no-codesign --release
-        env:
-          CODE_SIGNING_ALLOWED: "NO"
+        run: |
+          flutter pub get
+          flutter build ios --config-only --no-codesign --release
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
       - name: Cleanup
         if: ${{ always() }}
         working-directory: example
