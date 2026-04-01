@@ -132,11 +132,15 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
       })
       break;
     case "modify":
-      let modifyDict = (call.arguments as? [String: Any])?["identityRequest"] as? [NSNumber: String] ?? [:]
-      let modifyRequest = createIdentityRequest(identitiesKeyedOnType: modifyDict)
-      MParticle.sharedInstance().identity.modify(modifyRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
-        result(convertToIdentityResultJson(result: identityResult, error: error))
-      })
+      if let callArguments = call.arguments as? [String: Any],
+         let requestDictionary = callArguments["identityRequest"] as? [NSNumber: String] {
+        let identityRequest = createIdentityRequest(identitiesKeyedOnType: requestDictionary)
+        MParticle.sharedInstance().identity.modify(identityRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
+            result(convertToIdentityResultJson(result: identityResult, error: error))
+        })
+      } else {
+        print("Incorrect argument for \(call.method) iOS method: identityRequest is required for modify")
+      }
       break;
     // user methods
     case "getAttributions":
