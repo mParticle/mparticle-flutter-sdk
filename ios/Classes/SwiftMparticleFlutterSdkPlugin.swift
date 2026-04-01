@@ -140,6 +140,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         })
       } else {
         print("Incorrect argument for \(call.method) iOS method: identityRequest is required for modify")
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "identityRequest is required for modify", details: nil))
       }
       break;
     // user methods
