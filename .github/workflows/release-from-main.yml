@@ -2,14 +2,12 @@ name: Release SDK
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - VERSION
+    tags:
+      - 'v*'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -79,22 +77,9 @@ jobs:
           cd ios
           xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
 
-  setup-and-version:
+  release:
+    name: Publish and Release
     needs: [build-android, build-ios]
-    runs-on: ubuntu-latest
-    outputs:
-      final_version: ${{ steps.version-file.outputs.release-version }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Get current version
-        id: version-file
-        run: |
-          version_from_file=$(head -n 1 VERSION)
-          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
-
-  release-and-tag:
-    needs: [setup-and-version]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -107,11 +92,6 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Create git tag
-        run: |
-          git tag "v${{ needs.setup-and-version.outputs.final_version }}"
-          git push origin "v${{ needs.setup-and-version.outputs.final_version }}"
-
       - name: Publish Package
         run: |
           flutter pub publish --force
@@ -120,13 +100,12 @@ jobs:
         id: extract-release-notes
         with:
           changelog_file: CHANGELOG.md
-          release_notes_file: ${{ needs.setup-and-version.outputs.final_version }}.md
 
       - name: Create Github release
         uses: ncipollo/release-action@v1
         with:
           makeLatest: true
-          tag: v${{ needs.setup-and-version.outputs.final_version }}
+          tag: ${{ github.ref_name }}
           body: |
             ## Release notes:
             ${{ steps.extract-release-notes.outputs.release_notes }}
