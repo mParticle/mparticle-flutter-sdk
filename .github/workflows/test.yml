@@ -1,0 +1,34 @@
+name: Test
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install dependencies
+        run: flutter pub get
+      - name: Run tests
+        run: flutter test
+      - name: Cleanup
+        if: ${{ always() }}
+        run: |
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi

@@ -1,0 +1,49 @@
+name: Build Web
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  build-web:
+    name: Build web flutter app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Test example
+        working-directory: example
+        run: flutter test
+      - name: Build example web
+        working-directory: example
+        run: flutter build web
+      - name: Check if example web exists
+        working-directory: example
+        run: |
+          set -e
+          if [ ! -f build/web/flutter.js ]; then
+            echo "Web build not found!"
+            exit 1
+          fi
+      - name: Cleanup
+        if: ${{ always() }}
+        working-directory: example
+        run: |
+          rm -rf build
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi
