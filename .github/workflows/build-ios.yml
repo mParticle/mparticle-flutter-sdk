@@ -1,0 +1,45 @@
+name: Build iOS
+
+on:
+  workflow_call:
+
+env:
+  PUB_ENVIRONMENT: bot.github
+
+jobs:
+  build-ios:
+    name: Build iOS flutter app
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
+        with:
+          xcode-version: "16.4"
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Install example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Test
+        working-directory: example
+        run: flutter test
+      - name: Build example iOS app
+        working-directory: example
+        run: |
+          flutter pub get
+          flutter build ios --config-only --no-codesign --release
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+      - name: Cleanup
+        if: ${{ always() }}
+        working-directory: example
+        run: |
+          rm -rf build
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi

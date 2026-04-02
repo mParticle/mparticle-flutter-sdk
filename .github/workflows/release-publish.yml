@@ -1,0 +1,59 @@
+name: Release – Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build-android:
+    needs: test
+    uses: ./.github/workflows/build-android.yml
+
+  build-ios:
+    needs: test
+    uses: ./.github/workflows/build-ios.yml
+
+  release:
+    name: Publish and Release
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Publish Package
+        run: |
+          flutter pub publish --force
+
+      - uses: ffurrer2/extract-release-notes@cae32133495112d23e3569ad04fef240ba4e7bc8 # v2
+        id: extract-release-notes
+        with:
+          changelog_file: CHANGELOG.md
+
+      - name: Create Github release
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
+        with:
+          makeLatest: true
+          tag: ${{ github.ref_name }}
+          body: |
+            ## Release notes:
+            ${{ steps.extract-release-notes.outputs.release_notes }}

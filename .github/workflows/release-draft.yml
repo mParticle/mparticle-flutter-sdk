@@ -1,0 +1,81 @@
+name: Release – Draft
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump-type:
+        description: Specify if the version should be bumped as patch, minor, or major
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  publish-draft-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Get current version
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+      - name: Bump version
+        id: bump-version
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1
+        with:
+          current_version: ${{ steps.version-file.outputs.release-version }}
+          level: ${{ github.event.inputs.bump-type || 'patch' }}
+
+      - name: Save validated version to file
+        run: |
+          echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+
+      - name: Update changelog
+        uses: thomaseizinger/keep-a-changelog-new-release@f62c3c390716df5af712ba5d94f4f4a8efc1306d # v3
+        with:
+          tag: ${{ steps.bump-version.outputs.new_version }}
+
+      - name: Update pubspec.yaml
+        run: |
+          sed -i 's/version: .*/version: ${{ steps.bump-version.outputs.new_version }}/' pubspec.yaml
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: ${{ vars.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Run dry-run publish
+        run: |
+          flutter pub publish --dry-run
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@22a9089034f40e5a961c8808d113e2c98fb63676 # v7
+        with:
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          commit-message: "chore: Prepare release ${{ steps.bump-version.outputs.new_version }}"
+          branch: release/${{ steps.bump-version.outputs.new_version }}
+          title: "chore: Prepare release ${{ steps.bump-version.outputs.new_version }}"
+          base: main
+          body: |
+            Preparing for release ${{ steps.bump-version.outputs.new_version }}
+            - Updated pubspec.yaml to new version
+            - Updated CHANGELOG.md
+            - Updated VERSION file
+            - Ran a dry-run publish
+          labels: |
+            release

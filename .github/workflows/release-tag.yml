@@ -1,0 +1,30 @@
+name: Release – Tag
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - VERSION
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+
+      - name: Get version from file
+        id: version-file
+        run: |
+          version_from_file=$(head -n 1 VERSION)
+          echo "release-version=$version_from_file" >> $GITHUB_OUTPUT
+
+      - name: Create and push tag
+        run: |
+          git config user.name "mparticle-automation"
+          git config user.email "developers@mparticle.com"
+          git tag "v${{ steps.version-file.outputs.release-version }}"
+          git push origin "v${{ steps.version-file.outputs.release-version }}"
