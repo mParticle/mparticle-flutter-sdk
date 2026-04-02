@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.2] - 2026-04-02
 
+- fix: Make identityRequest optional for identify, login, and logout (#61)
+- fix: Improve pub.dev scores for license detection and static analysis (#63)
+- chore: Add release workflows for automated pub.dev publishing (#62)
+- chore: Remove semantic branch name and target branch checks (#65)
+
 ## [1.1.1] - 2025-11-21
 
 - fix: SDKE-627 Return true immediately for isInitialized on iOS (#57)
