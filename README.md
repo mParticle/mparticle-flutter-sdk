@@ -457,7 +457,7 @@ user?.getUserIdentities().then((identities) {
 ### IDSync
 IDSync is mParticle’s identity framework, enabling our customers to create a unified view of the customer. To read more about IDSync, see [here](https://docs.mparticle.com/guides/idsync/introduction).
 
-All IDSync calls require an `Identity Request`.
+IDSync calls accept an optional `Identity Request`. If no request is provided, an empty identity request is used, which mirrors the behavior of the native iOS and Android SDKs.
 
 #### IdentityRequest
 
@@ -480,7 +480,22 @@ Import the `SuccessResponse` and `FailureResponse` classes to write proper callb
 
 #### Identify
 
-The following is a full Identify example with error and success handling.  You can adapt the following example with `login`, `modify`, and `logout`.
+You can call `identify` without any parameters to identify with the current user's identities:
+
+```dart
+mpInstance?.identity
+    .identify()
+    .then(
+        (IdentityApiResult successResponse) =>
+            print("Success Response: $successResponse"),
+        onError: (error) {
+            var failureResponse = error as IdentityAPIErrorResponse;
+            print("Failure Response: $failureResponse");
+        }
+    );
+```
+
+Or with an identity request. The following is a full example with error and success handling. You can adapt the following example with `login`, `modify`, and `logout`.
 
 ```dart
 import 'package:mparticle_flutter_sdk/identity/identity_api_result.dart';
@@ -542,7 +557,22 @@ mpInstance?.identity
 
 #### Login
 
-Partial example - you can adapt the identify example above with login, modify, and logout.
+You can call `login` without any parameters:
+
+```dart
+mpInstance?.identity
+    .login()
+    .then(
+        (IdentityApiResult successResponse) =>
+            print("Success Response: $successResponse"),
+        onError: (error) {
+            var failureResponse = error as IdentityAPIErrorResponse;
+            print("Failure Response: $failureResponse");
+        }
+    );
+```
+
+Or with an identity request:
 
 ```dart
 var identityRequest = MparticleFlutterSdk.identityRequest;
@@ -561,7 +591,6 @@ mpInstance?.identity.login(identityRequest: identityRequest).then(
         var failureResponse = error as IdentityAPIErrorResponse;
         print("Failure Response: $failureResponse");
     });
-    
 ```
 
 #### Modify
@@ -592,11 +621,29 @@ mpInstance?.identity
 
 #### Logout
 
-Partial example - you can adapt the `identify` example above with `login`, `modify`, and `logout`.
+You can call `logout` without any parameters, which is the most common usage:
+
+```dart
+mpInstance?.identity
+    .logout()
+    .then(
+        (IdentityApiResult successResponse) =>
+            print("Success Response: $successResponse"),
+        onError: (error) {
+            var failureResponse = error as IdentityAPIErrorResponse;
+            print("Failure Response: $failureResponse");
+        }
+    );
+```
+
+Or with an identity request if needed:
 
 ```dart 
 var identityRequest = MparticleFlutterSdk.identityRequest;
-// depending on your identity strategy, you may have identities added to your identityRequestk
+identityRequest
+    .setIdentity(
+        identityType: IdentityType.CustomerId,
+        value: 'customerid');
 
 mpInstance?.identity
     .logout(identityRequest: identityRequest)

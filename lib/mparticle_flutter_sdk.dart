@@ -256,24 +256,24 @@ class Identity {
       const MethodChannel('mparticle_flutter_sdk');
 
   Future<IdentityApiResult> identify({
-    required IdentityRequest identityRequest,
+    IdentityRequest? identityRequest,
   }) async {
     return await sendIdentityRequest(
-        identityRequest.identities, _channel, 'identify');
+        (identityRequest ?? IdentityRequest()).identities, _channel, 'identify');
   }
 
   Future<IdentityApiResult> login({
-    required IdentityRequest identityRequest,
+    IdentityRequest? identityRequest,
   }) async {
     return await sendIdentityRequest(
-        identityRequest.identities, _channel, 'login');
+        (identityRequest ?? IdentityRequest()).identities, _channel, 'login');
   }
 
   Future<IdentityApiResult> logout({
-    required IdentityRequest identityRequest,
+    IdentityRequest? identityRequest,
   }) async {
     return await sendIdentityRequest(
-        identityRequest.identities, _channel, 'logout');
+        (identityRequest ?? IdentityRequest()).identities, _channel, 'logout');
   }
 
   Future<IdentityApiResult> modify({

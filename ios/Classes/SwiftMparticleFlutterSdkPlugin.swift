@@ -141,9 +141,12 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
       if let callArguments = call.arguments as? [String: Any],
          let requestDictionary = callArguments["identityRequest"] as? [NSNumber: String] {
         let identityRequest = createIdentityRequest(identitiesKeyedOnType: requestDictionary)
-          MParticle.sharedInstance().identity.modify(identityRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
+        MParticle.sharedInstance().identity.modify(identityRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
             result(convertToIdentityResultJson(result: identityResult, error: error))
-          })
+        })
+      } else {
+        print("Incorrect argument for \(call.method) iOS method: identityRequest is required for modify")
+        result(FlutterError(code: "INVALID_ARGUMENTS", message: "identityRequest is required for modify", details: nil))
       }
       break;
     // user methods
