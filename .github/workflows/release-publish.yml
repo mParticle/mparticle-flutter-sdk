@@ -29,9 +29,15 @@ jobs:
     name: Publish and Release
     needs: [build-android, build-ios]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Dart SDK
+        uses: dart-lang/setup-dart@e51d8e571e22473a2ddebf0ef8a2c4a1885fabab # v1
 
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -42,7 +48,7 @@ jobs:
 
       - name: Publish Package
         run: |
-          flutter pub publish --force
+          dart pub publish --force
 
       - uses: ffurrer2/extract-release-notes@cae32133495112d23e3569ad04fef240ba4e7bc8 # v2
         id: extract-release-notes
