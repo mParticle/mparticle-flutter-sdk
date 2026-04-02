@@ -111,25 +111,31 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         MParticle.sharedInstance().upload()
     // identity methods:
     case "identify":
-      let identifyDict = (call.arguments as? [String: Any])?["identityRequest"] as? [NSNumber: String] ?? [:]
-      let identifyRequest = createIdentityRequest(identitiesKeyedOnType: identifyDict)
-      MParticle.sharedInstance().identity.identify(identifyRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
-        result(convertToIdentityResultJson(result: identityResult, error: error))
-      })
+      if let callArguments = call.arguments as? [String: Any],
+         let requestDictionary = callArguments["identityRequest"] as? [NSNumber: String] {
+        let identityRequest = createIdentityRequest(identitiesKeyedOnType: requestDictionary);
+          MParticle.sharedInstance().identity.identify(identityRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
+            result(convertToIdentityResultJson(result: identityResult, error: error))
+          })
+      }
       break;
     case "login":
-      let loginDict = (call.arguments as? [String: Any])?["identityRequest"] as? [NSNumber: String] ?? [:]
-      let loginRequest = createIdentityRequest(identitiesKeyedOnType: loginDict)
-      MParticle.sharedInstance().identity.login(loginRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
-        result(convertToIdentityResultJson(result: identityResult, error: error))
-      })
+      if let callArguments = call.arguments as? [String: Any],
+         let requestDictionary = callArguments["identityRequest"] as? [NSNumber: String] {
+        let identityRequest = createIdentityRequest(identitiesKeyedOnType: requestDictionary)
+          MParticle.sharedInstance().identity.login(identityRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
+            result(convertToIdentityResultJson(result: identityResult, error: error))
+          })
+      }
       break;
     case "logout":
-      let logoutDict = (call.arguments as? [String: Any])?["identityRequest"] as? [NSNumber: String] ?? [:]
-      let logoutRequest = createIdentityRequest(identitiesKeyedOnType: logoutDict)
-      MParticle.sharedInstance().identity.logout(logoutRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
-        result(convertToIdentityResultJson(result: identityResult, error: error))
-      })
+      if let callArguments = call.arguments as? [String: Any],
+         let requestDictionary = callArguments["identityRequest"] as? [NSNumber: String] {
+        let identityRequest = createIdentityRequest(identitiesKeyedOnType: requestDictionary)
+          MParticle.sharedInstance().identity.logout(identityRequest, completion: {(identityResult: MPIdentityApiResult?, error: Error?) in
+            result(convertToIdentityResultJson(result: identityResult, error: error))
+          })
+      }
       break;
     case "modify":
       if let callArguments = call.arguments as? [String: Any],
