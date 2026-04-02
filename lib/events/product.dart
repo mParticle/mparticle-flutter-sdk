@@ -1,4 +1,4 @@
-/// A Product for use with a commerce event
+// A Product for use with a commerce event.
 class Product {
   Product(
       {required this.name,

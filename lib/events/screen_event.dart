@@ -1,5 +1,4 @@
-/// This class represents a screen event to be logged using the mParticle SDK
-
+// This class represents a screen event to be logged using the mParticle SDK.
 class ScreenEvent {
   /// The name of the screen event to be logged.
   String eventName;

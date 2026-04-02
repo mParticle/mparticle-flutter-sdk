@@ -1,2 +1,2 @@
-/// Contains the event types for logging mParticle custom events
+// Contains the promotion action types for logging mParticle commerce events.
 enum PromotionActionType { Click, View }

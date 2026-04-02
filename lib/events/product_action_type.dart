@@ -1,4 +1,4 @@
-/// Contains the Product Action types for logging mParticle commerce product events
+// Contains the Product Action types for logging mParticle commerce product events.
 enum ProductActionType {
   AddToCart,
   RemoveFromCart,

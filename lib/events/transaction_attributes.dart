@@ -1,5 +1,4 @@
-/// This class represents the attributes of a commerce event transaction. It is used in conjunction with CommerceEvent.
-
+// This class represents the attributes of a commerce event transaction. It is used in conjunction with CommerceEvent.
 class TransactionAttributes {
   TransactionAttributes(
       {required this.transactionId,
