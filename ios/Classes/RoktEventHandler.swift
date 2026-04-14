@@ -83,6 +83,17 @@ class RoktEventHandler: NSObject, FlutterStreamHandler {
                 params["totalPrice"] = cartItemInstantPurchaseEvent.totalPrice?.stringValue
                 params["quantity"] = cartItemInstantPurchaseEvent.quantity?.stringValue
                 params["unitPrice"] = cartItemInstantPurchaseEvent.unitPrice?.stringValue
+            case let initiatedEvent as RoktEvent.CartItemInstantPurchaseInitiated:
+                params["cartItemId"] = initiatedEvent.cartItemId
+                params["catalogItemId"] = initiatedEvent.catalogItemId
+            case let failureEvent as RoktEvent.CartItemInstantPurchaseFailure:
+                params["cartItemId"] = failureEvent.cartItemId
+                params["catalogItemId"] = failureEvent.catalogItemId
+                params["error"] = failureEvent.error
+            case let devicePayEvent as RoktEvent.CartItemDevicePay:
+                params["cartItemId"] = devicePayEvent.cartItemId
+                params["catalogItemId"] = devicePayEvent.catalogItemId
+                params["paymentProvider"] = devicePayEvent.paymentProvider
             default:
                 break
             }
@@ -113,6 +124,10 @@ private extension RoktEvent {
         case let event as RoktEvent.PositiveEngagement: return event.identifier
         case let event as RoktEvent.OpenUrl: return event.identifier
         case let event as RoktEvent.CartItemInstantPurchase: return event.identifier
+        case let event as RoktEvent.CartItemInstantPurchaseInitiated: return event.identifier
+        case let event as RoktEvent.CartItemInstantPurchaseFailure: return event.identifier
+        case let event as RoktEvent.InstantPurchaseDismissal: return event.identifier
+        case let event as RoktEvent.CartItemDevicePay: return event.identifier
         default: return nil
         }
     }
