@@ -14,9 +14,10 @@
 import Flutter
 import UIKit
 import mParticle_Apple_SDK
+import RoktContracts
 
 class FLRoktLayoutView: NSObject, FlutterPlatformView {
-    let roktEmbeddedView: MPRoktEmbeddedView
+    let roktEmbeddedView: RoktEmbeddedView
     let id: Int64
     let channel: FlutterMethodChannel
     var constraints: [NSLayoutConstraint]?
@@ -28,7 +29,7 @@ class FLRoktLayoutView: NSObject, FlutterPlatformView {
     ) {
         self.id = viewId
         channel = FlutterMethodChannel(name: "rokt_layout_\(id)", binaryMessenger: messenger)
-        roktEmbeddedView = MPRoktEmbeddedView()
+        roktEmbeddedView = RoktEmbeddedView()
         super.init()
     }
 
