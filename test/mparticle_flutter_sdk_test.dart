@@ -511,7 +511,7 @@ void main() {
               cacheAttributes: {'key1': 'value1'}));
 
       await mp.rokt.selectShoppableAds(
-        identifier: 'placement1',
+        identifier: 'identifier1',
         attributes: {'attr1': 'val1'},
         roktConfig: roktConfig,
       );
@@ -519,7 +519,7 @@ void main() {
       expect(
           methodCall,
           isMethodCall('roktSelectShoppableAds', arguments: {
-            'placementId': 'placement1',
+            'identifier': 'identifier1',
             'attributes': {'attr1': 'val1'},
             'config': {
               'colorMode': 'dark',

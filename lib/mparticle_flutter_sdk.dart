@@ -343,7 +343,7 @@ class Rokt {
     RoktConfig? roktConfig,
   }) async {
     return await _channel.invokeMethod('roktSelectShoppableAds', {
-      'placementId': identifier,
+      'identifier': identifier,
       'attributes': attributes,
       'config': _roktConfigToMap(config: roktConfig),
     });
