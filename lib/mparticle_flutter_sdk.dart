@@ -333,8 +333,10 @@ class Rokt {
 
   /// Selects shoppable ads with a [identifier], optional [attributes], and optional [roktConfig].
   ///
-  /// This method currently has native implementation on iOS.
-  /// Android keeps a no-op bridge for cross-platform API compatibility.
+  /// This method is currently implemented only on iOS.
+  ///
+  /// Android keeps a no-op bridge for API compatibility, and web does not
+  /// implement this method yet.
   Future<void> selectShoppableAds({
     required String identifier,
     Map<String, dynamic>? attributes,

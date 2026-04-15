@@ -536,18 +536,6 @@ class MparticleFlutterSdkWeb {
           })
         ]);
         break;
-      case 'roktSelectShoppableAds':
-        final mpRokt = JsObject.fromBrowserObject(context['mParticle']['Rokt']);
-        final placementId = call.arguments['placementId'];
-        final attributes = call.arguments['attributes'] ?? {};
-
-        mpRokt.callMethod('selectShoppableAds', [
-          JsObject.jsify({
-            'identifier': placementId,
-            'attributes': attributes
-          })
-        ]);
-        break;
       default:
         throw PlatformException(
           code: 'Unimplemented',
