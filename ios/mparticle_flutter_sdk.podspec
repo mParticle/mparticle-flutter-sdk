@@ -15,8 +15,11 @@ mParticle Flutter Wrapper
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  s.dependency 'mParticle-Apple-SDK/mParticle', '~> 8.5'
-  s.platform = :ios, '8.0'
+  # SDK 9.0 split requires both umbrella and ObjC pods.
+  s.dependency 'mParticle-Apple-SDK', '~> 9.0'
+  s.dependency 'mParticle-Apple-SDK-ObjC', '~> 9.0'
+  s.dependency 'RoktContracts', '~> 0.1'
+  s.platform = :ios, '15.6'
 
   # Flutter.framework does not contain a i386 slice.
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'EXCLUDED_ARCHS[sdk=iphonesimulator*]' => 'i386' }

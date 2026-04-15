@@ -1,6 +1,7 @@
 import Flutter
 import UIKit
 import mParticle_Apple_SDK
+import RoktContracts
 
 public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
 
@@ -512,7 +513,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             let placementId = callArguments["placementId"] as? String {
             let attributes = callArguments["attributes"] as? [String: String] ?? [:]
 
-            var placeholders: [String: MPRoktEmbeddedView] = [:]
+            var placeholders: [String: RoktEmbeddedView] = [:]
             if let placeholderDict = callArguments["placeholders"] as? [Int64: String] {
                 for (key, value) in placeholderDict {
                     if let roktLayoutView = roktLayoutFactory.platformViews[key] {
@@ -521,19 +522,7 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                 }
             }
 
-            let callback = MPRoktEventCallback()
-            if let placeholderDict = callArguments["placeholders"] as? [Int64: String] {
-                callback.onEmbeddedSizeChange = { [placeholderDict] viewId, height in
-                    for (key, value) in placeholderDict {
-                        guard let platformView = self.roktLayoutFactory.platformViews[key] else {
-                            continue
-                        }
-                        platformView.sendUpdatedHeight(height: height)
-                    }
-                }
-            }
-
-            var roktConfig: MPRoktConfig?
+            var roktConfig: RoktConfig?
             if let configMap = callArguments["config"] as? [String: Any] {
                 roktConfig = buildRoktConfig(configMap: configMap)
             }
@@ -544,7 +533,18 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
 
             roktEventHandler.subscribeToEvents(identifier: placementId)
 
-            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, embeddedViews: placeholders, config: roktConfig, callbacks: callback)
+            MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, embeddedViews: placeholders, config: roktConfig) { [weak self] event in
+                guard let self else { return }
+                if let sizeChangedEvent = event as? RoktEvent.EmbeddedSizeChanged,
+                   let placeholderDict = callArguments["placeholders"] as? [Int64: String] {
+                    for (key, _) in placeholderDict {
+                        guard let platformView = self.roktLayoutFactory.platformViews[key] else {
+                            continue
+                        }
+                        platformView.sendUpdatedHeight(height: sizeChangedEvent.updatedHeight)
+                    }
+                }
+            }
             result(true)
         } else {
             print("Incorrect argument for \(call.method) iOS method")
@@ -581,35 +581,31 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   }
 }
 
-private func buildRoktConfig(configMap: [String: Any]) -> MPRoktConfig? {
-    let config = MPRoktConfig()
+private func buildRoktConfig(configMap: [String: Any]) -> RoktConfig? {
+    let configBuilder = RoktConfig.Builder()
     var isConfigEmpty = true
 
     if let colorModeString = configMap["colorMode"] as? String {
-        if #available(iOS 12.0, *) {
-            isConfigEmpty = false
-            switch colorModeString {
-            case "dark":
-                if #available(iOS 13.0, *) {
-                    config.colorMode = .dark
-                }
-            case "light":
-                config.colorMode = .light
-            default: // "system"
-                config.colorMode = .system
-            }
+        isConfigEmpty = false
+        switch colorModeString {
+        case "dark":
+            configBuilder.colorMode(.dark)
+        case "light":
+            configBuilder.colorMode(.light)
+        default:
+            configBuilder.colorMode(.system)
         }
     }
 
     if let cacheConfigMap = configMap["cacheConfig"] as? [String: Any] {
         isConfigEmpty = false
-        let cacheDuration = cacheConfigMap["cacheDurationInSeconds"] as? NSNumber ?? 0
+        let cacheDuration = (cacheConfigMap["cacheDurationInSeconds"] as? NSNumber)?.doubleValue ?? 0
         let cacheAttributes = cacheConfigMap["cacheAttributes"] as? [String: String]
-        config.cacheAttributes = cacheAttributes
-        config.cacheDuration = cacheDuration
+        let cacheConfig = RoktConfig.CacheConfig(cacheDuration: cacheDuration, cacheAttributes: cacheAttributes)
+        configBuilder.cacheConfig(cacheConfig)
     }
 
-    return isConfigEmpty ? nil : config
+    return isConfigEmpty ? nil : configBuilder.build()
 }
 
 private func asStringForStringKey(jsonDictionary: [String : Any]) -> String {
