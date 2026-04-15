@@ -561,6 +561,28 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             print("Incorrect argument for \(call.method) iOS method")
             result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing placementId or catalogItemId or success", details: nil))
         }
+    case "roktSelectShoppableAds":
+        if let callArguments = call.arguments as? [String: Any],
+           let placementId = callArguments["placementId"] as? String {
+            let attributes = callArguments["attributes"] as? [String: String] ?? [:]
+            var roktConfig: RoktConfig?
+            if let configMap = callArguments["config"] as? [String: Any] {
+                roktConfig = buildRoktConfig(configMap: configMap)
+            }
+
+            roktEventHandler.subscribeToEvents(identifier: placementId)
+            MParticle.sharedInstance().rokt.selectShoppableAds(
+                placementId,
+                attributes: attributes,
+                config: roktConfig
+            ) { _ in
+                // Event propagation is handled by subscribeToEvents(identifier:)
+            }
+            result(true)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing placementId", details: nil))
+        }
     default:
         print("mParticle flutter SDK for iOS does not support \(call.method)")
     }

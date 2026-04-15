@@ -235,6 +235,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         result.success(true)
       }
       "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
+      "roktSelectShoppableAds" -> this.roktSelectShoppableAds(call, result)
       "roktPurchaseFinalized" -> this.roktPurchaseFinalized(call, result)
       else -> {
         result.notImplemented()
@@ -804,6 +805,11 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         null,
       )
     }
+  }
+
+  private fun roktSelectShoppableAds(call: MethodCall, result: Result) {
+    // Parity with RN bridge: Android API is exposed but not implemented yet.
+    result.success(true)
   }
 
   private fun String.toColorMode(): RoktConfig.ColorMode =
