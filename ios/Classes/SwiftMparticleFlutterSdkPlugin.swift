@@ -574,10 +574,9 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             MParticle.sharedInstance().rokt.selectShoppableAds(
                 identifier,
                 attributes: attributes,
-                config: roktConfig
-            ) { _ in
-                // Event propagation is handled by subscribeToEvents(identifier:)
-            }
+                config: roktConfig,
+                onEvent: nil
+            )
             result(true)
         } else {
             print("Incorrect argument for \(call.method) iOS method")

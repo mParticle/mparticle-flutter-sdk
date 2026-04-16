@@ -26,6 +26,7 @@ import com.mparticle.commerce.*
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
+import com.mparticle.internal.Logger
 import com.mparticle.rokt.CacheConfig
 import com.mparticle.rokt.RoktConfig
 import com.mparticle.rokt.RoktEmbeddedView
@@ -809,6 +810,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
 
   private fun roktSelectShoppableAds(call: MethodCall, result: Result) {
     // Parity with RN bridge: Android API is exposed but not implemented yet.
+    Logger.warning("selectShoppableAds is not yet supported on Android")
     result.success(true)
   }
 
