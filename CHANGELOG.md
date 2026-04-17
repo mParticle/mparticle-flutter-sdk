@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Support for mParticle Apple SDK 9 and the shared `RoktContracts` event types (#68).
+- iOS-only `Rokt.selectShoppableAds` Dart API. Android provides a no-op bridge; web is unsupported (#69).
+- New Rokt events emitted on the `MPRoktEvents` `EventChannel`: `CartItemInstantPurchaseInitiated`, `CartItemInstantPurchaseFailure`, `InstantPurchaseDismissal`, `CartItemDevicePay`.
+
+### Changed
+
+- **BREAKING**: iOS minimum deployment target raised from `8.0` to `15.6`.
+- **BREAKING**: iOS CocoaPods dependency replaced — `mParticle-Apple-SDK/mParticle ~> 8.5` → `mParticle-Apple-SDK ~> 9.0` (subspecs were removed in Apple SDK 9).
+
+See [MIGRATING.md](./MIGRATING.md) for the full 1.x → 2.0 upgrade guide.
+
 ## [1.1.2] - 2026-04-02
 
 - fix: Make identityRequest optional for identify, login, and logout (#61)
