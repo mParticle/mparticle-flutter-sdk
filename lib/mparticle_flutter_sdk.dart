@@ -331,6 +331,24 @@ class Rokt {
     return await _channel.invokeMethod('roktSelectPlacements', params);
   }
 
+  /// Selects shoppable ads with a [identifier], optional [attributes], and optional [roktConfig].
+  ///
+  /// This method is currently implemented only on iOS.
+  ///
+  /// Android keeps a no-op bridge for API compatibility, and web does not
+  /// implement this method yet.
+  Future<void> selectShoppableAds({
+    required String identifier,
+    Map<String, dynamic>? attributes,
+    RoktConfig? roktConfig,
+  }) async {
+    return await _channel.invokeMethod('roktSelectShoppableAds', {
+      'identifier': identifier,
+      'attributes': attributes,
+      'config': _roktConfigToMap(config: roktConfig),
+    });
+  }
+
   /// Notifies Rokt that a purchase has been finalized
   ///
   /// Use this method to inform Rokt that a purchase has been completed or failed

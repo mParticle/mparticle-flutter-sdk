@@ -502,5 +502,33 @@ void main() {
             'success': true,
           }));
     });
+
+    test('rokt select shoppable ads', () async {
+      final roktConfig = RoktConfig(
+          colorMode: ColorMode.dark,
+          cacheConfig: CacheConfig(
+              cacheDurationInSeconds: 100,
+              cacheAttributes: {'key1': 'value1'}));
+
+      await mp.rokt.selectShoppableAds(
+        identifier: 'identifier1',
+        attributes: {'attr1': 'val1'},
+        roktConfig: roktConfig,
+      );
+
+      expect(
+          methodCall,
+          isMethodCall('roktSelectShoppableAds', arguments: {
+            'identifier': 'identifier1',
+            'attributes': {'attr1': 'val1'},
+            'config': {
+              'colorMode': 'dark',
+              'cacheConfig': {
+                'cacheDurationInSeconds': 100,
+                'cacheAttributes': {'key1': 'value1'}
+              }
+            },
+          }));
+    });
   });
 }
