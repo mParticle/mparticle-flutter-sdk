@@ -577,7 +577,6 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
                 roktConfig = buildRoktConfig(configMap: configMap)
             }
 
-            roktEventHandler.subscribeToEvents(identifier: identifier)
             MParticle.sharedInstance().rokt.selectShoppableAds(
                 identifier,
                 attributes: attributes,
