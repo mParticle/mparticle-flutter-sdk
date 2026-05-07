@@ -117,7 +117,7 @@ To install mParticle on an iOS platform:
 2. Install the SDK using CocoaPods:
 
 ```bash
-$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 8.5.0 or later
+$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.1.0 or later
 $ pod install
 ```
 
