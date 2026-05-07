@@ -508,6 +508,15 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
         }
     case "setSdkVersion":
         MParticle._setWrapperSdk_internal(MPWrapperSdk.flutter, version: "")
+    case "roktSubscribeToEvents":
+        if let callArguments = call.arguments as? [String: Any],
+           let identifier = callArguments["identifier"] as? String {
+            roktEventHandler.subscribeToEvents(identifier: identifier)
+            result(true)
+        } else {
+            print("Incorrect argument for \(call.method) iOS method")
+            result(FlutterError(code: "INVALID_ARGUMENTS", message: "Missing identifier", details: nil))
+        }
     case "roktSelectPlacements":
         if let callArguments = call.arguments as? [String: Any],
             let placementId = callArguments["placementId"] as? String {
@@ -530,8 +539,6 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
             if let typefaces = fontFilePathMap {
                 registerPartnerFonts(typefaces)
             }
-
-            roktEventHandler.subscribeToEvents(identifier: placementId)
 
             MParticle.sharedInstance().rokt.selectPlacements(placementId, attributes: attributes, embeddedViews: placeholders, config: roktConfig) { [weak self] event in
                 guard let self else { return }

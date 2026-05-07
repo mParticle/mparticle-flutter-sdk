@@ -235,6 +235,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         setSdkVersion()
         result.success(true)
       }
+      "roktSubscribeToEvents" -> this.roktSubscribeToEvents(call, result)
       "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
       "roktSelectShoppableAds" -> this.roktSelectShoppableAds(call, result)
       "roktPurchaseFinalized" -> this.roktPurchaseFinalized(call, result)
@@ -756,22 +757,33 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
       }
 
       MParticle.getInstance()?.let { instance ->
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          activity?.let {
-            roktEventHandler?.subscribeToEvents(
-              events = instance.Rokt().events(placementId),
-              activity = it,
-              identifier = placementId,
-            )
-          }
-        }
-
         instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)
         result.success(true)
       } ?: result.error(TAG, "No mParticle instance exists", null)
     } catch (e: Exception) {
       result.error(TAG, e.localizedMessage, null)
     }
+  }
+
+  private fun roktSubscribeToEvents(call: MethodCall, result: Result) {
+    val identifier = call.argument<String>("identifier")
+    if (identifier.isNullOrBlank()) {
+      result.error(TAG, "Missing identifier", null)
+      return
+    }
+
+    MParticle.getInstance()?.let { instance ->
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+        activity?.let { currentActivity ->
+          roktEventHandler?.subscribeToEvents(
+            events = instance.Rokt().events(identifier),
+            activity = currentActivity,
+            identifier = identifier,
+          )
+        }
+      }
+      result.success(true)
+    } ?: result.error(TAG, "No mParticle instance exists", null)
   }
 
   private fun buildRoktConfig(configMap: Map<String, Any>): RoktConfig {
