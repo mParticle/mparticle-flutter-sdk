@@ -32,6 +32,7 @@ target 'Runner' do
   use_modular_headers!
 
   pod 'mParticle-Rokt'
+  pod 'RoktPaymentExtension'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end

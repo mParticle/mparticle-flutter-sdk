@@ -65,7 +65,7 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initMparticle() async {
     mpInstance = await MparticleFlutterSdk.getInstance();
-    mpInstance?.rokt.events('MSDKEmbeddedLayout', (event) {
+    mpInstance?.rokt.events('StgRoktShoppableAds', (event) {
       print("Rokt event: $event");
     });
     if (mpInstance != null) {

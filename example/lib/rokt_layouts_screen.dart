@@ -192,7 +192,7 @@ class _RoktLayoutsScreenState extends State<RoktLayoutsScreen> {
                       .identify(identityRequest: identityRequest);
 
                   widget.mpInstance?.rokt.selectShoppableAds(
-                      identifier: 'MSDKShoppableAdsLayout',
+                      identifier: 'StgRoktShoppableAds',
                       attributes: _getShoppableAdsAttributes());
                   print('${_getPlatform()} Rokt selectShoppableAds called');
                 } catch (e) {
