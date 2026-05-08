@@ -19,6 +19,7 @@ import RoktContracts
 class RoktEventHandler: NSObject, FlutterStreamHandler {
 
     private var eventListeners: [String: [FlutterEventSink]] = [:]
+    private var subscribedIdentifiers: Set<String> = []
     private let eventQueue = DispatchQueue(label: "com.mparticle.rokt.event.queue")
     private let EVENT_CHANNEL_NAME = "MPRoktEvents"
 
@@ -59,6 +60,18 @@ class RoktEventHandler: NSObject, FlutterStreamHandler {
 
 
     func subscribeToEvents(identifier: String) {
+        let shouldSubscribe = eventQueue.sync {
+            if subscribedIdentifiers.contains(identifier) {
+                return false
+            }
+            subscribedIdentifiers.insert(identifier)
+            return true
+        }
+
+        guard shouldSubscribe else {
+            return
+        }
+
         MParticle.sharedInstance().rokt.events(identifier) { event in
             var params: [String: String] = [:]
 
