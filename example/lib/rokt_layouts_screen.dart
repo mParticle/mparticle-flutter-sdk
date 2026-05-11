@@ -48,6 +48,30 @@ class _RoktLayoutsScreenState extends State<RoktLayoutsScreen> {
     return {};
   }
 
+  Map<String, String> _getShoppableAdsAttributes() {
+    return {
+      'country': 'US',
+      'shippingstate': 'NY',
+      'shippingzipcode': '10001',
+      'firstname': 'Jenny',
+      'stripeApplePayAvailable': 'true',
+      'last4digits': '4444',
+      'shippingaddress1': '123 Main St',
+      'colormode': 'LIGHT',
+      'billingzipcode': '07762',
+      'paymenttype': 'ApplePay',
+      'shippingcountry': 'US',
+      'sandbox': 'true',
+      'shippingaddress2': 'Apt 4B',
+      'confirmationref': 'ORD-12345',
+      'shippingcity': 'New York',
+      'newToApplePay': 'false',
+      'applePayCapabilities': 'true',
+      'lastname': 'Smith',
+      'email': 'jenny.smith@example.com',
+    };
+  }
+
   String _getPlatform() {
     if (kIsWeb) {
       return 'Web';
@@ -149,6 +173,30 @@ class _RoktLayoutsScreenState extends State<RoktLayoutsScreen> {
                   print('${_getPlatform()} Rokt selectPlacements called');
                 } catch (e) {
                   print('Error calling Rokt selectPlacements: $e');
+                }
+              }),
+              const SizedBox(height: 20),
+              buildButton('Select Shoppable Ads (iOS)', () async {
+                if (!Platform.isIOS) {
+                  print('${_getPlatform()} SelectShoppableAds is a no-op');
+                  return;
+                }
+
+                var identityRequest = MparticleFlutterSdk.identityRequest;
+                identityRequest.setIdentity(
+                    identityType: IdentityType.CustomerId,
+                    value: _getIdentityValue());
+
+                try {
+                  await widget.mpInstance?.identity
+                      .identify(identityRequest: identityRequest);
+
+                  widget.mpInstance?.rokt.selectShoppableAds(
+                      identifier: 'StgRoktShoppableAds',
+                      attributes: _getShoppableAdsAttributes());
+                  print('${_getPlatform()} Rokt selectShoppableAds called');
+                } catch (e) {
+                  print('Error calling Rokt selectShoppableAds: $e');
                 }
               }),
               Center(

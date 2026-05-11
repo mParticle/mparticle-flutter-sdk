@@ -117,7 +117,7 @@ To install mParticle on an iOS platform:
 2. Install the SDK using CocoaPods:
 
 ```bash
-$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 8.5.0 or later
+$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.1.0 or later
 $ pod install
 ```
 
@@ -254,6 +254,58 @@ You must first call `getInstance` on `MparticleFlutterSdk` before each method is
 
 ```dart
 MparticleFlutterSdk? mpInstance = await MparticleFlutterSdk.getInstance();
+```
+
+### Rokt
+
+`Rokt` is exposed under `mpInstance?.rokt` and supports:
+
+- `events(String identifier, void Function(dynamic event) onEvent)`
+- `selectPlacements(...)`
+- `selectShoppableAds(...)` (iOS implementation; Android no-op for parity; web unsupported)
+- `purchaseFinalized(...)` (iOS)
+
+Subscribe to events for a placement identifier before selecting placements:
+
+```dart
+mpInstance?.rokt.events('MSDKEmbeddedLayout', (event) {
+  print('Rokt event: $event');
+});
+
+await mpInstance?.rokt.selectPlacements(
+  identifier: 'MSDKEmbeddedLayout',
+  attributes: {'email': 'user@example.com'},
+);
+```
+
+For iOS shoppable ads:
+
+```dart
+mpInstance?.rokt.events('StgRoktShoppableAds', (event) {
+  print('Rokt shoppable event: $event');
+});
+
+await mpInstance?.rokt.selectShoppableAds(
+  identifier: 'StgRoktShoppableAds',
+  attributes: {'email': 'user@example.com'},
+);
+```
+
+To enable iOS payment flows for shoppable ads, add the payment extension pod in your app `ios/Podfile` and register it natively after `MParticle.sharedInstance().start(with:)`:
+
+```ruby
+pod 'RoktPaymentExtension'
+```
+
+```swift
+import RoktPaymentExtension
+
+if let paymentExtension = RoktPaymentExtension(
+  applePayMerchantId: "merchant.com.example.app",
+  urlScheme: nil
+) {
+  MParticle.sharedInstance().rokt.registerPaymentExtension(paymentExtension)
+}
 ```
 
 ### Custom Events

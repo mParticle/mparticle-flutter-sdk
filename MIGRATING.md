@@ -92,6 +92,6 @@ await MparticleFlutterSdk.getInstance().then((mp) => mp?.rokt.selectShoppableAds
 - **Android**: the method is exposed for API parity but is a no-op (logs a warning).
 - **Web**: not implemented — calls will throw `MissingPluginException`.
 
-Events for a shoppable ads placement are delivered on the existing `MPRoktEvents` `EventChannel` once `selectShoppableAds` has been called.
+Rokt event delivery now uses explicit subscription by identifier through `Rokt.events(...)`. Call `events(identifier, ...)` before `selectPlacements(...)` or `selectShoppableAds(...)` for that identifier.
 
-The Rokt Apple Pay payment extension (for example `RoktStripePaymentExtension`) is **not** proxied through Dart. Integrators must register it directly from native Swift/Objective-C in the host app (for example `ios/Runner/AppDelegate.swift`), after `MParticle.sharedInstance().start(with:)`. See the [Apple SDK Rokt integration section](https://github.com/mParticle/mparticle-apple-sdk/blob/main/README.md#rokt-integration) for the exact snippet.
+The Rokt payment extension (for example `RoktPaymentExtension`) is **not** proxied through Dart. Integrators must add the pod and register it directly from native Swift/Objective-C in the host app (for example `ios/Runner/AppDelegate.swift`), after `MParticle.sharedInstance().start(with:)`.

@@ -305,6 +305,13 @@ class Rokt {
 
   static const MethodChannel _channel =
       const MethodChannel('mparticle_flutter_sdk');
+  static const EventChannel _eventChannel = EventChannel('MPRoktEvents');
+
+  /// Subscribes to Rokt events for a specific [identifier].
+  void events(String identifier, void Function(dynamic event) onEvent) {
+    _channel.invokeMethod('roktSubscribeToEvents', {'identifier': identifier});
+    _eventChannel.receiveBroadcastStream().listen(onEvent);
+  }
 
   /// Selects placements with a [identifier], optional [attributes], optional [roktConfig], and optional [fontFilePathMap].
   ///
