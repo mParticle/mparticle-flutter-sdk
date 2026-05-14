@@ -15,8 +15,8 @@ mParticle Flutter Wrapper
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
-  # SDK 9.1 umbrella pod pulls required transitive dependencies.
-  s.dependency 'mParticle-Apple-SDK', '~> 9.1'
+  # SDK 9.2 umbrella pod pulls required transitive dependencies.
+  s.dependency 'mParticle-Apple-SDK', '~> 9.2'
   s.platform = :ios, '15.6'
 
   # Flutter.framework does not contain a i386 slice.

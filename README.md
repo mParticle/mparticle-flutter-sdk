@@ -44,7 +44,9 @@ To install mParticle on an Android platform:
 
 ```groovy
 dependencies {
-    implementation 'com.mparticle:android-core:5+'
+    implementation 'com.mparticle:android-core:5.79.0'
+    // Required only if you use Rokt APIs from Flutter
+    implementation 'com.mparticle:android-rokt-kit:5.79.0'
 
     // Required for gathering Android Advertising ID (see below)
     implementation 'com.google.android.gms:play-services-ads-identifier:16.0.0'
@@ -63,6 +65,8 @@ package com.example.myapp;
 
 import android.app.Application;
 import com.mparticle.MParticle;
+import com.mparticle.MParticleOptions;
+import com.mparticle.networking.NetworkOptions;
 
 public class MyApplication extends Application {
     @Override
@@ -70,6 +74,7 @@ public class MyApplication extends Application {
         super.onCreate();
         MParticleOptions options = MParticleOptions.builder(this)
             .credentials("REPLACE ME WITH KEY","REPLACE ME WITH SECRET")
+            .networkOptions(NetworkOptions.withNetworkOptions("https://rkt.example.com"))
             .setLogLevel(MParticle.LogLevel.VERBOSE)
             .identify(identifyRequest)
             .identifyTask(
@@ -88,12 +93,14 @@ public class MyApplication extends Application {
 ```kotlin
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
+import com.mparticle.networking.NetworkOptions
 
 class ExampleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val options = MParticleOptions.builder(this)
             .credentials("REPLACE ME WITH KEY", "REPLACE ME WITH SECRET")
+            .networkOptions(NetworkOptions.withNetworkOptions("https://rkt.example.com"))
             .build()
         MParticle.start(options)
     }
@@ -117,7 +124,7 @@ To install mParticle on an iOS platform:
 2. Install the SDK using CocoaPods:
 
 ```bash
-$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.1.0 or later
+$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.2.0 or later
 $ pod install
 ```
 
@@ -136,6 +143,9 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
         
        // Override point for customization after application launch.
         let mParticleOptions = MParticleOptions(key: "<<<App Key Here>>>", secret: "<<<App Secret Here>>>")
+        let networkOptions = MPNetworkOptions()
+        networkOptions.customBaseURL = URL(string: "https://rkt.example.com")
+        mParticleOptions.networkOptions = networkOptions
         
        //Please see the Identity page for more information on building this object
         let request = MPIdentityApiRequest()
@@ -182,6 +192,9 @@ Next, you'll need to start the SDK:
 
     MParticleOptions *mParticleOptions = [MParticleOptions optionsWithKey:@"REPLACE ME"
                                                                    secret:@"REPLACE ME"];
+    MPNetworkOptions *networkOptions = [MPNetworkOptions new];
+    networkOptions.customBaseURL = [NSURL URLWithString:@"https://rkt.example.com"];
+    mParticleOptions.networkOptions = networkOptions;
     
     //Please see the Identity page for more information on building this object
     MPIdentityApiRequest *request = [MPIdentityApiRequest requestWithEmptyUser];
