@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Apple SDK `MPNetworkOptions.customBaseURL` configuration in iOS initialization examples for CNAME routing.
+- Add Android initialization examples for CNAME routing via `NetworkOptions.withNetworkOptions(...)`.
+
+### Changed
+
+- Bump iOS CocoaPods dependency from `mParticle-Apple-SDK ~> 9.1` to `~> 9.2`.
+- Pin Android Gradle dependencies in plugin/example docs to `android-core:5.79.0` and `android-rokt-kit:5.79.0`.
+
 ## [2.0.0] - 2026-04-17
 
 ### Added
