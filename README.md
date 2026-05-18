@@ -66,7 +66,6 @@ package com.example.myapp;
 import android.app.Application;
 import com.mparticle.MParticle;
 import com.mparticle.MParticleOptions;
-import com.mparticle.networking.NetworkOptions;
 
 public class MyApplication extends Application {
     @Override
@@ -74,7 +73,6 @@ public class MyApplication extends Application {
         super.onCreate();
         MParticleOptions options = MParticleOptions.builder(this)
             .credentials("REPLACE ME WITH KEY","REPLACE ME WITH SECRET")
-            .networkOptions(NetworkOptions.withNetworkOptions("https://rkt.example.com"))
             .setLogLevel(MParticle.LogLevel.VERBOSE)
             .identify(identifyRequest)
             .identifyTask(
@@ -93,18 +91,36 @@ public class MyApplication extends Application {
 ```kotlin
 import com.mparticle.MParticle
 import com.mparticle.MParticleOptions
-import com.mparticle.networking.NetworkOptions
 
 class ExampleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val options = MParticleOptions.builder(this)
             .credentials("REPLACE ME WITH KEY", "REPLACE ME WITH SECRET")
-            .networkOptions(NetworkOptions.withNetworkOptions("https://rkt.example.com"))
             .build()
         MParticle.start(options)
     }
 }
+```
+
+Optional: if your team uses a custom CNAME endpoint, configure `NetworkOptions` separately:
+
+```java
+import com.mparticle.networking.NetworkOptions;
+
+MParticleOptions options = MParticleOptions.builder(this)
+    .credentials("REPLACE ME WITH KEY","REPLACE ME WITH SECRET")
+    .networkOptions(NetworkOptions.withNetworkOptions("https://rkt.example.com"))
+    .build();
+```
+
+```kotlin
+import com.mparticle.networking.NetworkOptions
+
+val options = MParticleOptions.builder(this)
+    .credentials("REPLACE ME WITH KEY", "REPLACE ME WITH SECRET")
+    .networkOptions(NetworkOptions.withNetworkOptions("https://rkt.example.com"))
+    .build()
 ```
 
 > **Warning:** Don't log events in your `Application.onCreate()`. Android may instantiate your `Application` class for a lot of reasons, in the background, while the user isn't even using their device. 
@@ -143,9 +159,6 @@ func application(_ application: UIApplication, didFinishLaunchingWithOptions lau
         
        // Override point for customization after application launch.
         let mParticleOptions = MParticleOptions(key: "<<<App Key Here>>>", secret: "<<<App Secret Here>>>")
-        let networkOptions = MPNetworkOptions()
-        networkOptions.customBaseURL = URL(string: "https://rkt.example.com")
-        mParticleOptions.networkOptions = networkOptions
         
        //Please see the Identity page for more information on building this object
         let request = MPIdentityApiRequest()
@@ -192,9 +205,6 @@ Next, you'll need to start the SDK:
 
     MParticleOptions *mParticleOptions = [MParticleOptions optionsWithKey:@"REPLACE ME"
                                                                    secret:@"REPLACE ME"];
-    MPNetworkOptions *networkOptions = [MPNetworkOptions new];
-    networkOptions.customBaseURL = [NSURL URLWithString:@"https://rkt.example.com"];
-    mParticleOptions.networkOptions = networkOptions;
     
     //Please see the Identity page for more information on building this object
     MPIdentityApiRequest *request = [MPIdentityApiRequest requestWithEmptyUser];
@@ -211,6 +221,20 @@ Next, you'll need to start the SDK:
     
     return YES;
 }
+```
+
+Optional: if your team uses a custom CNAME endpoint, configure `MPNetworkOptions` separately:
+
+```swift
+let networkOptions = MPNetworkOptions()
+networkOptions.customBaseURL = URL(string: "https://rkt.example.com")
+mParticleOptions.networkOptions = networkOptions
+```
+
+```objective-c
+MPNetworkOptions *networkOptions = [MPNetworkOptions new];
+networkOptions.customBaseURL = [NSURL URLWithString:@"https://rkt.example.com"];
+mParticleOptions.networkOptions = networkOptions;
 ```
 
 See [Identity](https://docs.mparticle.com/developers/sdk/ios/idsync/) for more information on supplying an `MPIdentityApiRequest` object during SDK initialization.
