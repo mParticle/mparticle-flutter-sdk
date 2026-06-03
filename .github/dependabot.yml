@@ -1,0 +1,47 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 4
+    labels:
+      - dependabot
+    commit-message:
+      prefix: chore
+  - package-ecosystem: gradle
+    directory: /android
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 4
+    labels:
+      - dependabot
+    commit-message:
+      prefix: chore
+  - package-ecosystem: gradle
+    directory: /example/android
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    labels:
+      - dependabot
+    commit-message:
+      prefix: chore
+  - package-ecosystem: cocoapods
+    directory: /ios
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 4
+    labels:
+      - dependabot
+    commit-message:
+      prefix: chore
+  - package-ecosystem: cocoapods
+    directory: /example/ios
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 2
+    labels:
+      - dependabot
+    commit-message:
+      prefix: chore
