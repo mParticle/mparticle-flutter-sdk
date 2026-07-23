@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Make `android-rokt-kit` a `compileOnly` plugin dependency and guard Android Rokt registration behind a runtime classpath check, matching the optional Rokt kit pattern used in react-native-mparticle.
+
 ## [2.2.0] - 2026-07-22
 
 ### Added
