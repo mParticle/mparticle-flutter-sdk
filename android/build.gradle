@@ -2,7 +2,7 @@ group 'com.mparticle.mparticle_flutter_sdk'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.9.22'
+    ext.kotlin_version = '2.1.20'
     repositories {
         google()
         mavenCentral()
@@ -41,14 +41,15 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 23
         compileSdkVersion 34
     }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'com.mparticle:android-core:5.79.0'
+    implementation 'com.mparticle:android-core:6.0.0'
+    implementation 'com.mparticle:android-rokt-kit:6.0.0'
 
     // Required for Rokt event subscription
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"

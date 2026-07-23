@@ -19,3 +19,6 @@ local.properties
 mparticle_flutter_sdk.iml
 
 doc/
+
+.build/
+.swiftpm/

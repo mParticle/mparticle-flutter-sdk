@@ -1,7 +1,7 @@
 package com.mparticle.mparticle_flutter_sdk
 
 import android.content.Context
-import com.mparticle.rokt.RoktEmbeddedView
+import com.mparticle.kits.RoktEmbeddedView
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView

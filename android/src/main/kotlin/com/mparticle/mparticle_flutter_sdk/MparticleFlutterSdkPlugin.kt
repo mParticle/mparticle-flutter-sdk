@@ -20,16 +20,17 @@ import com.mparticle.identity.IdentityHttpResponse
 import com.mparticle.identity.MParticleUser
 import com.mparticle.MParticle
 import com.mparticle.MPEvent
-import com.mparticle.UserAttributeListener
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.WrapperSdk
 import com.mparticle.commerce.*
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
 import com.mparticle.internal.Logger
-import com.mparticle.rokt.CacheConfig
-import com.mparticle.rokt.RoktConfig
-import com.mparticle.rokt.RoktEmbeddedView
+import com.mparticle.kits.RoktEmbeddedView
+import com.mparticle.kits.rokt
+import com.rokt.roktsdk.CacheConfig
+import com.rokt.roktsdk.RoktConfig
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
@@ -111,12 +112,13 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         } ?: result.error(TAG, "Missing attributeKey", null)
       }
       "getUserAttributes" -> this.getUser(call, result)?.let {
-        it.getUserAttributes(object : UserAttributeListener {
+        it.getUserAttributes(object : TypedUserAttributeListener {
           override fun onUserAttributesReceived(
-            userAttributes: Map<String, String>?,
-            userAttributeLists: Map<String, List<String>>?, mpid: Long?
+            userAttributes: Map<String, Any?>,
+            userAttributeLists: Map<String, List<String?>?>,
+            mpid: Long,
           ) {
-            result.success(sanitizeMapToString(userAttributes))
+            result.success(sanitizeMapToString(userAttributes.mapValues { (_, value) -> value?.toString() }))
           }
         })
         Unit
@@ -757,7 +759,13 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
       }
 
       MParticle.getInstance()?.let { instance ->
-        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)
+        instance.rokt.selectPlacements(
+          placementId,
+          stringAttributes,
+          placeHolders.takeIf { it.isNotEmpty() },
+          customFonts.takeIf { it.isNotEmpty() },
+          config,
+        )
         result.success(true)
       } ?: result.error(TAG, "No mParticle instance exists", null)
     } catch (e: Exception) {
@@ -776,7 +784,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
         activity?.let { currentActivity ->
           roktEventHandler?.subscribeToEvents(
-            events = instance.Rokt().events(identifier),
+            events = instance.rokt.events(identifier),
             activity = currentActivity,
             identifier = identifier,
           )
@@ -805,10 +813,10 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
     val catalogItemId = call.argument<String>("catalogItemId")
     val success = call.argument<Boolean>("success") ?: true
     if (placementId != null && catalogItemId != null) {
-      MParticle.getInstance()?.Rokt()?.purchaseFinalized(
-        placementId = placementId,
-        catalogItemId = catalogItemId,
-        status = success,
+      MParticle.getInstance()?.rokt?.purchaseFinalized(
+        placementId,
+        catalogItemId,
+        success,
       )
       result.success("Success")
     } else {

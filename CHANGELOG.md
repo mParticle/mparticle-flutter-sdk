@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-22
+
+### Added
+
+- Add Swift Package Manager support for the iOS plugin (`ios/mparticle_flutter_sdk/Package.swift`).
+
+### Changed
+
+- Bump iOS CocoaPods dependency from `mParticle-Apple-SDK ~> 9.2` to `~> 9.3`.
+- Bump Android Gradle dependencies to `android-core:6.0.0` and `android-rokt-kit:6.0.0`.
+- **BREAKING**: Android `minSdkVersion` raised from `16` to `23` (required by Rokt SDK 6.x transitive dependencies).
+- Migrate Android Rokt bridge code to Android SDK 6.0 APIs (`com.mparticle.kits`, `com.rokt.roktsdk`, `MParticle.rokt`).
+- Replace deprecated `UserAttributeListener` with `TypedUserAttributeListener` on Android.
+
+### Removed
+
+- Android Rokt layout padding callbacks (`onMarginChanged`) — removed upstream in Android SDK 6.0.
+
 ## [2.1.0] - 2026-05-19
 
 ### Added
