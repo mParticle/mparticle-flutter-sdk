@@ -22,3 +22,17 @@ jobs:
   build-web:
     needs: test
     uses: ./.github/workflows/build-web.yml
+
+  pr-notify:
+    if: >
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false
+    needs:
+      - test
+      - build-android
+      - build-ios
+      - build-web
+    name: Notify GChat
+    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@88d0e118869cc788aae18ba37635fa851c879b73 # main
+    secrets:
+      gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
