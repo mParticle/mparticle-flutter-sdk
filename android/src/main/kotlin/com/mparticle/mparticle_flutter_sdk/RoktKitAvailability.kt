@@ -1,7 +1,6 @@
 package com.mparticle.mparticle_flutter_sdk
 
 import io.flutter.plugin.common.BinaryMessenger
-import io.flutter.plugin.platform.PlatformViewRegistry
 
 internal object RoktKitAvailability {
     const val REQUIRED_MESSAGE =
@@ -24,12 +23,5 @@ internal object RoktKitAvailability {
             return null
         }
         return RoktBridge(messenger)
-    }
-
-    fun registerPlatformView(
-        registry: PlatformViewRegistry,
-        delegate: RoktPluginDelegate,
-    ) {
-        delegate.registerPlatformView(registry)
     }
 }

@@ -50,12 +50,7 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
     flutterAssets = flutterPluginBinding.flutterAssets
     applicationContext = flutterPluginBinding.applicationContext
     roktDelegate = RoktKitAvailability.createDelegate(flutterPluginBinding.binaryMessenger)
-    roktDelegate?.let { delegate ->
-      RoktKitAvailability.registerPlatformView(
-        flutterPluginBinding.platformViewRegistry,
-        delegate,
-      )
-    }
+    roktDelegate?.registerPlatformView(flutterPluginBinding.platformViewRegistry)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
