@@ -44,9 +44,11 @@ To install mParticle on an Android platform:
 
 ```groovy
 dependencies {
-    implementation 'com.mparticle:android-core:5.79.0'
-    // Required only if you use Rokt APIs from Flutter
-    implementation 'com.mparticle:android-rokt-kit:5.79.0'
+    implementation 'com.mparticle:android-core:6.0.0'
+
+    // Required if you use Rokt APIs or RoktLayout from Flutter.
+    // RoktEmbeddedView and related types live in android-rokt-kit, not android-core.
+    implementation 'com.mparticle:android-rokt-kit:6.0.0'
 
     // Required for gathering Android Advertising ID (see below)
     implementation 'com.google.android.gms:play-services-ads-identifier:16.0.0'
@@ -55,6 +57,8 @@ dependencies {
     implementation 'com.android.installreferrer:installreferrer:1.0'
 }
 ```
+
+> **Note:** The Flutter plugin compiles against `android-rokt-kit` but does not force it as a transitive dependency. Apps that use Rokt must add `android-rokt-kit` explicitly, matching the version of `android-core`. Without it, non-Rokt mParticle APIs continue to work, but Rokt method channel calls return an error.
 
 2. Grab your mParticle key and secret from [your workspace's dashboard](https://app.mparticle.com/setup/inputs/apps) and construct an `MParticleOptions` object.
 
@@ -140,7 +144,7 @@ To install mParticle on an iOS platform:
 2. Install the SDK using CocoaPods:
 
 ```bash
-$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.2.0 or later
+$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.3.1 or later
 $ pod install
 ```
 

@@ -317,7 +317,7 @@ class Rokt {
   ///
   /// This method calls the Rokt selectPlacements API on each platform:
   /// - Web: mParticle.Rokt.selectPlacements()
-  /// - Android: MParticle.getInstance()?.Rokt().selectPlacements()
+  /// - Android: MParticle.getInstance()?.rokt.selectPlacements()
   /// - iOS: MParticle.sharedInstance().rokt.selectPlacements()
   Future<void> selectPlacements({
     required String identifier,

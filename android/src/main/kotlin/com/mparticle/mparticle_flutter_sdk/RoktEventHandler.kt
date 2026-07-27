@@ -7,7 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.mparticle.RoktEvent
+import com.rokt.roktsdk.RoktEvent
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.EventChannel
 import kotlinx.coroutines.Job
@@ -99,16 +99,16 @@ class RoktEventHandler(private val messenger: BinaryMessenger) {
 
     private val RoktEvent.placementId: String?
         get() = when (this) {
-            is RoktEvent.FirstPositiveEngagement -> placementId
-            is RoktEvent.OfferEngagement -> placementId
-            is RoktEvent.PlacementClosed -> placementId
-            is RoktEvent.PlacementCompleted -> placementId
-            is RoktEvent.PlacementFailure -> placementId
-            is RoktEvent.PlacementInteractive -> placementId
-            is RoktEvent.PlacementReady -> placementId
-            is RoktEvent.PositiveEngagement -> placementId
-            is RoktEvent.OpenUrl -> placementId
-            is RoktEvent.CartItemInstantPurchase -> placementId
+            is RoktEvent.FirstPositiveEngagement -> identifier
+            is RoktEvent.OfferEngagement -> identifier
+            is RoktEvent.PlacementClosed -> identifier
+            is RoktEvent.PlacementCompleted -> identifier
+            is RoktEvent.PlacementFailure -> identifier
+            is RoktEvent.PlacementInteractive -> identifier
+            is RoktEvent.PlacementReady -> identifier
+            is RoktEvent.PositiveEngagement -> identifier
+            is RoktEvent.OpenUrl -> identifier
+            is RoktEvent.CartItemInstantPurchase -> identifier
             else -> null
         }
 

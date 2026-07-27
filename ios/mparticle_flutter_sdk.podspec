@@ -13,10 +13,11 @@ mParticle Flutter Wrapper
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
-  s.source_files = 'Classes/**/*'
+  s.source_files = 'mparticle_flutter_sdk/Sources/mparticle_flutter_sdk/**/*.{h,m,swift}'
+  s.public_header_files = 'mparticle_flutter_sdk/Sources/mparticle_flutter_sdk/include/**/*.h'
   s.dependency 'Flutter'
-  # SDK 9.2 umbrella pod pulls required transitive dependencies.
-  s.dependency 'mParticle-Apple-SDK', '~> 9.2'
+  # SDK 9.3 umbrella pod pulls required transitive dependencies.
+  s.dependency 'mParticle-Apple-SDK', '~> 9.3'
   s.platform = :ios, '15.6'
 
   # Flutter.framework does not contain a i386 slice.

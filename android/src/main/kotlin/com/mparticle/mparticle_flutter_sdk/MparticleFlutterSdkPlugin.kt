@@ -2,8 +2,6 @@ package com.mparticle.mparticle_flutter_sdk
 
 import android.app.Activity
 import android.content.Context
-import android.graphics.Typeface
-import android.os.Build
 import androidx.annotation.NonNull
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -20,22 +18,17 @@ import com.mparticle.identity.IdentityHttpResponse
 import com.mparticle.identity.MParticleUser
 import com.mparticle.MParticle
 import com.mparticle.MPEvent
-import com.mparticle.UserAttributeListener
+import com.mparticle.TypedUserAttributeListener
 import com.mparticle.WrapperSdk
 import com.mparticle.commerce.*
 import com.mparticle.consent.CCPAConsent
 import com.mparticle.consent.ConsentState
 import com.mparticle.consent.GDPRConsent
-import com.mparticle.internal.Logger
-import com.mparticle.rokt.CacheConfig
-import com.mparticle.rokt.RoktConfig
-import com.mparticle.rokt.RoktEmbeddedView
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 
 import org.json.JSONObject
 import kotlin.IllegalArgumentException
-import java.lang.ref.WeakReference
 
 
 /** MparticleFlutterSdkPlugin */
@@ -46,25 +39,18 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel: MethodChannel
   private val TAG = "MparticleFlutterSdkPlugin"
-  private lateinit var layoutFactory: RoktLayoutFactory
+  private var roktDelegate: RoktPluginDelegate? = null
   private var flutterAssets: FlutterPlugin.FlutterAssets? = null
   private var applicationContext: Context? = null
   private var activity: Activity? = null
-  private var roktEventHandler: RoktEventHandler? = null
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, "mparticle_flutter_sdk")
     channel.setMethodCallHandler(this)
-    layoutFactory = RoktLayoutFactory(flutterPluginBinding.binaryMessenger)
     flutterAssets = flutterPluginBinding.flutterAssets
     applicationContext = flutterPluginBinding.applicationContext
-    flutterPluginBinding.platformViewRegistry.registerViewFactory(
-        VIEW_TYPE,
-        layoutFactory,
-    )
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-          roktEventHandler = RoktEventHandler(flutterPluginBinding.binaryMessenger)
-      }
+    roktDelegate = RoktKitAvailability.createDelegate(flutterPluginBinding.binaryMessenger)
+    roktDelegate?.registerPlatformView(flutterPluginBinding.platformViewRegistry)
   }
 
   override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -111,12 +97,13 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         } ?: result.error(TAG, "Missing attributeKey", null)
       }
       "getUserAttributes" -> this.getUser(call, result)?.let {
-        it.getUserAttributes(object : UserAttributeListener {
+        it.getUserAttributes(object : TypedUserAttributeListener {
           override fun onUserAttributesReceived(
-            userAttributes: Map<String, String>?,
-            userAttributeLists: Map<String, List<String>>?, mpid: Long?
+            userAttributes: Map<String, Any?>,
+            userAttributeLists: Map<String, List<String?>?>,
+            mpid: Long,
           ) {
-            result.success(sanitizeMapToString(userAttributes))
+            result.success(sanitizeMapToString(userAttributes.mapValues { (_, value) -> value?.toString() }))
           }
         })
         Unit
@@ -235,10 +222,18 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
         setSdkVersion()
         result.success(true)
       }
-      "roktSubscribeToEvents" -> this.roktSubscribeToEvents(call, result)
-      "roktSelectPlacements" -> this.roktSelectPlacements(call, result)
-      "roktSelectShoppableAds" -> this.roktSelectShoppableAds(call, result)
-      "roktPurchaseFinalized" -> this.roktPurchaseFinalized(call, result)
+      "roktSubscribeToEvents" -> this.handleRoktCall(call, result) { delegate ->
+        delegate.subscribeToEvents(call, result, activity)
+      }
+      "roktSelectPlacements" -> this.handleRoktCall(call, result) { delegate ->
+        delegate.selectPlacements(call, result, applicationContext, flutterAssets)
+      }
+      "roktSelectShoppableAds" -> this.handleRoktCall(call, result) { delegate ->
+        delegate.selectShoppableAds(call, result)
+      }
+      "roktPurchaseFinalized" -> this.handleRoktCall(call, result) { delegate ->
+        delegate.purchaseFinalized(call, result)
+      }
       else -> {
         result.notImplemented()
       }
@@ -720,118 +715,18 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
     } ?: result.error(TAG, "No mParticle instance exists", null)
   }
 
-  private fun roktSelectPlacements(call: MethodCall, result: Result) {
-    try {
-      val placementId: String? = call.argument("placementId")
-      val attributes: Map<String, Any?>? = call.argument("attributes")
-      val placeHolders: MutableMap<String, WeakReference<RoktEmbeddedView>> = mutableMapOf()
-      val configMap = call.argument<HashMap<String, Any>>("config")
-      val config = configMap?.let { buildRoktConfig(it) }
-      val customFonts = call.argument<HashMap<String, String>>("fontFilePathMap")
-        .orEmpty()
-        .mapNotNull { (key, fontPath) ->
-            applicationContext?.assets?.let { assets ->
-                flutterAssets?.getAssetFilePathByName(fontPath)?.let { assetPath ->
-                    runCatching {
-                        key to WeakReference(Typeface.createFromAsset(assets, assetPath))
-                    }.getOrNull()
-                }
-            }
-        }
-        .toMap()
-
-      call.argument<HashMap<Int, String>>("placeholders")?.entries?.forEach { entry ->
-        layoutFactory.nativeViews[entry.key]?.let { view ->
-          placeHolders[entry.value] = WeakReference(view)
-        }
-      }
-
-      if (placementId == null) {
-        result.error(TAG, "Missing placementId", null)
-        return
-      }
-
-      val stringAttributes: MutableMap<String, String> = mutableMapOf()
-      attributes?.forEach { (key, value) ->
-        stringAttributes[key] = value?.toString() ?: ""
-      }
-
-      MParticle.getInstance()?.let { instance ->
-        instance.Rokt().selectPlacements(placementId, stringAttributes, null, placeHolders.takeIf { it.isNotEmpty() }, customFonts, config)
-        result.success(true)
-      } ?: result.error(TAG, "No mParticle instance exists", null)
-    } catch (e: Exception) {
-      result.error(TAG, e.localizedMessage, null)
-    }
-  }
-
-  private fun roktSubscribeToEvents(call: MethodCall, result: Result) {
-    val identifier = call.argument<String>("identifier")
-    if (identifier.isNullOrBlank()) {
-      result.error(TAG, "Missing identifier", null)
+  private fun handleRoktCall(
+    call: MethodCall,
+    result: Result,
+    handler: (RoktPluginDelegate) -> Unit,
+  ) {
+    val delegate = roktDelegate
+    if (delegate == null) {
+      result.error(TAG, RoktKitAvailability.REQUIRED_MESSAGE, null)
       return
     }
-
-    MParticle.getInstance()?.let { instance ->
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-        activity?.let { currentActivity ->
-          roktEventHandler?.subscribeToEvents(
-            events = instance.Rokt().events(identifier),
-            activity = currentActivity,
-            identifier = identifier,
-          )
-        }
-      }
-      result.success(true)
-    } ?: result.error(TAG, "No mParticle instance exists", null)
+    handler(delegate)
   }
-
-  private fun buildRoktConfig(configMap: Map<String, Any>): RoktConfig {
-    val builder = RoktConfig.Builder()
-    (configMap["colorMode"] as? String)?.let {
-      builder.colorMode(it.toColorMode())
-    }
-    (configMap["cacheConfig"] as? Map<String, Any>)?.let { cacheConfig ->
-      val cacheDurationInSeconds = cacheConfig["cacheDurationInSeconds"] as? Int ?: 0
-      val cacheAttributes = cacheConfig["cacheAttributes"] as? Map<String, String> ?: null
-      builder.cacheConfig(CacheConfig(cacheDurationInSeconds.toLong(), cacheAttributes))
-    }
-
-    return builder.build()
-  }
-
-  private fun roktPurchaseFinalized(call: MethodCall, result: Result) {
-    val placementId = call.argument<String>("placementId")
-    val catalogItemId = call.argument<String>("catalogItemId")
-    val success = call.argument<Boolean>("success") ?: true
-    if (placementId != null && catalogItemId != null) {
-      MParticle.getInstance()?.Rokt()?.purchaseFinalized(
-        placementId = placementId,
-        catalogItemId = catalogItemId,
-        status = success,
-      )
-      result.success("Success")
-    } else {
-      result.error(
-        "INVALID_PARAMS",
-        "placementId and catalogItemId are required",
-        null,
-      )
-    }
-  }
-
-  private fun roktSelectShoppableAds(call: MethodCall, result: Result) {
-    // Parity with RN bridge: Android API is exposed but not implemented yet.
-    Logger.warning("selectShoppableAds is not yet supported on Android")
-    result.success(true)
-  }
-
-  private fun String.toColorMode(): RoktConfig.ColorMode =
-    when (this) {
-      "dark" -> RoktConfig.ColorMode.DARK
-      "light" -> RoktConfig.ColorMode.LIGHT
-      else -> RoktConfig.ColorMode.SYSTEM
-    }
 
   private fun ConvertIdentityHttpResponseToString(response: IdentityHttpResponse?): String {
     val map = mutableMapOf<String, Any?>()
@@ -1004,9 +899,5 @@ class MparticleFlutterSdkPlugin: FlutterPlugin, MethodCallHandler, ActivityAware
       // Version string deliberately left blank
       instance.setWrapperSdk(WrapperSdk.WrapperFlutter, "")
     }
-  }
-
-  companion object {
-    private const val VIEW_TYPE = "rokt_sdk.rokt.com/rokt_layout"
   }
 }

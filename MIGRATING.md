@@ -95,3 +95,34 @@ await MparticleFlutterSdk.getInstance().then((mp) => mp?.rokt.selectShoppableAds
 Rokt event delivery now uses explicit subscription by identifier through `Rokt.events(...)`. Call `events(identifier, ...)` before `selectPlacements(...)` or `selectShoppableAds(...)` for that identifier.
 
 The Rokt payment extension (for example `RoktPaymentExtension`) is **not** proxied through Dart. Integrators must add the pod and register it directly from native Swift/Objective-C in the host app (for example `ios/Runner/AppDelegate.swift`), after `MParticle.sharedInstance().start(with:)`.
+
+## Migrating Android apps to mParticle Android SDK 6.0.0
+
+The Dart API is unchanged. Existing calls to `Rokt.selectPlacements`, `Rokt.events`, and `Rokt.purchaseFinalized` continue to use the same Flutter signatures and event channel names.
+
+### Android dependencies
+
+Android apps must include matching 6.x mParticle artifacts:
+
+```gradle
+implementation "com.mparticle:android-core:6.0.0"
+implementation "com.mparticle:android-rokt-kit:6.0.0"
+```
+
+`RoktEmbeddedView` and other Rokt bridge types moved out of `android-core` in SDK 6.0. They now live in `android-rokt-kit` under `com.mparticle.kits`. Apps that only add `android-core` will compile for non-Rokt usage, but Rokt method channel calls and `RoktLayout` platform views require `android-rokt-kit` on the app classpath.
+
+The Flutter plugin uses `compileOnly` for `android-rokt-kit` and registers Rokt platform views only when `com.mparticle.kits.RoktEmbeddedView` is present at runtime.
+
+Apps that include `android-rokt-kit` `6.0.0` should build with `compileSdk` 35+ and Android Gradle Plugin 8.6+.
+
+### Android Rokt API changes handled by the plugin
+
+| SDK 5.x | SDK 6.0 |
+| --- | --- |
+| `com.mparticle.rokt.RoktEmbeddedView` | `com.mparticle.kits.RoktEmbeddedView` |
+| `MParticle.getInstance()?.Rokt()` | `MParticle.getInstance()?.rokt` |
+| `com.mparticle.rokt.RoktConfig` | `com.rokt.roktsdk.RoktConfig` |
+| `com.mparticle.RoktEvent` | `com.rokt.roktsdk.RoktEvent` |
+| `UserAttributeListener` | `TypedUserAttributeListener` |
+
+`selectShoppableAds` remains a no-op on Android in this release.
