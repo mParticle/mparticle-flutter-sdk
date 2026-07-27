@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-07-27
+
 ### Changed
 
 - Make `android-rokt-kit` a `compileOnly` plugin dependency and guard Android Rokt registration behind a runtime classpath check, matching the optional Rokt kit pattern used in react-native-mparticle.
@@ -123,7 +125,8 @@ See [MIGRATING.md](./MIGRATING.md) for the full 1.x → 2.0 upgrade guide.
   - Identity API (identify, login, logout, and alias)
   - Github Actions - semantic PR title check; plugin building
 
-[unreleased]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.1.0...HEAD
+[unreleased]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.2.0...HEAD
+[2.2.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.1.0...2.2.0
 [2.1.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.0.0...2.1.0
 [2.0.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/1.1.2...2.0.0
 [1.1.2]: https://github.com/mParticle/mparticle-flutter-sdk/compare/47676b23d065e77f8ef7c9e2938793a93ec6dcc6...1.1.2
