@@ -7,6 +7,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   test:
     uses: ./.github/workflows/test.yml
@@ -26,7 +30,8 @@ jobs:
   pr-notify:
     if: >
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false &&
+      github.actor != 'dependabot[bot]'
     needs:
       - test
       - build-android
@@ -34,5 +39,8 @@ jobs:
       - build-web
     name: Notify GChat
     uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@88d0e118869cc788aae18ba37635fa851c879b73 # main
+    permissions:
+      contents: read
+      id-token: write
     secrets:
       gchat_webhook: ${{ secrets.GCHAT_PRS_WEBHOOK }}
