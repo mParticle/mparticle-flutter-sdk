@@ -48,8 +48,8 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'com.mparticle:android-core:6.0.0'
-    compileOnly 'com.mparticle:android-rokt-kit:6.0.0'
+    implementation 'com.mparticle:android-core:6.0.4'
+    compileOnly 'com.mparticle:android-rokt-kit:6.0.4'
 
     // Required for Rokt event subscription
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
