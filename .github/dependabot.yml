@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: "/android"
+    schedule:
+      interval: daily
+    labels:
+      - dependabot
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+  - package-ecosystem: gradle
+    directory: "/example/android"
+    schedule:
+      interval: daily
+    labels:
+      - dependabot
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 4
+    labels:
+      - dependabot
+    commit-message:
+      prefix: "chore"
