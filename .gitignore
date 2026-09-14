@@ -12,6 +12,9 @@ android/.idea/
 
 **/Pods/
 **/*.xcworkspace
+# Flutter's Swift Package Manager integration aborts with "Xcode workspace not
+# found" unless the example app's workspace is present.
+!example/ios/Runner.xcworkspace/
 **/Podfile.lock
 
 .gradle
