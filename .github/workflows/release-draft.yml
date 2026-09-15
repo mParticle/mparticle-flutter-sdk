@@ -61,7 +61,14 @@ jobs:
 
       - name: Run dry-run publish
         run: |
+          # `pub publish --dry-run` requires a clean git tree. This workflow
+          # intentionally edits VERSION/pubspec/changelog before opening the PR,
+          # so run the dry-run from a temporary copy without `.git`.
+          temp_publish_dir="$(mktemp -d)"
+          rsync -a --delete --exclude ".git" ./ "${temp_publish_dir}/"
+          pushd "${temp_publish_dir}"
           flutter pub publish --dry-run
+          popd
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
