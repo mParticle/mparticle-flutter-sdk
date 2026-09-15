@@ -3,7 +3,7 @@ import UIKit
 import mParticle_Apple_SDK
 import RoktContracts
 
-public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
+public class MparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
 
   fileprivate static let VIEW_CALL_DELEGATE = "rokt_sdk.rokt.com/rokt_layout"
   let roktLayoutFactory: RoktLayoutFactory
@@ -19,9 +19,9 @@ public class SwiftMparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
-    let instance = SwiftMparticleFlutterSdkPlugin(messenger: registrar.messenger(), registrar: registrar)
+    let instance = MparticleFlutterSdkPlugin(messenger: registrar.messenger(), registrar: registrar)
     registrar.addMethodCallDelegate(instance, channel: instance.channel)
-    registrar.register(instance.roktLayoutFactory, withId: SwiftMparticleFlutterSdkPlugin.VIEW_CALL_DELEGATE)
+    registrar.register(instance.roktLayoutFactory, withId: MparticleFlutterSdkPlugin.VIEW_CALL_DELEGATE)
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

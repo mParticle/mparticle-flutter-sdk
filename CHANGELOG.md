@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix Swift Package Manager builds failing with "contains mixed language source files" by making the iOS plugin Swift-only (remove the Objective-C registrar shim).
+
 ## [2.2.0] - 2026-07-27
 
 ### Changed

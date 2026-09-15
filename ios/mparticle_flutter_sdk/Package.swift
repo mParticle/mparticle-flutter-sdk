@@ -29,9 +29,6 @@ let package = Package(
                 .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "mParticle-Apple-SDK", package: "mparticle-apple-sdk"),
                 .product(name: "RoktContracts", package: "rokt-contracts-apple"),
-            ],
-            cSettings: [
-                .headerSearchPath("include/mparticle_flutter_sdk"),
             ]
         ),
     ]

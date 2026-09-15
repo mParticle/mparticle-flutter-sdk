@@ -8,7 +8,7 @@ env:
 
 jobs:
   build-ios:
-    name: Build iOS flutter app
+    name: Build iOS flutter app (CocoaPods)
     runs-on: macos-15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -22,6 +22,12 @@ jobs:
           flutter-version: ${{ vars.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Disable Swift Package Manager
+        run: |
+          # Flutter versions older than 3.24 predate SwiftPM and have no such flag.
+          if flutter config --help | grep -q 'enable-swift-package-manager'; then
+            flutter config --no-enable-swift-package-manager
+          fi
       - name: Install example dependencies
         working-directory: example
         run: flutter pub get
@@ -38,6 +44,79 @@ jobs:
       - name: Cleanup
         if: ${{ always() }}
         working-directory: example
+        run: |
+          rm -rf build
+          if command -v flutter &>/dev/null; then
+            flutter clean
+          fi
+
+  build-ios-spm:
+    name: Build iOS flutter app (Swift Package Manager)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          # The example app depends on the plugin by path, and Swift Package
+          # Manager derives a path dependency's identity from the enclosing
+          # git directory name. That name must equal the Dart package name or
+          # resolution fails. See https://github.com/flutter/flutter/issues/186881.
+          path: mparticle_flutter_sdk
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
+        with:
+          xcode-version: "16.4"
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          # Flutter's SwiftPM plugin scheme depends on the generated
+          # FlutterFramework package, which only exists in 3.44 and later.
+          flutter-version: ${{ vars.SPM_FLUTTER_VERSION || '3.47.4' }}
+          channel: stable
+          cache: true
+      - name: Enable Swift Package Manager
+        run: flutter config --enable-swift-package-manager
+      - name: Install example dependencies
+        working-directory: mparticle_flutter_sdk/example
+        run: flutter pub get
+      - name: Generate iOS project with Swift Package Manager
+        working-directory: mparticle_flutter_sdk/example
+        run: flutter build ios --config-only --no-codesign --release
+      - name: Verify plugin is resolved via Swift Package Manager
+        working-directory: mparticle_flutter_sdk/example
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import sys
+
+          plugins = json.loads(pathlib.Path(".flutter-plugins-dependencies").read_text())
+          spm_ios = plugins.get("swift_package_manager_enabled", {}).get("ios")
+          if spm_ios is not True:
+              print("Swift Package Manager was not enabled for iOS:")
+              print(json.dumps(plugins.get("swift_package_manager_enabled"), indent=2))
+              sys.exit(1)
+
+          generated = pathlib.Path("ios/Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage/Package.swift")
+          if not generated.is_file():
+              print(f"Missing generated Swift package at {generated}")
+              sys.exit(1)
+
+          text = generated.read_text()
+          if "mparticle_flutter_sdk" not in text:
+              print("Generated FlutterGeneratedPluginSwiftPackage does not depend on mparticle_flutter_sdk:")
+              print(text)
+              sys.exit(1)
+
+          print("Swift Package Manager is enabled and mparticle_flutter_sdk is in FlutterGeneratedPluginSwiftPackage")
+          PY
+      - name: Build example iOS app
+        working-directory: mparticle_flutter_sdk/example/ios
+        run: |
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+      - name: Cleanup
+        if: ${{ always() }}
+        working-directory: mparticle_flutter_sdk/example
         run: |
           rm -rf build
           if command -v flutter &>/dev/null; then
