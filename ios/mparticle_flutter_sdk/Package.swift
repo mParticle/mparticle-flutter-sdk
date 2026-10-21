@@ -13,8 +13,9 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "FlutterFramework", path: "../FlutterFramework"),
+        // mparticle_flutter_sdk.podspec reads this version: keep the URL and the upToNextMajor(from:) form.
         .package(
-            url: "https://github.com/mParticle/mparticle-apple-sdk.git",
+            url: "https://github.com/mParticle/mparticle-apple-sdk",
             .upToNextMajor(from: "9.3.1")
         ),
         .package(

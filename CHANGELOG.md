@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- iOS: log a warning at launch when the mParticle SDK is linked more than once, for example from both CocoaPods and Swift Package Manager.
+- Document Swift Package Manager setup for iOS, including how to add kits, and add a CocoaPods to Swift Package Manager migration guide.
+
+### Changed
+
+- iOS: Rokt methods now return an error when the Rokt kit is not in the app, matching Android. Previously they reported success and did nothing.
+- iOS: the CocoaPods spec reads the mParticle Apple SDK version from `Package.swift` (now `>= 9.3.1, < 10.0`), and the Swift package uses the same `mparticle-apple-sdk` package URL as the mParticle kits.
+- The example app uses Swift Package Manager on iOS.
+
 ## [2.2.1] - 2026-09-15
 
 ### Fixed

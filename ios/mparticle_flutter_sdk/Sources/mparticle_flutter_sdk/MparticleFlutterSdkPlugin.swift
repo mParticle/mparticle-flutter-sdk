@@ -6,6 +6,7 @@ import RoktContracts
 public class MparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
 
   fileprivate static let VIEW_CALL_DELEGATE = "rokt_sdk.rokt.com/rokt_layout"
+  private static let ROKT_METHODS: Set<String> = ["roktSubscribeToEvents", "roktSelectPlacements", "roktSelectShoppableAds", "roktPurchaseFinalized"]
   let roktLayoutFactory: RoktLayoutFactory
   let channel: FlutterMethodChannel
   let registrar: FlutterPluginRegistrar
@@ -19,12 +20,48 @@ public class MparticleFlutterSdkPlugin: NSObject, FlutterPlugin {
   }
 
   public static func register(with registrar: FlutterPluginRegistrar) {
+    _ = warnIfSDKLoadedTwice
     let instance = MparticleFlutterSdkPlugin(messenger: registrar.messenger(), registrar: registrar)
     registrar.addMethodCallDelegate(instance, channel: instance.channel)
     registrar.register(instance.roktLayoutFactory, withId: MparticleFlutterSdkPlugin.VIEW_CALL_DELEGATE)
   }
 
+  // Getting the SDK from both CocoaPods and Swift Package Manager links a second copy. That builds
+  // cleanly, then kits register with one copy while the app talks to the other. Runs once.
+  private static let warnIfSDKLoadedTwice: Void = {
+    let duplicates = imageCounts(forClassNames: ["MParticle", "RoktEmbeddedView", "MPKitRokt"])
+      .filter { $0.value > 1 }
+      .map { "\($0.key) x\($0.value)" }
+      .sorted()
+    if !duplicates.isEmpty {
+      NSLog("[mParticle] The mParticle SDK is loaded more than once (%@). This happens when it comes from both CocoaPods and Swift Package Manager: remove the mParticle and Rokt pods from your Podfile. See the iOS section of the mparticle_flutter_sdk README.", duplicates.joined(separator: ", "))
+    }
+  }()
+
+  private static func imageCounts(forClassNames names: [String]) -> [String: Int] {
+    var counts = Dictionary(uniqueKeysWithValues: names.map { ($0, 0) })
+    let bundlePath = Bundle.main.bundlePath
+    var imageCount: UInt32 = 0
+    let images = objc_copyImageNames(&imageCount)
+    defer { free(images) }
+    for i in 0..<Int(imageCount) where String(cString: images[i]).hasPrefix(bundlePath) {
+      var classCount: UInt32 = 0
+      guard let classes = objc_copyClassNamesForImage(images[i], &classCount) else { continue }
+      defer { free(classes) }
+      for j in 0..<Int(classCount) {
+        let name = String(cString: classes[j])
+        if let count = counts[name] { counts[name] = count + 1 }
+      }
+    }
+    return counts
+  }
+
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    // Matches Android: Rokt calls fail clearly when the Rokt kit is not in the app.
+    if MparticleFlutterSdkPlugin.ROKT_METHODS.contains(call.method) && NSClassFromString("MPKitRokt") == nil {
+      result(FlutterError(code: "MparticleFlutterSdkPlugin", message: "Rokt is unavailable. Add the mParticle Rokt kit (mParticle-Rokt) to your iOS app.", details: nil))
+      return
+    }
     switch call.method {
     case "isInitialized":
         result(true)

@@ -141,12 +141,49 @@ To install mParticle on an iOS platform:
 
 [1]: https://app.mparticle.com/apps
 
-2. Install the SDK using CocoaPods:
+2. Install the native SDKs. The plugin brings in the mParticle Apple SDK (9.3.1 or later). Add the kits your app uses, such as the Rokt kit for Rokt APIs and `RoktLayout`, with the dependency manager Flutter uses for your app.
 
-```bash
-$ # Update your Podfile to depend on 'mParticle-Apple-SDK' version 9.3.1 or later
-$ pod install
+#### Swift Package Manager
+
+Flutter uses Swift Package Manager by default from 3.44, and you can turn it on from 3.41. The plugin's Swift package brings in the mParticle Apple SDK, so don't add any mParticle or Rokt pods to `ios/Podfile`.
+
+Add each kit to the Runner target in Xcode: open `ios/Runner.xcworkspace`, choose **File > Add Package Dependencies…**, enter the package URL, and add the product to the **Runner** target.
+
+| Kit | Package URL | Product |
+| --- | --- | --- |
+| Rokt (required for Rokt APIs and `RoktLayout`) | `https://github.com/mparticle-integrations/mp-apple-integration-rokt` | `mParticle-Rokt` |
+| Rokt payment extension (shoppable ads payments) | `https://github.com/ROKT/rokt-payment-extension-ios` | `RoktPaymentExtension` |
+
+Use a 9.x kit version. Other kits are listed in the [mParticle Apple SDK README](https://github.com/mParticle/mparticle-apple-sdk#currently-supported-kits); use the Swift package of their 9.x version. If you use `RoktSDKPlus`, it already includes the Rokt kit and the payment extension, so don't add those separately. Commit the Xcode project change and `ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved`.
+
+> **Warning:** Get each mParticle and Rokt SDK from only one dependency manager. If a pod and a Swift package both bring in the SDK, the app still builds, but it contains two copies and kits register with the wrong one. The plugin logs `[mParticle] The mParticle SDK is loaded more than once` at launch when this happens. See [Moving iOS from CocoaPods to Swift Package Manager](MIGRATING.md#ios-moving-from-cocoapods-to-swift-package-manager).
+
+Flutter versions before 3.41 can't build the plugin with Swift Package Manager. Keep it turned off there and use CocoaPods.
+
+#### CocoaPods (deprecated)
+
+CocoaPods trunk becomes read-only on 2 December 2026, so no new mParticle or Rokt pod versions can be published after that date. If Swift Package Manager is turned off for your app, add the kits to `ios/Podfile`:
+
+```ruby
+platform :ios, '15.6'
+
+target 'Runner' do
+  use_frameworks!
+
+  # Required for Rokt APIs and RoktLayout.
+  pod 'mParticle-Rokt'
+
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
 ```
+
+Then run `pod install`.
+
+#### Troubleshooting
+
+- `Rokt is unavailable. Add the mParticle Rokt kit (mParticle-Rokt) to your iOS app.`: the Rokt kit isn't linked into the app. Add it as shown above.
+- `[mParticle] The mParticle SDK is loaded more than once`: the SDK comes from both CocoaPods and Swift Package Manager. Remove the mParticle and Rokt pods from `ios/Podfile`.
+- Package resolution fails, for example `no versions of '…' match the requirement`, or the build uses an old minimum iOS version: run `flutter clean`, then in Xcode choose **File > Packages > Reset Package Caches**.
 
 The mParticle SDK is initialized by calling the `startWithOptions` method within the `application:didFinishLaunchingWithOptions:` delegate call. Preferably the location of the initialization method call should be one of the last statements in the `application:didFinishLaunchingWithOptions:`. The `startWithOptions` method requires an options argument containing your key and secret and an initial Identity request.
 
@@ -332,11 +369,7 @@ await mpInstance?.rokt.selectShoppableAds(
 );
 ```
 
-To enable iOS payment flows for shoppable ads, add the payment extension pod in your app `ios/Podfile` and register it natively after `MParticle.sharedInstance().start(with:)`:
-
-```ruby
-pod 'RoktPaymentExtension'
-```
+To enable iOS payment flows for shoppable ads, add the Rokt payment extension to your app (with Swift Package Manager, the `RoktPaymentExtension` product from `https://github.com/ROKT/rokt-payment-extension-ios`; with CocoaPods, `pod 'RoktPaymentExtension'`) and register it natively after `MParticle.sharedInstance().start(with:)`:
 
 ```swift
 import RoktPaymentExtension
