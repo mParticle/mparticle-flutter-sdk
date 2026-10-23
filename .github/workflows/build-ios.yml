@@ -34,13 +34,65 @@ jobs:
       - name: Test
         working-directory: example
         run: flutter test
+      - name: Switch example to CocoaPods
+        working-directory: example/ios
+        run: |
+          # The example gets the kits from Swift Package Manager. Remove every Swift package from the
+          # project and add the kits as pods instead, otherwise the app links a second copy of the SDK.
+          # That includes Flutter's generated packages, which Flutter versions before 3.24 never generate.
+          ruby -rxcodeproj -e '
+            project = Xcodeproj::Project.open("Runner.xcodeproj")
+            target = project.targets.find { |t| t.name == "Runner" }
+            target.package_product_dependencies.dup.each do |dep|
+              target.frameworks_build_phase.files.select { |f| f.product_ref == dep }.each(&:remove_from_project)
+              dep.remove_from_project
+            end
+            project.root_object.package_references.dup.each(&:remove_from_project)
+            project.files.select { |f| f.path.to_s.start_with?("Flutter/ephemeral/Packages/") }.each(&:remove_from_project)
+            project.save'
+          cat > Podfile <<'PODFILE'
+          platform :ios, '15.6'
+          ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+          project 'Runner', { 'Debug' => :debug, 'Profile' => :release, 'Release' => :release }
+
+          def flutter_root
+            generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+            File.foreach(generated_xcode_build_settings_path) do |line|
+              matches = line.match(/FLUTTER_ROOT\=(.*)/)
+              return matches[1].strip if matches
+            end
+          end
+
+          require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+          flutter_ios_podfile_setup
+
+          target 'Runner' do
+            use_frameworks!
+            use_modular_headers!
+            pod 'mParticle-Rokt'
+            pod 'RoktPaymentExtension'
+            flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+          end
+
+          post_install do |installer|
+            installer.pods_project.targets.each do |target|
+              flutter_additional_ios_build_settings(target)
+              target.build_configurations.each do |config|
+                # mParticle-Apple-SDK's podspec declares iOS 15.0 but re-exports RoktContracts, which requires 15.6.
+                config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.6'
+              end
+            end
+          end
+          PODFILE
       - name: Build example iOS app
         working-directory: example
         run: |
           flutter pub get
           flutter build ios --config-only --no-codesign --release
           cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -derivedDataPath ../build/dd CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+      - name: Check the SDK is linked once
+        run: .github/scripts/check-single-copy.sh example/build/dd/Build/Products/Release-iphoneos/Runner.app
       - name: Cleanup
         if: ${{ always() }}
         working-directory: example
@@ -54,13 +106,9 @@ jobs:
     name: Build iOS flutter app (Swift Package Manager)
     runs-on: macos-15
     steps:
+      # The default checkout folder, mparticle-flutter-sdk, differs from the Dart package name on
+      # purpose: the example must build from a normal clone (https://github.com/flutter/flutter/issues/186881).
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          # The example app depends on the plugin by path, and Swift Package
-          # Manager derives a path dependency's identity from the enclosing
-          # git directory name. That name must equal the Dart package name or
-          # resolution fails. See https://github.com/flutter/flutter/issues/186881.
-          path: mparticle_flutter_sdk
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@ed7a3b1fda3918c0306d1b724322adc0b8cc0a90 # v1
         with:
@@ -68,21 +116,30 @@ jobs:
       - name: Setup Flutter SDK
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
         with:
-          # Flutter's SwiftPM plugin scheme depends on the generated
-          # FlutterFramework package, which only exists in 3.44 and later.
+          # The plugin's Package.swift depends on the generated FlutterFramework
+          # package, which only exists in Flutter 3.41 and later.
           flutter-version: ${{ vars.SPM_FLUTTER_VERSION || '3.47.4' }}
           channel: stable
           cache: true
       - name: Enable Swift Package Manager
         run: flutter config --enable-swift-package-manager
       - name: Install example dependencies
-        working-directory: mparticle_flutter_sdk/example
+        working-directory: example
         run: flutter pub get
+      - name: Remove the CocoaPods spec
+        # Without the podspec the plugin cannot fall back to CocoaPods unnoticed.
+        run: rm ios/mparticle_flutter_sdk.podspec
       - name: Generate iOS project with Swift Package Manager
-        working-directory: mparticle_flutter_sdk/example
-        run: flutter build ios --config-only --no-codesign --release
+        working-directory: example
+        run: |
+          set -o pipefail
+          flutter build ios --config-only --no-codesign --release | tee config.log
+          if grep -q 'Running pod install' config.log; then
+            echo "CocoaPods ran in the Swift Package Manager build"
+            exit 1
+          fi
       - name: Verify plugin is resolved via Swift Package Manager
-        working-directory: mparticle_flutter_sdk/example
+        working-directory: example
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -111,12 +168,14 @@ jobs:
           print("Swift Package Manager is enabled and mparticle_flutter_sdk is in FlutterGeneratedPluginSwiftPackage")
           PY
       - name: Build example iOS app
-        working-directory: mparticle_flutter_sdk/example/ios
+        working-directory: example/ios
         run: |
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -derivedDataPath ../build/dd CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+      - name: Check the SDK is linked once
+        run: .github/scripts/check-single-copy.sh example/build/dd/Build/Products/Release-iphoneos/Runner.app
       - name: Cleanup
         if: ${{ always() }}
-        working-directory: mparticle_flutter_sdk/example
+        working-directory: example
         run: |
           rm -rf build
           if command -v flutter &>/dev/null; then

@@ -15,8 +15,12 @@ mParticle Flutter Wrapper
   s.source           = { :path => '.' }
   s.source_files = 'mparticle_flutter_sdk/Sources/mparticle_flutter_sdk/**/*.swift'
   s.dependency 'Flutter'
+  # The Swift package manifest holds the one copy of the core SDK version; read it so the two cannot drift.
+  manifest = File.read(File.join(__dir__, 'mparticle_flutter_sdk', 'Package.swift'))
+  core_version = manifest[/mparticle-apple-sdk",\s*\.upToNextMajor\(from: "([^"]+)"\)/, 1] or
+    raise 'mparticle_flutter_sdk.podspec: mparticle-apple-sdk version not found in Package.swift'
   # SDK 9.3 umbrella pod pulls required transitive dependencies.
-  s.dependency 'mParticle-Apple-SDK', '~> 9.3'
+  s.dependency 'mParticle-Apple-SDK', ">= #{core_version}", "< #{core_version.to_i + 1}.0"
   s.platform = :ios, '15.6'
 
   # Flutter.framework does not contain a i386 slice.

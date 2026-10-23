@@ -6,6 +6,20 @@ This document describes upgrade steps for breaking changes in the mParticle Flut
 
 For changes in the underlying native iOS SDK (database migration, deprecated `UIApplicationDelegate` methods, removed `AppDelegateProxy`, regional routing / ATS, Rokt event class renames at the Swift/Objective-C level, etc.), refer to the [mParticle Apple SDK 9 migration guide](https://github.com/mParticle/mparticle-apple-sdk/blob/main/MIGRATING.md#migrating-from-versions--900).
 
+## iOS: moving from CocoaPods to Swift Package Manager
+
+CocoaPods trunk becomes read-only on 2 December 2026, and Flutter uses Swift Package Manager by default from 3.44. The plugin supports both. With Swift Package Manager on, the plugin brings in the mParticle Apple SDK as a Swift package, so any mParticle or Rokt pod left in `ios/Podfile` links a second copy of the SDK. That app builds, but kits register with the wrong copy.
+
+1. Use Flutter 3.44 or later, or Flutter 3.41 or later with `flutter config --enable-swift-package-manager`.
+2. Remove every mParticle and Rokt pod from `ios/Podfile`, for example `mParticle-Apple-SDK`, `mParticle-Rokt`, `RoktPaymentExtension` and `RoktSDKPlus`.
+   - If nothing else is left in the Podfile, run `pod deintegrate` in `ios/`, delete `Podfile` and `Podfile.lock`, and remove the `Pods-Runner` includes from `ios/Flutter/Debug.xcconfig` and `ios/Flutter/Release.xcconfig`.
+   - Otherwise, run `pod install`.
+3. Add the kits as Swift packages to the Runner target, as described in the iOS section of the [README](README.md#iOS).
+4. Run a Debug build once and check the console for `[mParticle] The mParticle SDK is loaded more than once`. If it appears, a pod still brings in the SDK.
+5. Commit the Xcode project change and `ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved`.
+
+To stay on CocoaPods for now, turn Swift Package Manager off for your app by adding `enable-swift-package-manager: false` under `flutter: config:` in your app's `pubspec.yaml`. Flutter plans to remove this option in a future release.
+
 ## Migrating from versions < 2.0.0
 
 Version 2.0.0 wraps the mParticle Apple SDK 9 on iOS. No Dart source changes are required for existing `selectPlacements`, `purchaseFinalized`, or `MPRoktEvents` integrations, but the iOS build configuration must be updated.
