@@ -37,18 +37,19 @@ jobs:
       - name: Switch example to CocoaPods
         working-directory: example/ios
         run: |
-          # The example gets the kits from Swift Package Manager. Unlink them and add them as pods
-          # instead, otherwise the app links a second copy of the SDK. Also drop the reference to the
-          # plugin's own package, which Xcode would otherwise resolve even with SPM off.
+          # The example gets the kits from Swift Package Manager. Remove every Swift package from the
+          # project and add the kits as pods instead, otherwise the app links a second copy of the SDK.
+          # That includes Flutter's generated packages and the plugin's own folder: Xcode resolves them
+          # even with SPM off, and Flutter versions before 3.24 never generate them.
           ruby -rxcodeproj -e '
             project = Xcodeproj::Project.open("Runner.xcodeproj")
             target = project.targets.find { |t| t.name == "Runner" }
-            target.package_product_dependencies.select { |d| d.package.is_a?(Xcodeproj::Project::Object::XCRemoteSwiftPackageReference) }.each do |dep|
+            target.package_product_dependencies.dup.each do |dep|
               target.frameworks_build_phase.files.select { |f| f.product_ref == dep }.each(&:remove_from_project)
-              project.root_object.package_references.delete(dep.package)
               dep.remove_from_project
             end
-            project.files.select { |f| f.path == "../../ios/mparticle_flutter_sdk" }.each(&:remove_from_project)
+            project.root_object.package_references.dup.each(&:remove_from_project)
+            project.files.select { |f| f.path == "../../ios/mparticle_flutter_sdk" || f.path.to_s.start_with?("Flutter/ephemeral/Packages/") }.each(&:remove_from_project)
             project.save'
           cat > Podfile <<'PODFILE'
           platform :ios, '15.6'
