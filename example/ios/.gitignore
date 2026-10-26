@@ -31,3 +31,7 @@ Runner/GeneratedPluginRegistrant.*
 !default.mode2v3
 !default.pbxuser
 !default.perspectivev3
+
+# Swift Package Manager state. Versions float within the ranges in Runner.xcodeproj so CI builds what new apps get.
+**/xcshareddata/swiftpm/
+Runner.xcodeproj/project.xcworkspace/
