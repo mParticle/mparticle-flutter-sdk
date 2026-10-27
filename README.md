@@ -44,11 +44,11 @@ To install mParticle on an Android platform:
 
 ```groovy
 dependencies {
-    implementation 'com.mparticle:android-core:6.0.0'
+    implementation 'com.mparticle:android-core:6.1.9'
 
     // Required if you use Rokt APIs or RoktLayout from Flutter.
     // RoktEmbeddedView and related types live in android-rokt-kit, not android-core.
-    implementation 'com.mparticle:android-rokt-kit:6.0.0'
+    implementation 'com.mparticle:android-rokt-kit:6.1.9'
 
     // Required for gathering Android Advertising ID (see below)
     implementation 'com.google.android.gms:play-services-ads-identifier:16.0.0'
@@ -162,7 +162,7 @@ Flutter versions before 3.41 can't build the plugin with Swift Package Manager. 
 
 #### CocoaPods (deprecated)
 
-CocoaPods trunk becomes read-only on 2 December 2026, so no new mParticle or Rokt pod versions can be published after that date. If Swift Package Manager is turned off for your app, add the kits to `ios/Podfile`:
+CocoaPods trunk becomes read-only on 2 December 2026, so no new mParticle or Rokt pod versions can be published after that date. If Swift Package Manager is turned off for your app, add the kits to `ios/Podfile` and raise any pod's deployment target below 15.6 to 15.6. A Podfile can have only one `post_install` block, so replace the one Flutter generated with this one:
 
 ```ruby
 platform :ios, '15.6'
@@ -175,6 +175,20 @@ target 'Runner' do
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      # The mParticle-Apple-SDK pod declares iOS 15.0 but depends on RoktContracts, which requires 15.6.
+      # Raise lower targets only; pods that need a later iOS keep their own.
+      current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'].to_s
+      if current.match?(/\A\d+(\.\d+)*\z/) && Gem::Version.new(current) < Gem::Version.new('15.6')
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.6'
+      end
+    end
+  end
+end
 ```
 
 Then run `pod install`.
@@ -183,6 +197,7 @@ Then run `pod install`.
 
 - `Rokt is unavailable. Add the mParticle Rokt kit (mParticle-Rokt) to your iOS app.`: the Rokt kit isn't linked into the app. Add it as shown above.
 - `[mParticle] The mParticle SDK is loaded more than once`: the SDK comes from both CocoaPods and Swift Package Manager. Remove the mParticle and Rokt pods from `ios/Podfile`.
+- `Compiling for iOS 15.0, but module 'RoktContracts' has a minimum deployment target of iOS 15.6` with CocoaPods: raise the pods' deployment target to 15.6 in the `post_install` block, as shown above.
 - Package resolution fails, for example `no versions of '…' match the requirement`, or the build uses an old minimum iOS version: run `flutter clean`, then in Xcode choose **File > Packages > Reset Package Caches**.
 
 The mParticle SDK is initialized by calling the `startWithOptions` method within the `application:didFinishLaunchingWithOptions:` delegate call. Preferably the location of the initialization method call should be one of the last statements in the `application:didFinishLaunchingWithOptions:`. The `startWithOptions` method requires an options argument containing your key and secret and an initial Identity request.
