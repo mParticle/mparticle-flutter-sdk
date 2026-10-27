@@ -43,12 +43,6 @@ jobs:
           current_version: ${{ steps.version-file.outputs.release-version }}
           level: ${{ github.event.inputs.bump-type || 'patch' }}
 
-      - name: Validate changelog before generation
-        env:
-          NEW_VERSION: ${{ steps.bump-version.outputs.new_version }}
-        run: |
-          python3 .github/scripts/release.py check --next-version "$NEW_VERSION"
-
       - name: Generate changelog from merged PR titles
         id: changelog
         uses: ROKT/rokt-workflows/actions/generate-changelog@da0c5fd5d38e9cf113a24ec9aaea079cc7d0bc40 # main
@@ -59,13 +53,12 @@ jobs:
           tag-prefix: v
           changelog-path: CHANGELOG.md
 
-      - name: Update and validate release versions
+      - name: Update release versions
         env:
           NEW_VERSION: ${{ steps.bump-version.outputs.new_version }}
         run: |
           printf '%s\n' "$NEW_VERSION" > VERSION
           sed -i "s/^version: .*/version: ${NEW_VERSION}/" pubspec.yaml
-          python3 .github/scripts/release.py check --tag "v${NEW_VERSION}"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2

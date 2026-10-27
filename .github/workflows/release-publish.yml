@@ -46,24 +46,21 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Validate tagged release
-        env:
-          TAG_NAME: ${{ github.ref_name }}
-        run: python3 .github/scripts/release.py check --tag "$TAG_NAME"
-
       - uses: ffurrer2/extract-release-notes@273da39a24fb7db106a35526c8162815faffd31d # v3.1.0
         id: extract-release-notes
         with:
           changelog_file: CHANGELOG.md
-          release_notes_file: ${{ runner.temp }}/release-notes.md
 
       - name: Prepare GitHub release body
         env:
           TAG_NAME: ${{ github.ref_name }}
-          NOTES_FILE: ${{ runner.temp }}/release-notes.md
+          RELEASE_NOTES: ${{ steps.extract-release-notes.outputs.release_notes }}
           BODY_FILE: ${{ runner.temp }}/release-body.md
         run: |
-          python3 .github/scripts/release.py body --tag "$TAG_NAME" --notes-file "$NOTES_FILE" --output "$BODY_FILE"
+          version="${TAG_NAME#v}"
+          test "$(head -n 1 VERSION)" = "$version"
+          comparison_url=$(awk -v reference="[${version}]:" '$1 == reference { matches++; url=$2 } END { if (matches != 1 || url == "") exit 1; print url }' CHANGELOG.md)
+          printf '## Release notes:\n%s\n\n**Full Changelog**: %s\n' "$RELEASE_NOTES" "$comparison_url" > "$BODY_FILE"
 
       - name: Publish Package
         run: |
