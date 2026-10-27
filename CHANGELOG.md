@@ -28,18 +28,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.2.0] - 2026-07-27
 
-### Changed
-
-- Make `android-rokt-kit` a `compileOnly` plugin dependency and guard Android Rokt registration behind a runtime classpath check, matching the optional Rokt kit pattern used in react-native-mparticle.
-
-## [2.2.0] - 2026-07-22
-
 ### Added
 
 - Add Swift Package Manager support for the iOS plugin (`ios/mparticle_flutter_sdk/Package.swift`).
 
 ### Changed
 
+- Make `android-rokt-kit` a `compileOnly` plugin dependency and guard Android Rokt registration behind a runtime classpath check, matching the optional Rokt kit pattern used in react-native-mparticle.
 - Bump iOS CocoaPods dependency from `mParticle-Apple-SDK ~> 9.2` to `~> 9.3`.
 - Bump Android Gradle dependencies to `android-core:6.0.0` and `android-rokt-kit:6.0.0`.
 - **BREAKING**: Android `minSdkVersion` raised from `16` to `23` (required by Rokt SDK 6.x transitive dependencies).
@@ -102,7 +97,7 @@ See [MIGRATING.md](./MIGRATING.md) for the full 1.x → 2.0 upgrade guide.
 
 - fix: Resolve linting issues (#48)
 
-## [1.0.5] - 2024-07-10
+## 1.0.5 - 2024-07-10
 
 - fix: type 'Null' is not a subtype of type 'String' in getCurrentUser (#46)
 
@@ -144,10 +139,21 @@ See [MIGRATING.md](./MIGRATING.md) for the full 1.x → 2.0 upgrade guide.
   - Identity API (identify, login, logout, and alias)
   - Github Actions - semantic PR title check; plugin building
 
-[unreleased]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.3.0...HEAD
-[2.3.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.2.1...2.3.0
-[2.2.1]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.2.0...2.2.1
-[2.2.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.1.0...2.2.0
-[2.1.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/2.0.0...2.1.0
-[2.0.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/1.1.2...2.0.0
-[1.1.2]: https://github.com/mParticle/mparticle-flutter-sdk/compare/47676b23d065e77f8ef7c9e2938793a93ec6dcc6...1.1.2
+[unreleased]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v2.2.1...v2.3.0
+[2.2.1]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v2.0.0...v2.1.0
+[2.0.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.1.2...v2.0.0
+[1.1.2]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.1.1...v1.1.2
+[1.1.1]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.1.0...v1.1.1
+[1.1.0]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.0.6...v1.1.0
+[1.0.6]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.0.4...v1.0.6
+[1.0.4]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v1.0.0-beta.1...v1.0.1
+[1.0.0-beta.1]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v0.2.0-alpha.1...v1.0.0-beta.1
+[0.2.0-alpha.1]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v0.1.0-alpha.2...v0.2.0-alpha.1
+[0.1.0-alpha.2]: https://github.com/mParticle/mparticle-flutter-sdk/compare/v0.1.0-alpha.1...v0.1.0-alpha.2
+[0.1.0-alpha.1]: https://github.com/mParticle/mparticle-flutter-sdk/tree/v0.1.0-alpha.1

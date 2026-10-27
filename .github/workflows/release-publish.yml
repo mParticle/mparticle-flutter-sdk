@@ -46,20 +46,32 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Publish Package
-        run: |
-          flutter pub publish --force
+      - name: Validate tagged release
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: python3 .github/scripts/release.py check --tag "$TAG_NAME"
 
       - uses: ffurrer2/extract-release-notes@273da39a24fb7db106a35526c8162815faffd31d # v3.1.0
         id: extract-release-notes
         with:
           changelog_file: CHANGELOG.md
+          release_notes_file: ${{ runner.temp }}/release-notes.md
+
+      - name: Prepare GitHub release body
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+          NOTES_FILE: ${{ runner.temp }}/release-notes.md
+          BODY_FILE: ${{ runner.temp }}/release-body.md
+        run: |
+          python3 .github/scripts/release.py body --tag "$TAG_NAME" --notes-file "$NOTES_FILE" --output "$BODY_FILE"
+
+      - name: Publish Package
+        run: |
+          flutter pub publish --force
 
       - name: Create Github release
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1
         with:
           makeLatest: true
           tag: ${{ github.ref_name }}
-          body: |
-            ## Release notes:
-            ${{ steps.extract-release-notes.outputs.release_notes }}
+          bodyFile: ${{ runner.temp }}/release-body.md

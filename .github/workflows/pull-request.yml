@@ -38,7 +38,7 @@ jobs:
       - build-ios
       - build-web
     name: Notify GChat
-    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@88d0e118869cc788aae18ba37635fa851c879b73 # main
+    uses: ROKT/rokt-workflows/.github/workflows/oss_pr_opened_notification.yml@490d3ec9069eeedb757be147bf440d6394705e84 # main
     permissions:
       contents: read
       id-token: write

@@ -22,9 +22,13 @@ permissions:
 
 jobs:
   publish-draft-release:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Get current version
         id: version-file
@@ -39,18 +43,29 @@ jobs:
           current_version: ${{ steps.version-file.outputs.release-version }}
           level: ${{ github.event.inputs.bump-type || 'patch' }}
 
-      - name: Save validated version to file
+      - name: Validate changelog before generation
+        env:
+          NEW_VERSION: ${{ steps.bump-version.outputs.new_version }}
         run: |
-          echo "${{ steps.bump-version.outputs.new_version }}" > VERSION
+          python3 .github/scripts/release.py check --next-version "$NEW_VERSION"
 
-      - name: Update changelog
-        uses: thomaseizinger/keep-a-changelog-new-release@f62c3c390716df5af712ba5d94f4f4a8efc1306d # v3
+      - name: Generate changelog from merged PR titles
+        id: changelog
+        uses: ROKT/rokt-workflows/actions/generate-changelog@da0c5fd5d38e9cf113a24ec9aaea079cc7d0bc40 # main
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
-          tag: ${{ steps.bump-version.outputs.new_version }}
+          version: ${{ steps.bump-version.outputs.new_version }}
+          tag-prefix: v
+          changelog-path: CHANGELOG.md
 
-      - name: Update pubspec.yaml
+      - name: Update and validate release versions
+        env:
+          NEW_VERSION: ${{ steps.bump-version.outputs.new_version }}
         run: |
-          sed -i 's/version: .*/version: ${{ steps.bump-version.outputs.new_version }}/' pubspec.yaml
+          printf '%s\n' "$NEW_VERSION" > VERSION
+          sed -i "s/^version: .*/version: ${NEW_VERSION}/" pubspec.yaml
+          python3 .github/scripts/release.py check --tag "v${NEW_VERSION}"
 
       - name: Setup Flutter
         uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
@@ -84,5 +99,8 @@ jobs:
             - Updated CHANGELOG.md
             - Updated VERSION file
             - Ran a dry-run publish
+
+            ## Changelog
+            ${{ steps.changelog.outputs.release-notes }}
           labels: |
             release

@@ -14,7 +14,7 @@ CocoaPods trunk becomes read-only on 2 December 2026, and Flutter uses Swift Pac
 2. Remove every mParticle and Rokt pod from `ios/Podfile`, for example `mParticle-Apple-SDK`, `mParticle-Rokt`, `RoktPaymentExtension` and `RoktSDKPlus`.
    - If nothing else is left in the Podfile, run `pod deintegrate` in `ios/`, delete `Podfile` and `Podfile.lock`, and remove the `Pods-Runner` includes from `ios/Flutter/Debug.xcconfig` and `ios/Flutter/Release.xcconfig`.
    - Otherwise, run `pod install`.
-3. Add the kits as Swift packages to the Runner target, as described in the iOS section of the [README](README.md#iOS).
+3. Add the kits as Swift packages to the Runner target, as described in the iOS section of the [README](README.md#ios).
 4. Run a Debug build once and check the console for `[mParticle] The mParticle SDK is loaded more than once`. If it appears, a pod still brings in the SDK.
 5. Commit the Xcode project change and `ios/Runner.xcworkspace/xcshareddata/swiftpm/Package.resolved`.
 

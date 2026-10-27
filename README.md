@@ -317,7 +317,7 @@ For more help, see the [full Web set up docs](https://docs.mparticle.com/develop
 
 ## Usage
 
-Each of our Dart methods is mapped to an underlying mParticle SDK at the platform level. Note that per Dart's [documentation](https://flutter.dev/docs/development/platform-integration/platform-channels#architecture, calling into platform specific code is asynchronous to ensure the user interface remains responsive.  In your code, you can swap usage between `async` and `then` in accordance to your app's requirements.
+Each of our Dart methods is mapped to an underlying mParticle SDK at the platform level. Note that per Dart's [documentation](https://flutter.dev/docs/development/platform-integration/platform-channels#architecture), calling into platform specific code is asynchronous to ensure the user interface remains responsive.  In your code, you can swap usage between `async` and `then` in accordance to your app's requirements.
 
 For a full description of all classes, methods, and properties, see the [mParticle Flutter SDK API Reference](https://pub.dev/documentation/mparticle_flutter_sdk/latest/).
 
