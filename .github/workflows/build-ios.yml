@@ -35,6 +35,9 @@ jobs:
         working-directory: example
         run: flutter test
       - name: Switch example to CocoaPods
+        id: cocoapods-setup
+        # CocoaPods trunk is going read-only; the Swift Package Manager job below gates the change.
+        continue-on-error: true
         working-directory: example/ios
         run: |
           # The example gets the kits from Swift Package Manager. Remove every Swift package from the
@@ -89,6 +92,9 @@ jobs:
           end
           PODFILE
       - name: Build example iOS app
+        id: cocoapods-build
+        if: steps.cocoapods-setup.outcome == 'success'
+        continue-on-error: true
         working-directory: example
         run: |
           flutter pub get
@@ -96,7 +102,16 @@ jobs:
           cd ios
           xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -derivedDataPath ../build/dd CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
       - name: Check the SDK is linked once
+        if: steps.cocoapods-build.outcome == 'success'
         run: .github/scripts/check-single-copy.sh example/build/dd/Build/Products/Release-iphoneos/Runner.app
+      - name: Warn when the CocoaPods build failed
+        if: steps.cocoapods-setup.outcome == 'failure' || steps.cocoapods-build.outcome == 'failure'
+        run: |
+          echo "::warning::The CocoaPods build of the example app failed. The Swift Package Manager build gates this change. Check the log above for the cause."
+          {
+            echo "### CocoaPods build failed"
+            echo "The Swift Package Manager build gates this change. Check the job log for the cause."
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Cleanup
         if: ${{ always() }}
         working-directory: example
