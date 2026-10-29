@@ -35,9 +35,6 @@ jobs:
         working-directory: example
         run: flutter test
       - name: Switch example to CocoaPods
-        id: cocoapods-setup
-        # CocoaPods trunk is going read-only; the Swift Package Manager job below gates the change.
-        continue-on-error: true
         working-directory: example/ios
         run: |
           # The example gets the kits from Swift Package Manager. Remove every Swift package from the
@@ -91,26 +88,29 @@ jobs:
             end
           end
           PODFILE
-      - name: Build example iOS app
-        id: cocoapods-build
-        if: steps.cocoapods-setup.outcome == 'success'
+      - name: Resolve CocoaPods dependencies
+        id: cocoapods-resolve
+        # CocoaPods trunk is going read-only, so pod install can fail on a version that only Swift
+        # Package Manager has. Only resolution is allowed to fail; the build below still gates the code.
         continue-on-error: true
         working-directory: example
         run: |
           flutter pub get
           flutter build ios --config-only --no-codesign --release
-          cd ios
-          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -derivedDataPath ../build/dd CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
+      - name: Build example iOS app
+        if: steps.cocoapods-resolve.outcome == 'success'
+        working-directory: example/ios
+        run: xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -derivedDataPath ../build/dd CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO -quiet
       - name: Check the SDK is linked once
-        if: steps.cocoapods-build.outcome == 'success'
+        if: steps.cocoapods-resolve.outcome == 'success'
         run: .github/scripts/check-single-copy.sh example/build/dd/Build/Products/Release-iphoneos/Runner.app
-      - name: Warn when the CocoaPods build failed
-        if: steps.cocoapods-setup.outcome == 'failure' || steps.cocoapods-build.outcome == 'failure'
+      - name: Warn when CocoaPods could not resolve
+        if: steps.cocoapods-resolve.outcome == 'failure'
         run: |
-          echo "::warning::The CocoaPods build of the example app failed. The Swift Package Manager build gates this change. Check the log above for the cause."
+          echo "::warning::CocoaPods could not resolve the example app's dependencies, so the CocoaPods build was skipped. Check the log above for the cause."
           {
-            echo "### CocoaPods build failed"
-            echo "The Swift Package Manager build gates this change. Check the job log for the cause."
+            echo "### CocoaPods dependencies did not resolve"
+            echo "The CocoaPods build of the example app was skipped. Check the job log for the cause."
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Cleanup
         if: ${{ always() }}
