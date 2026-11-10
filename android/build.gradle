@@ -48,7 +48,7 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'com.mparticle:android-core:6.1.9'
+    implementation 'com.mparticle:android-core:6.1.10'
     compileOnly 'com.mparticle:android-rokt-kit:6.1.9'
 
     // Required for Rokt event subscription
