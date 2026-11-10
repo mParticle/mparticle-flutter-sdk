@@ -70,7 +70,7 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-    implementation 'com.mparticle:android-core:6.1.9'
+    implementation 'com.mparticle:android-core:6.1.10'
 
     implementation 'com.mparticle:android-rokt-kit:6.1.9'
 
