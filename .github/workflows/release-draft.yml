@@ -16,14 +16,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# The release PR is opened with the GitHub App token below, so GITHUB_TOKEN only reads.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 jobs:
   publish-draft-release:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    # Holds the release GitHub App credentials; its deployment rule admits main only.
+    environment: release
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -78,10 +81,28 @@ jobs:
           flutter pub publish --dry-run
           popd
 
+      # A short-lived GitHub App token, scoped to this repository, opens the release PR.
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ secrets.SDK_RELEASE_GITHUB_CLIENT_ID }}
+          private-key: ${{ secrets.SDK_RELEASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: mparticle-flutter-sdk
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.MP_SEMANTIC_RELEASE_BOT }}
+          token: ${{ steps.app-token.outputs.token }}
+          sign-commits: true
+          # The release PR changes only these files.
+          add-paths: |
+            VERSION
+            pubspec.yaml
+            CHANGELOG.md
           commit-message: "chore: Prepare release ${{ steps.bump-version.outputs.new_version }}"
           branch: release/${{ steps.bump-version.outputs.new_version }}
           title: "chore: Prepare release ${{ steps.bump-version.outputs.new_version }}"
